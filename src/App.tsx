@@ -4,7 +4,7 @@ import './App.css';
 import { TonConnectUIProvider, TonConnectButton } from './ton-ui';
 
 const manifest = new URL('ton-connect-manifest.json', import.meta.url);
-// const logo = new URL('logo.svg', import.meta.url);
+const logo = new URL('logo.svg', import.meta.url);
 
 
 function App() {
