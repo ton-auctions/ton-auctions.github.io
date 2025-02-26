@@ -21,7 +21,8 @@
   "scripts": {
     "start": "parcel",
     "build": "parcel build",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "prepare": "husky"
   },
   "browserslist": {
     "production": [
@@ -46,6 +47,7 @@
     "babel-preset-react-app": "^10.1.0",
     "eslint": "^9.21.0",
     "eslint-plugin-react": "^7.37.4",
+    "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
     "jest-watch-typeahead": "^1.1.0",
     "postcss": "^8.5.3",

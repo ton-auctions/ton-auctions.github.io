@@ -29,6 +29,8 @@ jobs:
         uses: asdf-vm/actions/install@v3.0.2
       - name: Install dependencies
         run: pnpm install
+      - name: Lint
+        run: pnpm lint
       - name: Build
         run: pnpm build
       - name: Copy Logo
