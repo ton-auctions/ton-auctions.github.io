@@ -7,6 +7,7 @@ import { WebApp } from '@grammyjs/web-app';
 const manifest = new URL('./ton-connect-manifest.json', import.meta.url);
 
 function App() {
+
   
   useEffect(() => {
     console.log(WebApp.initDataUnsafe.chat?.id);
@@ -27,3 +28,5 @@ function App() {
 }
 
 export default App;
+
+

@@ -1,0 +1,11 @@
+{
+    "$schema": "http://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
+    "projects": [
+        {
+          "name": "slotton",
+          "path": "./protocol/controller.tact",
+          "output": "./protocol/output/controller.output",
+          "mode": "full"
+        }
+    ]
+}

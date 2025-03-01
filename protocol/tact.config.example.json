@@ -1,0 +1,29 @@
+{
+    "$schema": "http://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
+    "projects": [
+        {
+          "name": "some_prefix",
+          "path": "./contract.tact",
+          "output": "./contract.output",
+          "verbose": 2,
+          "mode": "full",
+          "options": {
+            "debug": true,
+            "external": true,
+            "ipfsAbiGetter": false,
+            "interfacesGetter": true,
+            "parser": "new",
+            "safety": {
+                "nullChecks": true
+            },
+            "optimizations": {
+                "alwaysSaveContractData": false,
+                "enableLazyDeploymentCompletedGetter": false
+            },
+            "experimental": {
+                "inline": true
+            }
+          }
+        }
+    ]
+}

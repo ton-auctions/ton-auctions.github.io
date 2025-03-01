@@ -25,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Copy app files
+        run: cp -r ./app/* .
       - name: Install asdf & tools
         uses: asdf-vm/actions/install@v3.0.2
       - name: Install dependencies
