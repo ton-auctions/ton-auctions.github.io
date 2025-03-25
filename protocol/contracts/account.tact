@@ -1,58 +1,82 @@
-import "@stdlib/deploy";
 import "@stdlib/ownable";
-import "./auction";
+import "./auctions";
+import "./controller";
 
+const MaxArraySize: Int = 100;
 
-message CreateAuctionMsg {
+struct AuctionMeta {
+    id: Int;
+    name: String;
+    description: String;
+    address: Address;
+    type: String;
+}
+
+message ProfitMsg {
+    id: Int;
+    amount: Int as uint128;
+}
+message AuctionCleanUp {}
+
+message ReferralCommissionMsg {}
+message CreateBasicAuctionMsg {
+    id: Int as uint64;
     name: String;
     description: String;
     minimal_amount: Int;
-    ends_at: Int;
-    comission: Int;
+    ends_at: Int as uint64;
+    comission: Int as uint16;
 }
 
-contract Account with Ownable, Deployable {
-    collector: Address;
-    owner: Address;
-    referree: Address?;
-    comission: Int;
-    referral_comission: Int;
-    chat_id: Int; // TODO: encrypt!
+// 
+// Account might have referral and might not. If not referral_comission field is ignored
+// In case referral is notspecified controller will assign sum of comissions into comission field.
+// 
+contract Account(
+    collector: Address,
+    owner: Address,
+    referree: Address?,
+    comission: Int as uint16,
+    referral_comission: Int as uint16,
+    chat_id: Int,
+    auctions: map<Int, AuctionMeta>,
+) {
+    const VERSION: Int = 1;
+    const ERRORS_UNAUTHORISED: Int = 201;
 
-    init(
-        collector: Address,
-        owner: Address,
-        referree: Address?,
-        comission: Int,
-        referral_comission: Int,
-        chat_id: Int, // TODO: encrypt!
-    ) { 
-        self.collector = sender();
+    const MINIMAL_COMMISSION_TO_BE_PAID: Int = ton("0.1");
+    const NO_WINNER: Winner = Winner {
+        address: null,
+        amount: 0,
+        chat_id: 0,
+    };
 
-        self.owner = owner; 
-        self.referree = referree;
-        self.comission = comission;
-        self.referral_comission = referral_comission;
-        self.chat_id = chat_id;
-    }
 
-    receive(msg: CreateAuctionMsg) {
-        // TODO: check if the sender is the controller
-        let ctx: Context = context();
+    receive(msg: CreateBasicAuctionMsg) {
+        throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
         
-        let init = initOf SimplestAuction(
+        let init = initOf BasicAuction(
+            msg.id,
             self.owner,
+            self.collector,
             msg.minimal_amount,
             msg.ends_at,
-            self.comission,
             self.chat_id,
-            self.referral_comission,
-            self.collector,
-            self.referree, 
+            self.NO_WINNER,
         );
-        
+
+        let meta = AuctionMeta{
+            id: msg.id,
+            name: msg.name,
+            description: msg.description,
+            address: contractAddress(init),
+            type: "basic",
+        };
+
+        self.auctions.set(msg.id, meta);
+
         // https://docs.tact-lang.org/ref/core-common/
-        deploy( DeployParameters{
+        deploy(DeployParameters{
             mode: SendDefaultMode,
             value: ton("0.1"),
             bounce: true,
@@ -60,9 +84,71 @@ contract Account with Ownable, Deployable {
         });
     }
 
-    // receive(msg: AuctionDeployed) {
+    receive(msg: ProfitMsg) {
+        let ctx = context();
 
-    // }
-    
+        let service_comission = msg.value * self.comission / 10000;
+        if service_comission > self.MINIMAL_COMMISSION_TO_BE_PAID {
+            message(MessageParameters{
+                mode: SendDefaultMode, // We put charge on ourselves
+                to: self.collector,
+                value: service_comission,
+                body: ServiceComission{}.toCell(),
+            });
+        }
+
+        let referral_amount = ctx.value * self.referral_comission / 10000;
+        if self.referree != null && referral_amount > self.MINIMAL_COMMISSION_TO_BE_PAID {
+            message(MessageParameters{
+                mode: SendDefaultMode, // Referree will pay the fee
+                to: self.referree!!,
+                value: referral_amount,
+                body: ReferralCommissionMsg{}.toCell(),
+            });
+        }
+
+        self.auctions.del(msg.id)
+    }
+
+    receive(_: ReferralCommissionMsg) {
+        if self.referree == null {
+            // No referree
+            return
+        }
+
+        let ctx = context();
+
+        let referral_amount = ctx.value >> 1; // Halve it
+        
+        if referral_amount < self.MINIMAL_COMMISSION_TO_BE_PAID {
+            // Not worth it
+            return
+        }
+
+        message(MessageParameters{
+            mode: SendDefaultMode, // Referree will pay the fee
+            to: self.referree!!,
+            value: referral_amount,
+            body: ReferralCommissionMsg{}.toCell(),
+        });
+    }
+
+    get fun version(): Int { return self.VERSION; }    
+
+    get fun owner(): Address { return self.owner; }
+    get fun referree(): Address? { return self.referree; }
+    get fun comission(): Int { return self.comission; }
+    get fun referral_comission(): Int { 
+        if self.referree != null {
+            return self.referral_comission; 
+        }
+        return 0;
+    }
+    get fun chat_id(): Int { return self.chat_id; }
+    get fun auction(id: Int): AuctionMeta? { return self.auctions.get(id); }
+    get fun balance(): Int { return myBalance(); }
+
+    receive() {
+    }
 }
 

@@ -3,9 +3,12 @@
     "projects": [
         {
           "name": "slotton",
-          "path": "./protocol/controller.tact",
-          "output": "./protocol/output/controller.output",
-          "mode": "full"
+          "path": "./contracts/controller.tact",
+          "output": "./contracts/output/controller.output",
+          "mode": "full",
+          "options": {
+            "debug": true
+          }
         }
     ]
 }

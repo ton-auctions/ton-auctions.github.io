@@ -1,67 +1,103 @@
-import "@stdlib/deploy";
 import "@stdlib/ownable";
 import "./account";
 
-message CreateAccountMsg {
+
+message CreateAccount {
     chat_id: Int;
     referree: Address?;
 }
 
 message ConfigureService {
-    comission: Int;
-    referral_comission: Int;
+    comission: Int as uint16;
+    referral_comission: Int as uint16;
 }
 
-contract Controller with Deployable {
-    owner1: Address;
-    owner2: Address;
-    comission: Int;
-    referral_comission: Int;
+message ServiceComission {
+}
 
-    const ERRORS_INSUFFICIENT_FUNDS: Int = 201;
+contract Controller(
+    owner1: Address,
+    owner2: Address,
+    comission: Int as uint16,
+    referral_comission: Int as uint16,
+    users: map<Address, Address>,
+) {
+
+    // const ERRORS_INSUFFICIENT_FUNDS: Int = 201;
     const ERRORS_UNAUTHORISED: Int = 202;
     const ERRORS_BAD_CONFIGURATION: Int = 203;
     
     const MINIMAL_AMOUNT: Int = ton("0.1");
     
-    init(owner1: Address, owner2: Address) {
-        self.owner1 = owner1;
-        self.owner2 = owner2;
-        self.comission = 5;
-        self.referral_comission = 3;
-    }
-
     receive(msg: ConfigureService) {
         let sender = sender();
         
-        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.comission > msg.referral_comission);
         throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
+        
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.comission >= 0);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.referral_comission >= 0);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.comission + msg.referral_comission <= 10000);
         
         self.comission = msg.comission;
         self.referral_comission = msg.referral_comission;
     }
 
-    receive(msg: CreateAccountMsg) {
+    receive(msg: CreateAccount) {
         let ctx: Context = context();
-        let user = ctx.sender;
-        let moneys = ctx.value;
+        let user: Address = ctx.sender;
         
-        throwUnless(self.ERRORS_INSUFFICIENT_FUNDS, moneys > self.MINIMAL_AMOUNT);
+        let service_comission = self.comission;
+        let referral_comission = self.referral_comission;
         
-        let init = initOf Account(
+        if msg.referree == null {
+            // If no referree service takes it all.
+            service_comission = self.comission + self.referral_comission;
+            referral_comission = 0;
+        } 
+
+        let init: StateInit = initOf Account(
             myAddress(),
             user,
             msg.referree,
-            self.comission,
-            self.referral_comission,
+            service_comission,
+            referral_comission,
             msg.chat_id, // TODO: encrypt!
+            emptyMap()
+        );
+
+        self.users.set(
+            user, 
+            contractAddress(init)
         );
         
         deploy(DeployParameters{
             mode: SendDefaultMode | SendRemainingValue,
-            value: moneys,
+            value: ton("0"),
             bounce: true,
             init: init
-        })
+        });
     }
+
+    bounced(msg: bounced<CreateAccount>) { self.users.del(sender()); }
+
+    get fun user_account(address: Address): Address? { return self.users.get(address); }
+    get fun comission(): Int { return self.comission; }
+    get fun referral_comission(): Int { return self.referral_comission; }
+    get fun balance(): Int { return myBalance(); }
+
+    receive() {
+        message(MessageParameters{
+            mode: SendRemainingBalance | SendIgnoreErrors,
+            body: null,
+            value: 0,
+            to: sender(),
+            bounce: false,
+        });
+    }
+
+    receive(msg: ServiceComission) {
+        // hmm
+    }
+
+    
 }
