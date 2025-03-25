@@ -15,6 +15,10 @@ message ConfigureService {
 message ServiceComission {
 }
 
+message Emergency {
+
+}
+
 contract Controller(
     owner1: Address,
     owner2: Address,
@@ -23,10 +27,11 @@ contract Controller(
     users: map<Address, Address>,
 ) {
 
-    // const ERRORS_INSUFFICIENT_FUNDS: Int = 201;
     const ERRORS_UNAUTHORISED: Int = 202;
     const ERRORS_BAD_CONFIGURATION: Int = 203;
     
+    const EVENT_EMERGENCY: Int = 3;
+
     const MINIMAL_AMOUNT: Int = ton("0.1");
     
     receive(msg: ConfigureService) {
@@ -99,5 +104,13 @@ contract Controller(
         // hmm
     }
 
-    
+    receive(msg: Emergency) {
+        let emergency = beginCell()
+            .storeUint(self.EVENT_EMERGENCY, 4)
+            .storeUint(msg.id, 64)
+            .asCell();
+
+        emit(emergency);
+    }
+   
 }

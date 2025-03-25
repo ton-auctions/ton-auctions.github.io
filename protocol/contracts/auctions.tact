@@ -42,7 +42,7 @@ contract BasicAuction(
         throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount > self.winner.amount);
     
         // Return the money to the previous winner
-        message(MessageParameters{
+        message(MessageParameters {
             mode: SendDefaultMode,
             to: self.winner.address!!,
             value: self.winner.amount,
@@ -58,11 +58,11 @@ contract BasicAuction(
         emit(event_outbidded);
 
         // Assign new winner
-        self.winner = Winner{
+        self.winner = Winner {
             amount: amount,
             address: bidder,
             chat_id: msg.chat_id,
-        }      
+        };
     }
 
     receive(_: Resolve) {
@@ -70,20 +70,15 @@ contract BasicAuction(
         
         throwUnless(self.ERRORS_NOONE_WINS, self.winner.address != null);
         throwUnless(self.ERRORS_NOT_ALLOWED, sender != self.owner && sender != self.collector);
-        
+
         message(MessageParameters {
             mode: SendDefaultMode | SendRemainingBalance, 
-            to: self.owner.address,
+            to: self.owner,
             value: 0,
-            body: ProfitMsg{
+            body: Profit{
                 id: self.id,
                 amount: self.winner.amount,
             }.toCell(),
-        });
-
-        message(MessageParameters{
-            to: self.owner,
-            value: service_comission,
         });
 
         let auction_resolved = beginCell()
@@ -93,5 +88,20 @@ contract BasicAuction(
             .asCell();
 
         emit(auction_resolved);
+    }
+
+    receive(_: EmergencyResolve) {
+        let sender = sender();
+
+        throwUnless(self.ERRORS_NOT_ALLOWED, sender != self.owner);
+
+        message(MessageParameters {
+            mode: SendDefaultMode | SendRemainingBalance, 
+            to: self.collector,
+            value: 0,
+            body: Emergency{
+                id: self.id,
+            }.toCell(),
+        });
     }
 }

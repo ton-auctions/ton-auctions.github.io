@@ -12,14 +12,17 @@ struct AuctionMeta {
     type: String;
 }
 
-message ProfitMsg {
+message Profit {
     id: Int;
     amount: Int as uint128;
 }
+message Collect {
+    amount: Int as uint128
+}
 message AuctionCleanUp {}
 
-message ReferralCommissionMsg {}
-message CreateBasicAuctionMsg {
+message ReferralCommission {}
+message CreateBasicAuction {
     id: Int as uint64;
     name: String;
     description: String;
@@ -52,7 +55,7 @@ contract Account(
     };
 
 
-    receive(msg: CreateBasicAuctionMsg) {
+    receive(msg: CreateBasicAuction) {
         throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
         
         let init = initOf BasicAuction(
@@ -65,7 +68,7 @@ contract Account(
             self.NO_WINNER,
         );
 
-        let meta = AuctionMeta{
+        let meta = AuctionMeta {
             id: msg.id,
             name: msg.name,
             description: msg.description,
@@ -76,7 +79,7 @@ contract Account(
         self.auctions.set(msg.id, meta);
 
         // https://docs.tact-lang.org/ref/core-common/
-        deploy(DeployParameters{
+        deploy(DeployParameters {
             mode: SendDefaultMode,
             value: ton("0.1"),
             bounce: true,
@@ -84,12 +87,12 @@ contract Account(
         });
     }
 
-    receive(msg: ProfitMsg) {
+    receive(msg: Profit) {
         let ctx = context();
 
-        let service_comission = msg.value * self.comission / 10000;
+        let service_comission = (msg.value * self.comission) / 10000;
         if service_comission > self.MINIMAL_COMMISSION_TO_BE_PAID {
-            message(MessageParameters{
+            message(MessageParameters {
                 mode: SendDefaultMode, // We put charge on ourselves
                 to: self.collector,
                 value: service_comission,
@@ -97,20 +100,20 @@ contract Account(
             });
         }
 
-        let referral_amount = ctx.value * self.referral_comission / 10000;
+        let referral_amount = (ctx.value * self.referral_comission) / 10000;
         if self.referree != null && referral_amount > self.MINIMAL_COMMISSION_TO_BE_PAID {
-            message(MessageParameters{
+            message(MessageParameters {
                 mode: SendDefaultMode, // Referree will pay the fee
                 to: self.referree!!,
                 value: referral_amount,
-                body: ReferralCommissionMsg{}.toCell(),
+                body: ReferralCommission{}.toCell(),
             });
         }
 
-        self.auctions.del(msg.id)
+        self.auctions.del(msg.id);
     }
 
-    receive(_: ReferralCommissionMsg) {
+    receive(_: ReferralCommission) {
         if self.referree == null {
             // No referree
             return
@@ -125,11 +128,22 @@ contract Account(
             return
         }
 
-        message(MessageParameters{
+        message(MessageParameters {
             mode: SendDefaultMode, // Referree will pay the fee
             to: self.referree!!,
             value: referral_amount,
-            body: ReferralCommissionMsg{}.toCell(),
+            body: ReferralCommission {}.toCell(),
+        });
+    }
+
+    receive(msg: Collect) {
+        throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
+
+        message(MessageParameters{
+            mode: SendDefaultMode | SendRemainingBalance, 
+            to: self.owner,
+            value: msg.amount,
+            body: ReferralCommission {}.toCell(),
         });
     }
 
