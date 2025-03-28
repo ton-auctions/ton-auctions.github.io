@@ -2,12 +2,8 @@ import { Blockchain, SandboxContract, TreasuryContract } from "@ton/sandbox";
 import { Address, Dictionary, toNano } from "@ton/core";
 import { Controller } from "../wrappers/Controller";
 import { Account } from "../wrappers/Account";
+import { PrivateKey } from "eciesjs";
 import "@ton/test-utils";
-
-enum Errors {
-  ERRORS_UNAUTHORISED = 202,
-  ERRORS_BAD_CONFIGURATION = 203,
-}
 
 describe("Controller", () => {
   let blockchain: Blockchain;
@@ -18,6 +14,8 @@ describe("Controller", () => {
   let referree: SandboxContract<TreasuryContract>;
   let controllerComission = 150n;
   let controllerReferralComission = 200n;
+
+  const sk = new PrivateKey();
 
   beforeEach(async () => {
     blockchain = await Blockchain.create();
@@ -51,7 +49,7 @@ describe("Controller", () => {
   });
 
   it("should have default comissions specified", async () => {
-    let comission = await controller.getComission();
+    let comission = await controller.getServiceComission();
     expect(comission).toBe(controllerComission);
     let referralComission = await controller.getReferralComission();
     expect(referralComission).toBe(controllerReferralComission);
@@ -69,7 +67,7 @@ describe("Controller", () => {
           },
           {
             $$type: "ConfigureService",
-            comission: newComission,
+            service_comission: newComission,
             referral_comission: newReferralComission,
           },
         );
@@ -79,7 +77,7 @@ describe("Controller", () => {
           success: true,
           deploy: false,
         });
-        let comission = await controller.getComission();
+        let comission = await controller.getServiceComission();
         let referralComission = await controller.getReferralComission();
         expect(typeof comission).toBe("bigint");
         expect(comission).not.toBeNull();
@@ -91,7 +89,7 @@ describe("Controller", () => {
     );
   });
 
-  it("should allow owners to configure comission", async () => {
+  it("should not allow owners to configure comission", async () => {
     const not_owner = await blockchain.treasury("someone_else");
     const configureControllerResult = await controller.send(
       not_owner.getSender(),
@@ -100,7 +98,7 @@ describe("Controller", () => {
       },
       {
         $$type: "ConfigureService",
-        comission: 100n,
+        service_comission: 100n,
         referral_comission: 90n,
       },
     );
@@ -110,7 +108,7 @@ describe("Controller", () => {
       success: false,
       deploy: false,
       aborted: true,
-      exitCode: Errors.ERRORS_UNAUTHORISED,
+      exitCode: Number(Controller.ERRORS_UNAUTHORISED),
     });
   });
 
@@ -122,7 +120,7 @@ describe("Controller", () => {
       },
       {
         $$type: "ConfigureService",
-        comission: 5000n, // 50%
+        service_comission: 5000n, // 50%
         referral_comission: 6000n, //60%
       },
     );
@@ -132,7 +130,7 @@ describe("Controller", () => {
       success: false,
       deploy: false,
       aborted: true,
-      exitCode: Errors.ERRORS_BAD_CONFIGURATION,
+      exitCode: Number(Controller.ERRORS_BAD_CONFIGURATION),
     });
   });
 
@@ -150,7 +148,7 @@ describe("Controller", () => {
           },
           {
             $$type: "ConfigureService",
-            comission: commision,
+            service_comission: commision,
             referral_comission: referralCommission,
           },
         );
@@ -160,7 +158,7 @@ describe("Controller", () => {
           success: false,
           deploy: false,
           aborted: true,
-          exitCode: Errors.ERRORS_BAD_CONFIGURATION,
+          exitCode: Number(Controller.ERRORS_BAD_CONFIGURATION),
         });
       }),
     );
@@ -202,7 +200,7 @@ describe("Controller", () => {
     const owner = await userAccount.getOwner();
     expect(owner.toString()).toBe(user.address.toString());
 
-    expect(await userAccount.getComission()).toBe(controllerComission);
+    expect(await userAccount.getServiceComission()).toBe(controllerComission);
     expect(await userAccount.getReferralComission()).toBe(
       controllerReferralComission,
     );
@@ -244,13 +242,13 @@ describe("Controller", () => {
     const owner = await userAccount.getOwner();
     expect(owner.toString()).toBe(user.address.toString());
 
-    expect(await userAccount.getComission()).toBe(
+    expect(await userAccount.getServiceComission()).toBe(
       controllerComission + controllerReferralComission,
     );
     expect(await userAccount.getReferralComission()).toBe(0n);
   });
 
-  it("should abort creating user account if not enough moneys", async () => {
+  it("should abort creating user account if no moneys", async () => {
     let user = await blockchain.treasury("user");
     const createAccountResult = await controller.send(
       user.getSender(),
@@ -273,6 +271,93 @@ describe("Controller", () => {
       aborted: true,
     });
     const accountAddress = await controller.getUserAccount(user.address);
-    expect(accountAddress).toBeNull();
+
+    let address = blockchain.openContract(Account.fromAddress(accountAddress));
+
+    expect(address.init).toBeUndefined();
+  });
+
+  it("should abort creating user account if not enough moneys", async () => {
+    let user = await blockchain.treasury("user");
+    const createAccountResult = await controller.send(
+      user.getSender(),
+      {
+        value: toNano("0.5"),
+        bounce: true,
+      },
+      {
+        $$type: "CreateAccount",
+        chat_id: BigInt(100),
+        referree: referree.address,
+      },
+    );
+    expect(createAccountResult.transactions).toHaveTransaction({
+      from: user.address,
+      to: controller.address,
+      success: false,
+      deploy: false,
+      inMessageBounceable: true,
+      aborted: true,
+      exitCode: Number(Controller.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT),
+    });
+    const accountAddress = await controller.getUserAccount(user.address);
+
+    let address = blockchain.openContract(Account.fromAddress(accountAddress));
+
+    expect(address.init).toBeUndefined();
+  });
+
+  it("should not deploy account for same user twice", async () => {
+    let user = await blockchain.treasury("user");
+
+    let result1 = await controller.send(
+      user.getSender(),
+      {
+        value: toNano("5"),
+      },
+      {
+        $$type: "CreateAccount",
+        chat_id: BigInt(100),
+        referree: referree.address,
+      },
+    );
+
+    let account_address = await controller.getUserAccount(user.address);
+
+    expect(result1.transactions).toHaveTransaction({
+      from: controller.address,
+      to: account_address,
+      success: true,
+      aborted: false,
+      deploy: true,
+    });
+
+    expect(result1.transactions).toHaveTransaction({
+      from: account_address,
+      to: controller.address,
+      success: true,
+      aborted: false,
+      deploy: false,
+    });
+
+    const account = blockchain.openContract(
+      Account.fromAddress(account_address),
+    );
+
+    expect(await account.getInitialised()).toBe(true);
+
+    let result2 = await controller.send(
+      user.getSender(),
+      {
+        value: toNano("1"),
+      },
+      {
+        $$type: "CreateAccount",
+        chat_id: BigInt(100),
+        referree: referree.address,
+      },
+    );
+
+    expect(result2.transactions).toHaveLength(3);
   });
 });

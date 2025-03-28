@@ -7,87 +7,162 @@ message CreateAccount {
     referree: Address?;
 }
 
+message AccountCreated {
+
+}
+
 message ConfigureService {
-    comission: Int as uint16;
+    service_comission: Int as uint16;
     referral_comission: Int as uint16;
 }
 
-message ServiceComission {
+message ConfigureAccount {
+    address: Address;
+    service_comission: Int as uint16;
+    referral_comission: Int as uint16;
+    max_allowance: Int as uint16;
 }
 
-message Emergency {
-
+message RequestInitialisation {
+    user_account: Address;
 }
+
+message ServiceComission {}
 
 contract Controller(
     owner1: Address,
     owner2: Address,
-    comission: Int as uint16,
+    service_comission: Int as uint16,
     referral_comission: Int as uint16,
-    users: map<Address, Address>,
+    initialisers: map<Address, AccountInitialisation>,
 ) {
+    const ERRORS_UNAUTHORISED: Int = 201;
+    const ERRORS_BAD_CONFIGURATION: Int = 202;
+    const NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT: Int = 203;
 
-    const ERRORS_UNAUTHORISED: Int = 202;
-    const ERRORS_BAD_CONFIGURATION: Int = 203;
-    
-    const EVENT_EMERGENCY: Int = 3;
+    const REGISTRATION_FEE: Int = ton("1");
+    const DEFAULT_ALLOWANCE: Int = 10;
 
-    const MINIMAL_AMOUNT: Int = ton("0.1");
-    
     receive(msg: ConfigureService) {
         let sender = sender();
         
         throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
         
-        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.comission >= 0);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.service_comission >= 0);
         throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.referral_comission >= 0);
-        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.comission + msg.referral_comission <= 10000);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.service_comission + msg.referral_comission <= 10000);
         
-        self.comission = msg.comission;
+        self.service_comission = msg.service_comission;
         self.referral_comission = msg.referral_comission;
     }
 
-    receive(msg: CreateAccount) {
-        let ctx: Context = context();
-        let user: Address = ctx.sender;
+    receive(msg: ConfigureAccount) {
+        let sender = sender();
         
-        let service_comission = self.comission;
-        let referral_comission = self.referral_comission;
+        throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
         
-        if msg.referree == null {
-            // If no referree service takes it all.
-            service_comission = self.comission + self.referral_comission;
-            referral_comission = 0;
-        } 
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.service_comission >= 0);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.referral_comission >= 0);
+        throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.service_comission + msg.referral_comission <= 10000);
+        
+        self.forward(msg.address, msg.toCell(), false, null);
+    }
 
-        let init: StateInit = initOf Account(
+    receive(msg: CreateAccount) {
+        let ctx = context();
+
+        throwUnless(self.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT, ctx.value >= self.REGISTRATION_FEE);
+
+        let user = ctx.sender;
+
+        let init = initOf Account(
             myAddress(),
             user,
-            msg.referree,
-            service_comission,
-            referral_comission,
-            msg.chat_id, // TODO: encrypt!
-            emptyMap()
+            null,
+            0, // service com
+            0, // referral com
+            0, // chat id
+            emptyMap(),
+            0, // max allow
+            0, // allow
+            false,
         );
+        
+        let user_account = contractAddress(init);
 
-        self.users.set(
-            user, 
-            contractAddress(init)
-        );
+        if self.initialisers.exists(user_account) {
+            return
+        }
+
+        let account_serice_comission = self.service_comission;
+        let account_referral_comission = self.referral_comission;
+        if msg.referree == null {
+            // If no referree service takes it all.
+            account_serice_comission = self.service_comission + self.referral_comission;
+            account_referral_comission = 0;
+        } 
+
+        self.initialisers.set(user_account, AccountInitialisation{
+            referree: msg.referree,
+            chat_id: msg.chat_id,
+            service_comission: account_serice_comission,
+            referral_comission: account_referral_comission,
+            max_allowance: self.DEFAULT_ALLOWANCE,
+        });
         
         deploy(DeployParameters{
             mode: SendDefaultMode | SendRemainingValue,
             value: ton("0"),
-            bounce: true,
+            bounce: false,
             init: init
         });
     }
 
-    bounced(msg: bounced<CreateAccount>) { self.users.del(sender()); }
+    receive(msg: RequestInitialisation) {
+        let source = sender();
 
-    get fun user_account(address: Address): Address? { return self.users.get(address); }
-    get fun comission(): Int { return self.comission; }
-    get fun referral_comission(): Int { return self.referral_comission; }
+        if !self.initialisers.exists(source) {
+            return
+        }
+
+        let data = self.initialisers.get(source)!!;
+
+        self.reply(Initialize{
+            chat_id: data.chat_id, // TODO: encrypt!
+            referree: data.referree,
+            service_comission: data.service_comission,
+            referral_comission: data.referral_comission,
+            max_allowance: data.max_allowance,
+        }.toCell());        
+    }
+
+    receive(msg: AccountCreated) {
+        let source = sender();
+
+        if !self.initialisers.exists(source) {
+            return
+        }
+
+        self.initialisers.del(source);
+    }
+    
+    get fun userAccount(user: Address): Address { 
+        let init = initOf Account(
+            myAddress(),
+            user,
+            null,
+            0, // service com
+            0, // referral com
+            0, // chat TODO: encrypt!
+            emptyMap(), // auctions
+            0, // max allowance
+            0, // allowance
+            false, // initialised
+        );
+        return contractAddress(init); 
+    }
+    get fun serviceComission(): Int { return self.service_comission; }
+    get fun referralComission(): Int { return self.referral_comission; }
     get fun balance(): Int { return myBalance(); }
 
     receive() {
@@ -104,13 +179,4 @@ contract Controller(
         // hmm
     }
 
-    receive(msg: Emergency) {
-        let emergency = beginCell()
-            .storeUint(self.EVENT_EMERGENCY, 4)
-            .storeUint(msg.id, 64)
-            .asCell();
-
-        emit(emergency);
-    }
-   
 }
