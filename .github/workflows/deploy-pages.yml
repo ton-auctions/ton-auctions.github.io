@@ -20,21 +20,24 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # build-proto:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Copy app files
-  #       run: cp -r ./protocol/* .
-  #     - name: Install asdf & tools
-  #       uses: asdf-vm/actions/install@v3.0.2
-  #       with:
-  #         asdf_branch: v0.16.7
-  #     - name: Install dependencies
-  #       run: pnpm install
-  #     - name: Build
-  #       run: pnpm test
+  build-proto:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v3.0.2
+      - name: Install dependencies
+        working-directory: ./protocol
+        run: pnpm install
+      - name: Install dependencies
+        working-directory: ./protocol
+        env:
+          PARCEL_WORKER_BACKEND: process
+        run: pnpm build
+      - name: Test
+        working-directory: ./protocol
+        run: pnpm test
 
   build-app:
     runs-on: ubuntu-latest
@@ -50,7 +53,9 @@ jobs:
         run: pnpm lint
         working-directory: ./app
       - name: Build
-        run: PARCEL_WORKER_BACKEND=process pnpm build
+        env:
+          PARCEL_WORKER_BACKEND: process
+        run: pnpm build
         working-directory: ./app
       - name: Copy Logo
         run: cp ./public/logo192.png ./dist/logo.png
