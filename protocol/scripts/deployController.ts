@@ -1,22 +1,23 @@
-import { toNano } from '@ton/core';
-import { Controller } from '../wrappers/Controller';
-import { NetworkProvider } from '@ton/blueprint';
+import { Address, Dictionary, toNano } from "@ton/core";
+import { Controller } from "../wrappers/Controller";
+import { NetworkProvider } from "@ton/blueprint";
 
 export async function run(provider: NetworkProvider) {
-    const controller = provider.open(await Controller.fromInit());
+  const owner = Address.parse(
+    "0QBKrZkHjRetJ_eZKWCJFRkThnFmZXBOVr8qaY9mhO9Hckle",
+  );
 
-    await controller.send(
-        provider.sender(),
-        {
-            value: toNano('0.05'),
-        },
-        {
-            $$type: 'Deploy',
-            queryId: 0n,
-        }
-    );
+  const controller = provider.open(
+    await Controller.fromInit(owner, owner, 200n, 200n, Dictionary.empty()),
+  );
 
-    await provider.waitForDeploy(controller.address);
+  await controller.send(
+    provider.sender(),
+    {
+      value: toNano("0.05"),
+    },
+    null,
+  );
 
-    // run methods on `controller`
+  await provider.waitForDeploy(controller.address);
 }

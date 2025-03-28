@@ -9,7 +9,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
-    "@tonconnect/ui": "^2.0.11",
+    "@tonconnect/ui-react": "^2.1.0",
     "globals": "^16.0.0",
     "parcel": "^2.13.3",
     "react": "^19.0.0",

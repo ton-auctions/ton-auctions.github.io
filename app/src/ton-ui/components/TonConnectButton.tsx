@@ -1,12 +1,13 @@
-import { CSSProperties, FunctionComponent, memo, useEffect } from 'react';
-import { useTonConnectUI } from '../hooks/useTonConnectUI';
+import * as React from "react";
+import { CSSProperties, FunctionComponent, memo, useEffect } from "react";
+import { useTonConnectUI } from "../hooks/useTonConnectUI";
 
-const buttonRootId = 'ton-connect-button';
+const buttonRootId = "ton-connect-button";
 
 export interface TonConnectButtonProps {
-    className?: string;
+  className?: string;
 
-    style?: CSSProperties;
+  style?: CSSProperties;
 }
 
 /**
@@ -16,22 +17,24 @@ export interface TonConnectButtonProps {
  * @param [style] style to add to the button container.
  * @constructor
  */
-const TonConnectButton: FunctionComponent<TonConnectButtonProps> = ({ className, style }) => {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    const [_, setOptions] = useTonConnectUI();
+const TonConnectButton: FunctionComponent<TonConnectButtonProps> = ({
+  className,
+  style,
+}) => {
+  const [_, setOptions] = useTonConnectUI();
 
-    useEffect(() => {
-        setOptions({ buttonRootId });
-        return () => setOptions({ buttonRootId: null });
-    }, [setOptions]);
+  useEffect(() => {
+    setOptions({ buttonRootId });
+    return () => setOptions({ buttonRootId: null });
+  }, [setOptions]);
 
-    return (
-        <div
-            id={buttonRootId}
-            className={className}
-            style={{ width: 'fit-content', ...style }}
-        ></div>
-    );
+  return (
+    <div
+      id={buttonRootId}
+      className={className}
+      style={{ width: "fit-content", ...style }}
+    ></div>
+  );
 };
 
 export default memo(TonConnectButton);
