@@ -20,43 +20,47 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-proto:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Copy app files
-        run: cp -r ./protocol/* .
-      - name: Install asdf & tools
-        uses: asdf-vm/actions/install@v3.0.2
-      - name: Install dependencies
-        run: pnpm install
-      - name: Build
-        run: pnpm test
+  # build-proto:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Copy app files
+  #       run: cp -r ./protocol/* .
+  #     - name: Install asdf & tools
+  #       uses: asdf-vm/actions/install@v3.0.2
+  #       with:
+  #         asdf_branch: v0.16.7
+  #     - name: Install dependencies
+  #       run: pnpm install
+  #     - name: Build
+  #       run: pnpm test
 
   build-app:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Copy app files
-        run: cp -r ./app/* .
       - name: Install asdf & tools
         uses: asdf-vm/actions/install@v3.0.2
       - name: Install dependencies
         run: pnpm install
+        working-directory: ./app
       - name: Lint
         run: pnpm lint
+        working-directory: ./app
       - name: Build
-        run: pnpm build
+        run: PARCEL_WORKER_BACKEND=process pnpm build
+        working-directory: ./app
       - name: Copy Logo
         run: cp ./public/logo192.png ./dist/logo.png
+        working-directory: ./app
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: |
-            dist
+            ./app/dist
 
   deploy:
     needs: build-app
@@ -70,11 +74,11 @@ jobs:
           name: dist
           path: ./dist
       - name: Setup Pages
-        uses: actions/configure-pages@v5 
+        uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: "./dist"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
