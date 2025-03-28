@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         working-directory: ./protocol
         run: pnpm install
+      - name: Test
+        working-directory: ./protocol
+        run: pnpm lint
       - name: Install dependencies
         working-directory: ./protocol
         env:

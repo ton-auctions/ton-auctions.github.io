@@ -65,7 +65,12 @@ contract Controller(
         throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.referral_comission >= 0);
         throwUnless(self.ERRORS_BAD_CONFIGURATION, msg.service_comission + msg.referral_comission <= 10000);
         
-        self.forward(msg.address, msg.toCell(), false, null);
+        self.forward(msg.address, ConfigureAccount{
+            address: msg.address,
+            max_allowance: msg.max_allowance,
+            referral_comission: msg.referral_comission,
+            service_comission: msg.service_comission,
+        }.toCell(), false, null);
     }
 
     receive(msg: CreateAccount) {

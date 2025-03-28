@@ -113,7 +113,7 @@ contract Account(
         self.service_comission = msg.service_comission;
         self.referral_comission = msg.referral_comission;
         let allowance_change = msg.max_allowance - self.max_allowance;
-        self.allowance = self.allowance + allowance_change;
+        self.allowance += allowance_change;
         self.max_allowance = msg.max_allowance;
     }
 
