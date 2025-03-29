@@ -23,6 +23,9 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.0)
+      '@tonconnect/sdk':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@tonconnect/ui-react':
         specifier: ^2.1.0
         version: 2.1.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -32,6 +35,9 @@ importers:
       parcel:
         specifier: ^2.14.2
         version: 2.14.2(@swc/helpers@0.5.15)(postcss@8.5.3)(relateurl@0.2.7)(svgo@3.3.2)(terser@5.39.0)(typescript@5.8.2)
+      parcel-namer-hashless:
+        specifier: ^1.0.7
+        version: 1.0.7(@parcel/core@2.14.2(@swc/helpers@0.5.15))
       react:
         specifier: ^19.1.0
         version: 19.1.0
@@ -96,6 +102,9 @@ importers:
       jest-watch-typeahead:
         specifier: ^2.2.2
         version: 2.2.2(jest@27.5.1)
+      parcel-namer-custom:
+        specifier: ^0.2.0
+        version: 0.2.0(@parcel/core@2.14.2(@swc/helpers@0.5.15))
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -3417,6 +3426,14 @@ packages:
   p-try@2.2.0:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
+
+  parcel-namer-custom@0.2.0:
+    resolution: {integrity: sha512-TgIKjkrNB/IeZqEdOKmqswJrZrAdpXXMU70j7ZOXmN7C5gDehZ2ooONROnuNTWGajNrCJ5NjUW6d4se7uPbodg==}
+    engines: {node: '>=10', parcel: ^2.0.0-nightly.1 || ^2.0.0-beta.1}
+
+  parcel-namer-hashless@1.0.7:
+    resolution: {integrity: sha512-UzDAc47AH6gnzs8xiSkY3k8pVEGWurPiH+0RznWBCCiM35ybuehoVmAbu00AjaDSQ4DJKcVBjDvc+UYmN08vVw==}
+    engines: {node: '>= 16.0.0', parcel: 2.x}
 
   parcel@2.14.2:
     resolution: {integrity: sha512-dqB4/Oo8L7HfWyrxAQKnizQ/XzQM2iAY5fEaZUgS4wh+B3FE4LO5JVgobhVBBrIOoT02sV4gUEQhNJeU3raSuA==}
@@ -8491,6 +8508,22 @@ snapshots:
       p-limit: 3.1.0
 
   p-try@2.2.0: {}
+
+  parcel-namer-custom@0.2.0(@parcel/core@2.14.2(@swc/helpers@0.5.15)):
+    dependencies:
+      '@parcel/plugin': 2.14.2(@parcel/core@2.14.2(@swc/helpers@0.5.15))
+    transitivePeerDependencies:
+      - '@parcel/core'
+      - napi-wasm
+
+  parcel-namer-hashless@1.0.7(@parcel/core@2.14.2(@swc/helpers@0.5.15)):
+    dependencies:
+      '@parcel/namer-default': 2.14.2(@parcel/core@2.14.2(@swc/helpers@0.5.15))
+      '@parcel/plugin': 2.14.2(@parcel/core@2.14.2(@swc/helpers@0.5.15))
+      '@swc/helpers': 0.5.15
+    transitivePeerDependencies:
+      - '@parcel/core'
+      - napi-wasm
 
   parcel@2.14.2(@swc/helpers@0.5.15)(postcss@8.5.3)(relateurl@0.2.7)(svgo@3.3.2)(terser@5.39.0)(typescript@5.8.2):
     dependencies:

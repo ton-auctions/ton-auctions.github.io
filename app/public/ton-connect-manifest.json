@@ -1,5 +1,7 @@
 {
     "url": "https://ton-auctions.github.io/",
     "name": "TON Slot Auction",
-    "iconUrl": "https://ton-auctions.github.io/logo.png"
+    "iconUrl": "https://ton-auctions.github.io/logo.png",
+    "network": "testnet",
+    "bridgeUrl": "https://bridge.tonapi.io/bridge"
 }

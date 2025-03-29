@@ -4,5 +4,9 @@
     "ton-connect-manifest.json": [
       "@parcel/transformer-raw"
     ]
-  }
+  },
+  "namers": [
+    "parcel-namer-hashless",
+    "..."
+  ]
 }
