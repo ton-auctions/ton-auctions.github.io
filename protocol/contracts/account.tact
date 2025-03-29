@@ -67,7 +67,7 @@ contract Account(
     referree: Address?,
     service_comission: Int as uint16,
     referral_comission: Int as uint16,
-    chatId: Int,
+    chat_id: Int,
     auctions: map<Int, AuctionMeta>,
     max_allowance: Int,
     allowance: Int,
@@ -94,7 +94,7 @@ contract Account(
         throwUnless(self.ERRORS_AUCTION_NOT_EXIST, sender() == self.collector);
         throwUnless(self.ERRORS_AUCTION_INITIALISED, !self.initialised);
         
-        self.chatId = msg.chat_id;
+        self.chat_id = msg.chat_id;
         self.referree = msg.referree;
         self.service_comission = msg.service_comission;
         self.referral_comission = msg.referral_comission;
@@ -164,7 +164,7 @@ contract Account(
             self.collector,
             msg.minimalAmount,
             msg.endsAt,
-            self.chatId,
+            self.chat_id,
             null,
             false,
         );
@@ -243,10 +243,9 @@ contract Account(
     receive(_: ReferralCommission) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
 
-        if self.referree == null {
-            // No referree
-            return
-        }
+        // if self.referree == null {
+        //     return
+        // }
 
         let ctx = context();
 
@@ -257,12 +256,27 @@ contract Account(
             return
         }
 
-        message(MessageParameters {
-            mode: SendDefaultMode, // Referree will pay the fee
-            to: self.referree!!,
-            value: referral_amount,
-            body: ReferralCommission {}.toCell(),
-        });
+        if self.referree == null {
+            message(MessageParameters {
+                mode: SendDefaultMode, // Collector will pay the fee
+                to: self.collector,
+                value: referral_amount,
+                body: ServiceComission {}.toCell(),
+            });
+        } else {
+            message(MessageParameters {
+                mode: SendDefaultMode, // Referree will pay the fee
+                to: self.referree!!,
+                value: referral_amount,
+                body: ReferralCommission {}.toCell(),
+            });
+        }
+        // message(MessageParameters {
+        //     mode: SendDefaultMode, // Referree will pay the fee
+        //     to: self.referree!!,
+        //     value: referral_amount,
+        //     body: ReferralCommission {}.toCell(),
+        // });
     }
 
     receive(msg: Collect) {
@@ -289,7 +303,7 @@ contract Account(
         }
         return 0;
     }
-    get fun chatId(): Int { return self.chatId; }
+    get fun chatId(): Int { return self.chat_id; }
     get fun auction(id: Int): AuctionMeta? { return self.auctions.get(id); }
     get fun balance(): Int { return myBalance(); }
     get fun allowance(): Int { return self.allowance; }

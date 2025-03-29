@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@tailwindcss/postcss": "^4.0.17",
+    "@telegram-apps/sdk": "^3.5.3",
+    "@telegram-apps/sdk-react": "^3.1.5",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",

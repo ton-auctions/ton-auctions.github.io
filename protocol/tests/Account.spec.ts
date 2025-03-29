@@ -306,16 +306,6 @@ describe("Account", () => {
       value: toNano("1000"),
     });
 
-    // UserAccount sends 2% moneys to ReferreeAccount
-    expect(profitResult.transactions).toHaveTransaction({
-      from: userAccount.address,
-      to: referreeAccount.address,
-      success: true,
-      aborted: false,
-      deploy: false,
-      value: isCloseTo(toNano("20")),
-    });
-
     // UserAccount sends 1.5% moneys to Collector
     expect(profitResult.transactions).toHaveTransaction({
       from: userAccount.address,
@@ -326,14 +316,33 @@ describe("Account", () => {
       value: isCloseTo(toNano("15")),
     });
 
-    expect(profitResult.transactions).toHaveLength(3);
+    // UserAccount sends 2% moneys to ReferreeAccount
+    expect(profitResult.transactions).toHaveTransaction({
+      from: userAccount.address,
+      to: referreeAccount.address,
+      success: true,
+      aborted: false,
+      deploy: false,
+      value: isCloseTo(toNano("20")),
+    });
+
+    expect(profitResult.transactions).toHaveTransaction({
+      from: referreeAccount.address,
+      to: collector.address,
+      success: true,
+      aborted: false,
+      deploy: false,
+      value: isCloseTo(toNano("10")),
+    });
+
+    expect(profitResult.transactions).toHaveLength(4);
 
     const userBalance = await userAccount.getBalance();
     const expectedUserBalance = toNano("965") + initialUserBalance;
     expect(expectedUserBalance - userBalance).toBeLessThan(toNano("0.01"));
 
     const referreeBalance = await referreeAccount.getBalance();
-    const expectedReferreeBalance = toNano("20") + initialReferreeBalance;
+    const expectedReferreeBalance = toNano("10") + initialReferreeBalance;
 
     expect(expectedReferreeBalance - referreeBalance).toBeLessThan(
       toNano("0.01"),
