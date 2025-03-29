@@ -9,17 +9,17 @@ import { useEffect } from "react";
 
 // const CONTROLLER_ADDRESS = "EQAs3c0OAgJHg4Jq__YwHEIaqM8MmcGzjzzksKGz0zEBJCN6";
 
-function View() {
-  const wallet = useTonWallet();
+// function View() {
+//   const wallet = useTonWallet();
 
-  // {/* <span>{JSON.stringify(WebApp.initDataUnsafe)}</span> */}
-  return (
-    <React.Fragment>
-      <span>My App with React UI</span>
-      {wallet?.account.address}
-    </React.Fragment>
-  );
-}
+//   // {/* <span>{JSON.stringify(WebApp.initDataUnsafe)}</span> */}
+//   return (
+//     <React.Fragment>
+//       <span>My App with React UI</span>
+//       {wallet?.account.address}
+//     </React.Fragment>
+//   );
+// }
 
 function App() {
   useEffect(() => {}, []);
