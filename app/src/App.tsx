@@ -1,10 +1,6 @@
 import * as React from "react";
 import "./index.css";
-import {
-  TonConnectUIProvider,
-  TonConnectButton,
-  useTonWallet,
-} from "@tonconnect/ui-react";
+import { TonConnectUIProvider, TonConnectButton } from "@tonconnect/ui-react";
 import { useEffect } from "react";
 
 // const CONTROLLER_ADDRESS = "EQAs3c0OAgJHg4Jq__YwHEIaqM8MmcGzjzzksKGz0zEBJCN6";
