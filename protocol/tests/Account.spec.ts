@@ -386,7 +386,7 @@ describe("Account", () => {
     expect(initialBalance - balance).toBeLessThan(toNano("0.01"));
   });
 
-  it("Should send no referral commission if no referry exist", async () => {
+  it("Should send commission to controller if no referry exist", async () => {
     await userWithoutReferreeAccount.send(
       user.getSender(),
       {

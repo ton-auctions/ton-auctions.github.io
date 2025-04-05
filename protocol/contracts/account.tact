@@ -2,7 +2,6 @@ import "@stdlib/ownable";
 import "./auctions";
 import "./controller";
 
-
 struct AuctionMeta {
     id: Int;
     name: String;
@@ -26,6 +25,8 @@ message AuctionDeleted {
     id: Int as uint64;
     refund: Bool;
 }
+
+message AccountDelete {}
 
 struct AccountInitialisation {
     chat_id: Int as uint64;
@@ -53,14 +54,26 @@ message CreateBasicAuction {
     endsAt: Int as uint64;
 }
 
-message CleanUp {
+message CleanUp {}
 
+struct AccountData {
+    initialised: Bool;
+    version: Int;
+    owner: Address;
+    service_comission: Int as uint16;
+    referral_comission: Int as uint16;
+    max_allowance: Int;
+    allowance: Int;
+    balance: Int;
+    auctions: map<Int, AuctionMeta>;
+    chat_id: Int;
+    referree: Address?;
 }
 
-// 
+//
 // Account might have referral and might not. If not referral_comission field is ignored
 // In case referral is notspecified controller will assign sum of comissions into comission field.
-// 
+//
 contract Account(
     collector: Address,
     owner: Address,
@@ -85,15 +98,15 @@ contract Account(
     const ERRORS_AUCTION_ALREADY_EXISTS: Int = 209;
 
     const MINIMAL_COMMISSION_TO_BE_PAID: Int = ton("0.1");
-    const MINIMAL_AUCTION_TIMESPAN: Int = 3600*5;
-    const MAXIMAL_AUCTION_TIMESPAN: Int = 3600*30*24;
+    const MINIMAL_AUCTION_TIMESPAN: Int = 3600 * 5;
+    const MAXIMAL_AUCTION_TIMESPAN: Int = 3600 * 30 * 24;
 
     const EVENT_ACCOUNT_CREATED: Int = 1000;
 
     receive(msg: Initialize) {
         throwUnless(self.ERRORS_AUCTION_NOT_EXIST, sender() == self.collector);
         throwUnless(self.ERRORS_AUCTION_INITIALISED, !self.initialised);
-        
+
         self.chat_id = msg.chat_id;
         self.referree = msg.referree;
         self.service_comission = msg.service_comission;
@@ -103,7 +116,7 @@ contract Account(
 
         self.initialised = true;
 
-        self.reply(AccountCreated{}.toCell());
+        self.reply(AccountCreated {}.toCell());
     }
 
     receive(msg: ConfigureAccount) {
@@ -120,7 +133,7 @@ contract Account(
     receive(msg: AuctionDeleted) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
         throwUnless(self.ERRORS_AUCTION_NOT_EXIST, self.auctions.exists(msg.id));
-        
+
         let meta = self.auctions.get(msg.id)!!;
         throwUnless(self.ERRORS_WRONG_AUCTION_ADDRESS, meta.address == sender());
 
@@ -137,7 +150,7 @@ contract Account(
 
         let allowance = 10;
         let auctions: map<Int, AuctionMeta> = emptyMap();
-        
+
         foreach (key, auction in self.auctions) {
             if !auction.ended {
                 auctions.set(auction.id, auction);
@@ -190,24 +203,20 @@ contract Account(
         self.allowance -= 1;
     }
 
-    bounced(msg: bounced<CreateBasicAuction>) { 
-        if !self.auctions.exists(msg.id) {
-            return
-        }
-        
+    bounced(msg: bounced<CreateBasicAuction>) {
+        if !self.auctions.exists(msg.id) { return }
+
         let auction = self.auctions.get(msg.id)!!;
-        if (auction.address != sender()) {
-            return
-        }
-        
-        self.auctions.del(msg.id); 
+        if (auction.address != sender()) { return }
+
+        let _ = self.auctions.del(msg.id);
         self.allowance += 1;
     }
 
     receive(msg: Profit) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
         throwUnless(self.ERRORS_AUCTION_NOT_EXIST, self.auctions.exists(msg.id));
-        
+
         let ctx = context();
         let sender = ctx.sender;
         let amount = min(msg.amount, ctx.value);
@@ -216,25 +225,23 @@ contract Account(
         throwUnless(self.ERRORS_WRONG_AUCTION_ADDRESS, sender == meta.address);
 
         let service_comission = (amount * self.service_comission) / 10000;
-        if service_comission > self.MINIMAL_COMMISSION_TO_BE_PAID {
-            message(MessageParameters {
-                mode: SendDefaultMode, // We put charge on ourselves
-                to: self.collector,
-                value: service_comission,
-                body: ServiceComission{}.toCell(),
-            });
-        }
+        message(MessageParameters {
+            mode: SendDefaultMode, // We put charge on ourselves
+            to: self.collector,
+            value: service_comission,
+            body: ServiceComission {}.toCell(),
+        });
 
         let referral_amount = (amount * self.referral_comission) / 10000;
-        if self.referree != null && referral_amount > self.MINIMAL_COMMISSION_TO_BE_PAID {
+        if self.referree != null {
             message(MessageParameters {
                 mode: SendDefaultMode, // Referree will pay the fee
                 to: self.referree!!,
                 value: referral_amount,
-                body: ReferralCommission{}.toCell(),
+                body: ReferralCommission {}.toCell(),
             });
         }
-        
+
         meta.ended = true;
         self.auctions.set(msg.id, meta);
         self.allowance += 1;
@@ -243,17 +250,13 @@ contract Account(
     receive(_: ReferralCommission) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
 
-        // if self.referree == null {
-        //     return
-        // }
-
         let ctx = context();
-
+        let forwardFee = ctx.readForwardFee();
         let referral_amount = ctx.value >> 1; // Halve it
-        
-        if referral_amount < self.MINIMAL_COMMISSION_TO_BE_PAID {
+
+        if referral_amount < forwardFee {
             // Not worth it
-            return
+            return;
         }
 
         if self.referree == null {
@@ -271,53 +274,66 @@ contract Account(
                 body: ReferralCommission {}.toCell(),
             });
         }
-        // message(MessageParameters {
-        //     mode: SendDefaultMode, // Referree will pay the fee
-        //     to: self.referree!!,
-        //     value: referral_amount,
-        //     body: ReferralCommission {}.toCell(),
-        // });
     }
 
     receive(msg: Collect) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
         throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
 
-        message(MessageParameters{
-            mode: SendDefaultMode | SendRemainingBalance, 
+        message(MessageParameters {
+            mode: SendDefaultMode | SendRemainingBalance,
             to: self.owner,
             value: msg.amount,
             body: ReferralCommission {}.toCell(),
         });
     }
 
-    get fun version(): Int { return self.VERSION; }    
-
-    get fun initialised(): Bool { return self.initialised; }
-    get fun owner(): Address { return self.owner; }
-    get fun referree(): Address? { return self.referree; }
-    get fun serviceComission(): Int { return self.service_comission; }
-    get fun referralComission(): Int { 
-        if self.referree != null {
-            return self.referral_comission; 
-        }
-        return 0;
+    get fun balance(): Int {
+        return myBalance();
     }
-    get fun chatId(): Int { return self.chat_id; }
-    get fun auction(id: Int): AuctionMeta? { return self.auctions.get(id); }
-    get fun balance(): Int { return myBalance(); }
-    get fun allowance(): Int { return self.allowance; }
+
+    get fun allowance(): Int {
+        return self.allowance;
+    }
+
+    get fun auction(id: Int): AuctionMeta? {
+        return self.auctions.get(id);
+    }
+
+    get fun data(): AccountData {
+        return AccountData {
+            initialised: self.initialised,
+            version: self.VERSION,
+            owner: self.owner,
+            service_comission: self.service_comission,
+            referral_comission: self.referral_comission,
+            max_allowance: self.max_allowance,
+            allowance: self.allowance,
+            balance: myBalance(),
+            auctions: self.auctions,
+            chat_id: self.chat_id,
+            referree: self.referree,
+        };
+    }
+
+    receive(msg: AccountDelete) {
+        throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
+
+        send(SendParameters {
+            to: self.owner,
+            value: 0,
+            mode: SendRemainingBalance | SendDestroyIfZero,
+            body: null,
+        });
+    }
 
     receive() {
-        if self.initialised {
-            return
-        }
+        if self.initialised { return }
 
         self.reply(
-            RequestInitialisation{
+            RequestInitialisation {
                 user_account: myAddress(),
-            }.toCell()
-        )
+            }.toCell(),
+        );
     }
 }
-
