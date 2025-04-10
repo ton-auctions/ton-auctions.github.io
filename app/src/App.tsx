@@ -5,7 +5,7 @@ import { Address } from "@ton/core";
 
 import React from "react";
 
-import { Route, Routes } from "react-router";
+import { Navigate, Route, Routes } from "react-router";
 import { BaseLayout } from "./layouts/BaseLayout";
 import { Registration } from "./features/Registration";
 import { useUserAccount } from "./contexts/account";
@@ -13,6 +13,7 @@ import { TonContextValue, useTon } from "./contexts/tonClient";
 import { CreateAuctionForm } from "./features/CreateAuction";
 import { AuctionRow } from "./features/AuctionRow";
 import { AccountZone } from "./layouts/AccountZone";
+import { WalletZone } from "./layouts/WalletZone";
 
 const CONTROLLER_ADDRESS = "EQC9mlmtZxFa6-MHfpAFfztJXOwY-uCR406rXtqZv_OYOk3U";
 
@@ -76,14 +77,19 @@ function App() {
         >
           <Route index element={<About />} />
           <Route path="connect" element={<ConnectWallet />} />
-          <Route path="register" element={<Registration />} />
           <Route path="auction/:address" element={<SKIP name="auction" />} />
 
-          <Route path="app" element={<AccountZone />}>
-            <Route index element={<Auctions />} />
-            <Route path="auctions" element={<Auctions />} />
-            <Route path="basic" element={<SKIP name="basic" />} />
-            <Route path="profile" element={<SKIP name="profile" />} />
+          <Route path="app" element={<WalletZone />}>
+            <Route index element={<Navigate to="auctions" />} />
+
+            <Route path="register" element={<Registration />} />
+
+            <Route path="auctions" element={<AccountZone />}>
+              <Route index element={<Auctions />} />
+              {/* <Route path="auctions" element={<Auctions />} /> */}
+              <Route path="basic" element={<SKIP name="basic" />} />
+              <Route path="profile" element={<SKIP name="profile" />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

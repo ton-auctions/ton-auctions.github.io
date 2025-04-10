@@ -23,7 +23,7 @@ const contextValue = {
     _showTimeout = setTimeout(() => {
       loaderState.caption = caption;
       loaderState.isLoading = true;
-    }, 200);
+    }, 0);
   },
   hide: () => {
     clearTimeout(_showTimeout);
@@ -31,7 +31,7 @@ const contextValue = {
     _hideTimeout = setTimeout(() => {
       loaderState.caption = "";
       loaderState.isLoading = false;
-    }, 200);
+    }, 500);
   },
 } as LoaderContextValue;
 

@@ -10,12 +10,13 @@ import { toNano } from "@ton/ton";
 import React from "react";
 import { useUserAccount } from "../contexts/account";
 import { useLocation, useNavigate } from "react-router";
+import { Navbar } from "./Navbar";
 
 export const Registration: React.FC<{}> = () => {
   const loader = useLoader();
 
   const { refreshAccount } = useUserAccount();
-  const [ui] = useTonConnectUI();
+
   const connection = useConnection();
   const controller = useServiceController();
   const location = useLocation();
@@ -70,20 +71,13 @@ export const Registration: React.FC<{}> = () => {
     navigate(location.state.forward || "app");
   }, [controller, wallet]);
 
-  const disconnect = useCallback(() => {
-    ui.disconnect();
-  }, []);
-
   return (
-    <div className="flex flex-col">
-      <div className="text-gray-100">
+    <div className="flex h-full flex-col">
+      <div className="flex flex-none h-18 justify-center"></div>
+
+      <div className="flex flex-none justify-center z-10">
         <button className="btn" onClick={register}>
           REGISTRATION
-        </button>
-      </div>
-      <div className="text-gray-100">
-        <button className="btn" onClick={disconnect}>
-          DISSCONNECT
         </button>
       </div>
     </div>

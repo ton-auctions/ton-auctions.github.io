@@ -55,6 +55,7 @@
     "@parcel/packager-raw-url": "^2.14.4",
     "@parcel/transformer-inline-string": "2.13.3",
     "@parcel/transformer-raw": "^2.14.4",
+    "@parcel/transformer-svg-react": "^2.14.4",
     "@parcel/transformer-webmanifest": "^2.14.4",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",

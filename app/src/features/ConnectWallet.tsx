@@ -30,7 +30,7 @@ export const useWalletContract = (ton: TonContextValue) => {
 };
 
 export const ConnectWallet = () => {
-  const [tonConnectUI, _] = useTonConnectUI();
+  const [ui] = useTonConnectUI();
   const wallet = useTonWallet();
   const loader = useLoader();
 
@@ -39,17 +39,18 @@ export const ConnectWallet = () => {
 
   useEffect(() => {
     loader.show("Checking connection");
-    tonConnectUI.connectionRestored.then((restored) => {
-      loader.hide();
-      if (restored) {
-        navigate(location.state.forward);
-      }
-    });
-  }, [tonConnectUI]);
+    console.log("ConnectWallet useEffect");
 
-  if (wallet !== null) {
-    return <Navigate to={location.state.forward ?? "app"} />;
-  }
+    ui.connectionRestored
+      .then(() => {
+        if (wallet) {
+          navigate(location.state.forward);
+        }
+      })
+      .finally(() => {
+        loader.hide();
+      });
+  }, [ui]);
 
   const imageUrl = new URL(
     "/public/logo_t.png?as=webp&width=250",
@@ -72,7 +73,7 @@ export const ConnectWallet = () => {
         <button
           className="btn btn-primary text-gray-100 p-5 mt-5"
           onClick={async () => {
-            await tonConnectUI.openModal();
+            await ui.openModal();
           }}
         >
           Connect Wallet

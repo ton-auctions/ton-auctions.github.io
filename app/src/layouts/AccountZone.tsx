@@ -1,11 +1,7 @@
 import { useTonWallet } from "@tonconnect/ui-react";
-import { Navigate, Outlet, useLocation } from "react-router";
-import {
-  Account,
-  AccountContextProvider,
-  useUserAccount,
-} from "../contexts/account";
-import { Account as AccountWrapper, AccountData } from "../protocol";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
+import { Account, AccountContextProvider } from "../contexts/account";
+import { Account as AccountWrapper } from "../protocol";
 import React, { useState } from "react";
 import { useTon } from "../contexts/tonClient";
 import { useLoader } from "../contexts/loader";
@@ -81,20 +77,27 @@ const useAccountState = () => {
 };
 
 export const AccountZone = () => {
-  const wallet = useTonWallet();
+  const loader = useLoader();
   const location = useLocation();
+  const navigate = useNavigate();
   const { account, refreshAccount } = useAccountState();
 
-  if (wallet === null) {
-    return (
-      <Navigate to="/connect" state={{ forward: location.pathname }} replace />
-    );
-  }
+  useEffect(() => {
+    console.log("ACCOUNT ZONE EFFECT");
+    loader.show("Fetching account");
+
+    if (!account.deployed) {
+      loader.hide();
+      navigate("/app/register", {
+        state: {
+          forward: location.pathname,
+        },
+      });
+    }
+  }, []);
 
   if (!account.deployed) {
-    return (
-      <Navigate to="/register" state={{ forward: location.pathname }} replace />
-    );
+    return <></>;
   }
 
   return (

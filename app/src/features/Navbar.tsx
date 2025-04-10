@@ -1,12 +1,25 @@
-import React from "react";
+import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
+import React, { useCallback } from "react";
+import Exit from "../assets/exit.svg";
+import { useNavigate } from "react-router";
 
 export const Navbar = () => {
+  const wallet = useTonWallet();
+  const [ui] = useTonConnectUI();
+  const navigate = useNavigate();
+
+  const disconnect = useCallback(() => {
+    console.log("DISCONNECT");
+    ui.disconnect();
+    navigate("/");
+  }, []);
+
   return (
-    <div className="navbar bg-base-100 shadow-sm">
-      <label htmlFor="my-drawer" className="pl-2 pt-0">
+    <div className="navbar absolute bg-base-300 shadow-sm min-height">
+      <label htmlFor="my-drawer" className="p-3 hover:darken">
         <svg
-          width="20px"
-          height="20px"
+          width="22px"
+          height="22px"
           viewBox="0 0 12 12"
           version="1.1"
           xmlns="http://www.w3.org/2000/svg"
@@ -18,7 +31,12 @@ export const Navbar = () => {
           </g>
         </svg>
       </label>
-      <a className="btn btn-ghost text-xl">BidTon</a>
+      <div className="flex-1 text-xl pl-2">BidTon</div>
+      {wallet && (
+        <div className="flex-none pr-2" onClick={disconnect}>
+          <Exit width="30" height="30" />
+        </div>
+      )}
     </div>
   );
 };

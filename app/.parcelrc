@@ -3,6 +3,10 @@
   "transformers": {
     "ton-connect-manifest.json": [
       "@parcel/transformer-raw"
+    ],
+    "*.svg": [
+      "...",
+      "@parcel/transformer-svg-react"
     ]
   },
   "namers": [
