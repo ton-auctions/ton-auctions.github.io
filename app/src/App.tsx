@@ -1,60 +1,37 @@
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 
-import { ConnectWallet, useWalletContract } from "./features/ConnectWallet";
-import { Address } from "@ton/core";
+import { ConnectWallet } from "./features/ConnectWallet";
 
 import React from "react";
 
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { BaseLayout } from "./layouts/BaseLayout";
 import { Registration } from "./features/Registration";
-import { useUserAccount } from "./contexts/account";
-import { TonContextValue, useTon } from "./contexts/tonClient";
-import { CreateAuctionForm } from "./features/CreateAuction";
-import { AuctionRow } from "./features/AuctionRow";
+import { CreateAuction } from "./features/CreateAuction";
 import { AccountZone } from "./layouts/AccountZone";
 import { WalletZone } from "./layouts/WalletZone";
 
-const CONTROLLER_ADDRESS = "EQC9mlmtZxFa6-MHfpAFfztJXOwY-uCR406rXtqZv_OYOk3U";
+import { Profile } from "./features/Profile";
+import { Auctions } from "./features/Auctions";
 
-const waitTillExists = async (client: TonContextValue, src: Address) => {
-  let contractExists = true;
-  while (contractExists) {
-    contractExists = await client.client.isContractDeployed(src);
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  }
-};
-
-const Auctions: React.FC<{}> = () => {
-  const { account, refreshAccount } = useUserAccount();
-  const ton = useTon();
-  const wallet = useWalletContract(ton);
-
-  return (
-    <div className="mx-auto text-gray-100">
-      <ul className="mx-auto list bg-base-100 rounded-box shadow-md mt-5 w-80">
-        <li>
-          <h1 className="p-4 mx-auto">My auctions</h1>
-        </li>
-
-        <div className="divider p-0 m-0 h-0"></div>
-
-        {account!.data.auctions.values().map((auc) => {
-          return <AuctionRow key={auc.id} auction={auc} />;
-        })}
-      </ul>
-
-      <CreateAuctionForm
-        account={account!}
-        wallet={wallet!}
-        onAccountChange={refreshAccount}
-      ></CreateAuctionForm>
-    </div>
-  );
-};
+const CONTROLLER_ADDRESS = "EQCjIf7UE-3wYk0ZXLGmYma0541x5HDqH9Eoq1QPckXiZ-CK";
 
 function About() {
-  return <div>OLOLOLO</div>;
+  const navigate = useNavigate();
+
+  return (
+    <div>
+      OLOLOLO
+      <button
+        className="btn btn-primary"
+        onClick={() => {
+          navigate("app");
+        }}
+      >
+        TO APP
+      </button>
+    </div>
+  );
 }
 
 function SKIP(props: { name: string }) {
@@ -79,16 +56,20 @@ function App() {
           <Route path="connect" element={<ConnectWallet />} />
           <Route path="auction/:address" element={<SKIP name="auction" />} />
 
+          <Route path="r" element={<WalletZone />}>
+            <Route path=":ref" element={<Registration />} />
+          </Route>
+
           <Route path="app" element={<WalletZone />}>
-            <Route index element={<Navigate to="auctions" />} />
+            <Route index element={<Navigate to="account" />} />
 
             <Route path="register" element={<Registration />} />
 
-            <Route path="auctions" element={<AccountZone />}>
+            <Route path="account" element={<AccountZone />}>
               <Route index element={<Auctions />} />
-              {/* <Route path="auctions" element={<Auctions />} /> */}
-              <Route path="basic" element={<SKIP name="basic" />} />
-              <Route path="profile" element={<SKIP name="profile" />} />
+              <Route path="auctions" element={<Auctions />} />
+              <Route path="create" element={<CreateAuction />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
           </Route>
         </Route>

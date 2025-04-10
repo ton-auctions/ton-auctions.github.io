@@ -103,7 +103,7 @@ contract Controller(
 
         let initialiserExists = self.initialisers.exists(user_account);
         if initialiserExists {
-            // TODO: emit message
+            self.reply(null);
             return;
         }
 
@@ -136,7 +136,7 @@ contract Controller(
         let source = sender();
 
         if !self.initialisers.exists(source) {
-            // TODO: emit message
+            self.reply(null);
             return;
         }
 

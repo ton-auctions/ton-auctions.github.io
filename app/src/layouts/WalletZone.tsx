@@ -3,20 +3,25 @@ import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useLoader } from "../contexts/loader";
 import { Navbar } from "../features/Navbar";
+import { useUserAccount } from "../contexts/account";
+import { NavbarContext, NavbarContextProvider } from "../contexts/navbar";
 
 export const WalletZone = () => {
   const [ui] = useTonConnectUI();
   const wallet = useTonWallet();
   const loader = useLoader();
 
+  const [showBurger, setShowBurger] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     loader.show("Checking wallet connection");
-    console.log("WalletZone useEffect");
+
     ui.connectionRestored
-      .then(() => {
+      .then((restored) => {
+        if (restored) return;
+
         if (!wallet) {
           navigate("/connect", { state: { forward: location.pathname } });
         }
@@ -24,7 +29,7 @@ export const WalletZone = () => {
       .finally(() => {
         loader.hide();
       });
-  }, [ui]);
+  }, [ui, wallet]);
 
   if (!wallet) {
     return <></>;
@@ -32,8 +37,10 @@ export const WalletZone = () => {
 
   return (
     <>
-      <Navbar />
-      <Outlet />
+      <NavbarContextProvider setShowBurger={setShowBurger}>
+        <Outlet />
+      </NavbarContextProvider>
+      <Navbar withBurger={showBurger} />
     </>
   );
 };

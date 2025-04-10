@@ -1,5 +1,6 @@
 import {
   Address,
+  Cell,
   Contract,
   OpenedContract,
   TonClient,
@@ -10,6 +11,7 @@ import React from "react";
 import { useContext } from "react";
 import { createContext } from "react";
 import { proxy, useSnapshot } from "valtio";
+import { loadAuctionDeleted, loadProfit } from "../protocol/tact_Account";
 
 type ClientState = {
   apiKey?: string;
@@ -31,6 +33,17 @@ export type TonContextValue = {
     src?: Address;
     dest?: Address;
     limit?: number;
+  }) => Promise<Transaction[]>;
+
+  waitForTransactions2: (params: {
+    at_address: Address;
+    from: Address;
+    after_ts: Moment;
+    lt?: string;
+    hash?: string;
+    timeout?: number;
+    limit?: number;
+    testMessage: (cell: Cell) => boolean;
   }) => Promise<Transaction[]>;
 
   setApiKey: (apiKey: string) => void;
@@ -96,35 +109,110 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
           const new_txs = all_txs
             .filter((tx) => tx.now >= params.after_ts.unix())
             .filter((tx) => {
-              console.log(
-                "SRC",
-                tx.inMessage?.info.src?.toString(),
-                params.src?.toString()
-              );
-
               return (
                 !params.src ||
                 tx.inMessage?.info.src?.toString() == params.src.toString()
               );
             })
             .filter((tx) => {
-              console.log(
-                "DST",
-                tx.inMessage?.info.dest?.toString(),
-                params.dest?.toString()
-              );
-
               return (
                 !params.dest ||
                 tx.inMessage?.info.dest?.toString() == params.dest.toString()
               );
             });
 
+          const conf = {
+            urlSafe: true,
+            bounceable: true,
+            testOnly: true,
+          };
+
+          console.log(`INSRC: ${params.src?.toString(conf)}`);
+          console.log(`INDST: ${params.dest?.toString(conf)}`);
+
+          for (let tx of new_txs) {
+            console.log(`TXSRC: ${tx.inMessage?.info.src?.toString(conf)}`);
+            console.log(`TXDST: ${tx.inMessage?.info.dest?.toString(conf)}`);
+          }
+
           if (new_txs.length > 0) {
-            console.log("new_txs", new_txs);
             return new_txs;
           }
         } catch (e) {
+          // TODO: Do smth
+          // ignore
+        } finally {
+          await new Promise((resolve) =>
+            setTimeout(resolve, params.timeout || 1000)
+          );
+        }
+      }
+      return [];
+    },
+
+    waitForTransactions2: async (params: {
+      at_address: Address;
+      from: Address;
+      after_ts: Moment;
+      lt?: string;
+      hash?: string;
+      timeout?: number;
+      limit?: number;
+      testMessage: (cell: Cell) => boolean;
+    }) => {
+      var tx: Transaction[] = [];
+      while (tx.length == 0) {
+        try {
+          const all_txs = await client.getTransactions(params.at_address, {
+            limit: params.limit ?? 5,
+            lt: params.lt,
+            hash: params.hash,
+          });
+
+          const new_txs = all_txs
+            .filter((tx) => tx.now >= params.after_ts.unix())
+            .filter((tx) => {
+              return (
+                !params.from ||
+                tx.inMessage?.info.src?.toString() == params.from.toString()
+              );
+            })
+            .filter((tx) => {
+              return (
+                !params.at_address ||
+                tx.inMessage?.info.dest?.toString() ==
+                  params.at_address.toString()
+              );
+            })
+            .filter((tx) => {
+              if (!tx.inMessage) return false;
+              try {
+                params.testMessage(tx.inMessage?.body);
+              } catch (e) {
+                return false;
+              }
+              return true;
+            });
+
+          const conf = {
+            urlSafe: true,
+            bounceable: true,
+            testOnly: true,
+          };
+
+          console.log(`INSRC: ${params.from?.toString(conf)}`);
+          console.log(`INDST: ${params.at_address?.toString(conf)}`);
+
+          for (let tx of new_txs) {
+            console.log(`TXSRC: ${tx.inMessage?.info.src?.toString(conf)}`);
+            console.log(`TXDST: ${tx.inMessage?.info.dest?.toString(conf)}`);
+          }
+
+          if (new_txs.length > 0) {
+            return new_txs;
+          }
+        } catch (e) {
+          // TODO: Do smth
           // ignore
         } finally {
           await new Promise((resolve) =>
@@ -180,7 +268,6 @@ export const TonClientProvider: React.FC<TonClientProviderProps> = ({
 
 //   const result = data.transactions
 //     .map((tx) => {
-//       console.log(tx);
 
 //       if (!tx.in_msg.destination) return;
 //       if (!tx.in_msg.source) return;

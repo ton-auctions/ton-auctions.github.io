@@ -4,12 +4,13 @@ import { useTon } from "../contexts/tonClient";
 import { useConnection } from "../hooks/ton";
 import { Moment } from "moment";
 import moment from "moment";
-import { DeployedAccount } from "../contexts/account";
+import { DeployedAccount, useUserAccount } from "../contexts/account";
 import { OpenedContract, toNano } from "@ton/core";
 import { WalletV5 } from "../protocol/wallet_v5";
 import { useCallback } from "react";
 import React from "react";
 import { useTonPriceOracle } from "../hooks/priceOracle";
+import { useWalletContract } from "./ConnectWallet";
 
 type CreateAuctionFormProps = {
   account: DeployedAccount;
@@ -206,7 +207,7 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
           min={moment().add(1, "day").format("YYYY-MM-DD")}
           max={moment().add(29, "days").format("YYYY-MM-DD")}
           onChange={(event) => {
-            setEndsAt(moment(event.target.value, "DD/MM/YYYY"));
+            setEndsAt(moment(event.target.value, "YYYY-MM-DD"));
           }}
         />
 
@@ -215,5 +216,22 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
         </button>
       </fieldset>
     </form>
+  );
+};
+
+export const CreateAuction: React.FC<{}> = () => {
+  const { account, refreshAccount } = useUserAccount();
+  const ton = useTon();
+  const wallet = useWalletContract(ton);
+
+  return (
+    <div className="max-h-dvh min-w-xs mx-auto text-gray-100">
+      <div className="flex flex-none h-21 justify-center"></div>
+      <CreateAuctionForm
+        account={account!}
+        wallet={wallet!}
+        onAccountChange={refreshAccount}
+      ></CreateAuctionForm>
+    </div>
   );
 };

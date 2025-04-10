@@ -19,12 +19,18 @@ export const useWalletContract = (ton: TonContextValue) => {
   useEffect(() => {
     if (!wallet) return;
 
+    if (
+      walletContract?.address.toRawString() == wallet.account.address.toString()
+    ) {
+      return;
+    }
+
     setWalletContract(
       ton.cachedOpenContract(
         WalletV5.createFromAddress(Address.parse(wallet.account.address))
       )
     );
-  });
+  }, [wallet]);
 
   return walletContract;
 };
@@ -39,7 +45,6 @@ export const ConnectWallet = () => {
 
   useEffect(() => {
     loader.show("Checking connection");
-    console.log("ConnectWallet useEffect");
 
     ui.connectionRestored
       .then(() => {
@@ -50,7 +55,7 @@ export const ConnectWallet = () => {
       .finally(() => {
         loader.hide();
       });
-  }, [ui]);
+  }, [ui, wallet]);
 
   const imageUrl = new URL(
     "/public/logo_t.png?as=webp&width=250",
@@ -58,7 +63,7 @@ export const ConnectWallet = () => {
   );
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="max-h-dvh min-w-xs flex h-full flex-col">
       <div className="grow z-10"></div>
 
       <div className="flex flex-none justify-center items-center z-10 text-center text-gray-100">

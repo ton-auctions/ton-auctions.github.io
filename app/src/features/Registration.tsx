@@ -1,16 +1,40 @@
-import { useTonConnectUI } from "@tonconnect/ui-react";
 import { useLoader } from "../contexts/loader";
 import { useConnection } from "../hooks/ton";
 import { useServiceController } from "../contexts/serviceController";
 import { useTon } from "../contexts/tonClient";
 import { useWalletContract } from "./ConnectWallet";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import moment from "moment";
-import { toNano } from "@ton/ton";
+import { Address, toNano } from "@ton/ton";
 import React from "react";
 import { useUserAccount } from "../contexts/account";
-import { useLocation, useNavigate } from "react-router";
-import { Navbar } from "./Navbar";
+import { useLocation, useNavigate, useParams } from "react-router";
+
+function useReferreeAddress(
+  key: string
+): [Address | null, React.Dispatch<React.SetStateAction<Address | null>>] {
+  const [value, setValue] = useState<Address | null>(() => {
+    try {
+      const val = localStorage.getItem(key);
+      return Address.parse(val || "");
+    } catch (e) {
+      // TODO: Do smth
+      localStorage.removeItem(key);
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const oldValue = localStorage.getItem(key);
+
+    if (oldValue !== null) return;
+    if (value === null) return;
+
+    localStorage.setItem(key, value.toString());
+  }, [key, value]);
+
+  return [value, setValue];
+}
 
 export const Registration: React.FC<{}> = () => {
   const loader = useLoader();
@@ -20,10 +44,25 @@ export const Registration: React.FC<{}> = () => {
   const connection = useConnection();
   const controller = useServiceController();
   const location = useLocation();
+  const params = useParams();
+  const [referree, setReferee] = useReferreeAddress("referree");
+
   const navigate = useNavigate();
 
   const ton = useTon();
   const wallet = useWalletContract(ton);
+
+  useEffect(() => {
+    if (referree !== null) return;
+
+    let referreeAddress: Address | null = null;
+    try {
+      referreeAddress = Address.parse(params.ref || "");
+      setReferee(referreeAddress);
+    } catch (e) {
+      // TODO: Do smth
+    }
+  }, [params]);
 
   const register = useCallback(async () => {
     if (!controller.loaded) return;
@@ -46,12 +85,11 @@ export const Registration: React.FC<{}> = () => {
         {
           $$type: "CreateAccount",
           chat_id: 0n,
-          referree: null,
+          referree,
         }
       );
     } catch (e) {
       // TODO: manually test for insufficient TON
-      console.log("JOPA");
     }
 
     loader.show("Creating account. Waiting for transation to settle.");
@@ -72,12 +110,12 @@ export const Registration: React.FC<{}> = () => {
   }, [controller, wallet]);
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="max-h-dvh min-w-xs flex h-full flex-col">
       <div className="flex flex-none h-18 justify-center"></div>
 
       <div className="flex flex-none justify-center z-10">
         <button className="btn" onClick={register}>
-          REGISTRATION
+          REGISTRATION {referree?.toString()}
         </button>
       </div>
     </div>

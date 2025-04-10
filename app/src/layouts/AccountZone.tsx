@@ -1,33 +1,32 @@
 import { useTonWallet } from "@tonconnect/ui-react";
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router";
 import { Account, AccountContextProvider } from "../contexts/account";
 import { Account as AccountWrapper } from "../protocol";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useTon } from "../contexts/tonClient";
 import { useLoader } from "../contexts/loader";
 import { useServiceController } from "../contexts/serviceController";
 import { useEffect } from "react";
 import { Address } from "@ton/core";
 import { useCallback } from "react";
+import { useNavbarControls } from "../contexts/navbar";
+import { Drawer } from "../features/Drawer";
 
 const useAccountState = () => {
   const [refresher, setRefresher] = useState(0);
 
-  const tonContext = useTon();
+  const ton = useTon();
   const loader = useLoader();
   const wallet = useTonWallet();
 
   const controller = useServiceController();
-  const [account, setAccount] = useState<Account>({
-    deployed: false,
-  });
+  const [account, setAccount] = useState<Account | undefined>();
 
   useEffect(() => {
-    const walletAddressStr = wallet?.account.address;
-
-    if (!walletAddressStr) return;
-    if (!tonContext) return;
+    if (!ton) return;
     if (!controller.loaded) return;
+
+    const walletAddressStr = wallet!.account.address;
 
     const walletAddress = Address.parse(walletAddressStr);
 
@@ -36,9 +35,7 @@ const useAccountState = () => {
         walletAddress
       );
 
-      const isDeployed = await tonContext.client.isContractDeployed(
-        accountAddress
-      );
+      const isDeployed = await ton.client.isContractDeployed(accountAddress);
 
       if (!isDeployed) {
         setAccount({
@@ -48,7 +45,7 @@ const useAccountState = () => {
         return;
       }
 
-      const contract = tonContext.cachedOpenContract(
+      const contract = ton.cachedOpenContract(
         AccountWrapper.fromAddress(accountAddress)
       );
       const data = await contract.getData();
@@ -64,7 +61,7 @@ const useAccountState = () => {
     loader.show("Locating user account.");
     loadServiceAccount().finally(loader.hide);
     // TODO: handle exceptions.
-  }, [wallet, tonContext, controller, refresher]);
+  }, [ton, controller, refresher]);
 
   const refreshAccount = useCallback(() => {
     setRefresher((refresher + 1) % 1000);
@@ -80,29 +77,38 @@ export const AccountZone = () => {
   const loader = useLoader();
   const location = useLocation();
   const navigate = useNavigate();
+
+  const navBarControls = useNavbarControls();
   const { account, refreshAccount } = useAccountState();
 
   useEffect(() => {
-    console.log("ACCOUNT ZONE EFFECT");
     loader.show("Fetching account");
 
+    navBarControls.setShowBurger(false);
+
+    if (account === undefined) return;
+
     if (!account.deployed) {
-      loader.hide();
       navigate("/app/register", {
         state: {
           forward: location.pathname,
         },
       });
+    } else {
+      navBarControls.setShowBurger(true);
+      loader.hide();
     }
-  }, []);
+  }, [account]);
 
-  if (!account.deployed) {
+  if (!account || !account.deployed) {
     return <></>;
   }
 
   return (
-    <AccountContextProvider account={account} refreshAccount={refreshAccount}>
-      <Outlet />;
+    <AccountContextProvider account={account!} refreshAccount={refreshAccount}>
+      <Drawer>
+        <Outlet />
+      </Drawer>
     </AccountContextProvider>
   );
 };
