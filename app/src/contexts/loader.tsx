@@ -1,6 +1,7 @@
 import React from "react";
 import { proxy, useSnapshot } from "valtio";
-import Loader from "./components";
+import Loader from "../components/Loader";
+import { useContext } from "react";
 
 export const loaderState = proxy({
   isLoading: false,
@@ -54,3 +55,5 @@ export const LoaderProvider: React.FC<React.PropsWithChildren> = ({
     </LoaderContext.Provider>
   );
 };
+
+export const useLoader = () => useContext(LoaderContext);

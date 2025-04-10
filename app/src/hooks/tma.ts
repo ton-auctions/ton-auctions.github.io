@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLoader } from "../features/loader";
+
 import { isTMA as sdkIsTMA } from "@telegram-apps/sdk";
+import { useLoader } from "../contexts/loader";
 
 export const useTMA = () => {
   const loader = useLoader();

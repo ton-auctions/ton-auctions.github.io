@@ -1,12 +1,5 @@
-import {
-  Address,
-  Contract,
-  OpenedContract,
-  Sender,
-  SenderArguments,
-  TonClient,
-} from "@ton/ton";
-import { useEffect, useState, use, cache } from "react";
+import { Contract, OpenedContract, Sender, SenderArguments } from "@ton/ton";
+import { useEffect, useState } from "react";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 
 export function useInit<T>(func: () => Promise<T>, deps: any[] = []) {
@@ -24,10 +17,6 @@ export function useInit<T>(func: () => Promise<T>, deps: any[] = []) {
 export function useContractWrapper<T extends Contract>(client, contract: T) {
   return useInit(async () => {
     if (!client) return;
-
-    // const contract = fromAddress(
-    //   Address.parse("EQAs3c0OAgJHg4Jq__YwHEIaqM8MmcGzjzzksKGz0zEBJCN6")
-    // );
 
     return client.open(contract) as OpenedContract<T>;
   }, [client]);

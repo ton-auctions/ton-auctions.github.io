@@ -23,8 +23,8 @@ let createAuction = async (
       id: id || BigInt(0),
       name: "Auction 1",
       description: "Empty",
-      minimalAmount: toNano("1"),
-      endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+      minimal_amount: toNano("1"),
+      ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
     },
   );
   expect(result.transactions).toHaveTransaction({
@@ -271,8 +271,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
 
@@ -398,8 +398,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
     const auctionMeta = await userWithoutReferreeAccount.getAuction(BigInt(0));
@@ -481,8 +481,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
 
@@ -512,8 +512,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000)),
       },
     );
 
@@ -543,8 +543,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000)),
       },
     );
 
@@ -574,8 +574,8 @@ describe("Account", () => {
         id: BigInt(0),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
 
@@ -590,7 +590,7 @@ describe("Account", () => {
     let auction = await userAccount.getAuction(BigInt(0));
     expect(auction).not.toBeNull();
     expect(auction).toMatchObject({
-      $$type: "AuctionMeta",
+      $$type: "AuctionConfig",
       id: BigInt(0),
       name: "Auction 1",
       description: "Empty",
@@ -734,8 +734,8 @@ describe("Account", () => {
         id: 3n,
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
     expect(result2.transactions).toHaveTransaction({
@@ -771,8 +771,8 @@ describe("Account", () => {
         id: BigInt(10),
         name: "Auction 1",
         description: "Empty",
-        minimalAmount: toNano("1"),
-        endsAt: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+        minimal_amount: toNano("1"),
+        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
       },
     );
 

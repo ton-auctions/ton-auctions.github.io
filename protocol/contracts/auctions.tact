@@ -9,21 +9,14 @@ struct Winner {
     chat_id: Int as int64;
 }
 
-struct AuctionData {
-    id: Int as uint64;
-    owner_account: Address;
-    minimal_amount: Int as uint128;
-    ends_at: Int as uint64;
-    winner: Winner?;
-    ended: Bool;
-}
-
 message Resolve {}
 
 message Delete {}
 
 contract BasicAuction(
     id: Int as uint64,
+    name: String,
+    description: String,
     owner: Address,
     owner_account: Address,
     collector: Address,
@@ -32,6 +25,7 @@ contract BasicAuction(
     owner_chat_id: Int,
     winner: Winner?,
     ended: Bool,
+    refund: Bool,
 ) with Ownable {
     const ERRORS_BID_IS_TOO_SMALL: Int = 201;
     const ERRORS_BID_RAISE_IS_TOO_SMALL: Int = 202;
@@ -119,11 +113,13 @@ contract BasicAuction(
 
         let auction_resolved = beginCell()
             .storeUint(self.EVENT_RESOLVED, 4)
-            .storeUint(self.owner_chat_id, 64);
+            .storeUint(self.owner_chat_id, 255);
 
-        emit(auction_resolved.asCell());
+        self.ended = true;
 
         if self.winner == null {
+            emit(auction_resolved.asCell());
+            self.refund = true;
             message(MessageParameters {
                 mode: SendDefaultMode | SendRemainingBalance,
                 to: self.owner_account,
@@ -132,6 +128,10 @@ contract BasicAuction(
             });
         } else {
             let winner = self.winner!!;
+
+            auction_resolved = auction_resolved.storeUint(winner.chat_id, 64);
+            emit(auction_resolved.asCell());
+
             message(MessageParameters {
                 mode: SendDefaultMode | SendRemainingBalance,
                 to: self.owner_account,
@@ -141,11 +141,7 @@ contract BasicAuction(
                     amount: winner.amount,
                 }.toCell(),
             });
-
-            auction_resolved = auction_resolved.storeUint(winner.chat_id, 64);
         }
-
-        self.ended = true;
     }
 
     receive() {}
@@ -193,5 +189,19 @@ contract BasicAuction(
 
     get fun balance(): Int {
         return myBalance();
+    }
+
+    get fun data(): AuctionConfig {
+        return AuctionConfig {
+            id: self.id,
+            name: self.name,
+            description: self.description,
+            address: myAddress(),
+            type: "basic",
+            ends_at: self.ends_at,
+            minimal_amount: self.minimal_amount,
+            ended: self.ended,
+            refund: self.refund,
+        };
     }
 }

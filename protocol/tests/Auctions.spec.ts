@@ -28,6 +28,8 @@ describe("Auctions", () => {
     auction = blockchain.openContract(
       await BasicAuction.fromInit(
         BigInt(0),
+        "name",
+        "description",
         owner.address,
         owner_account.address,
         collector.address,
@@ -35,6 +37,7 @@ describe("Auctions", () => {
         BigInt(ends_at),
         BigInt(0),
         null,
+        false,
         false,
       ),
     );

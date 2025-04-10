@@ -1,4 +1,11 @@
-import { motion, MotionValue, useTime, useTransform } from "motion/react";
+import {
+  EasingFunction,
+  motion,
+  MotionValue,
+  TransformProperties,
+  useTime,
+  useTransform,
+} from "motion/react";
 
 // import { periodic, perc, blur, around } from "../old/utils/motions";
 
@@ -28,18 +35,39 @@ export const periodic = (
   return useTransform(sin, [-1, 1], range);
 };
 
+type TransformOptions = {
+  ease?: EasingFunction | EasingFunction[];
+};
+
 export const periodic_modulus = (
   value: MotionValue,
   duration: number,
-  range: [number, number]
+  range: [number, number],
+  options?: TransformOptions
 ) => {
   const offset = Math.random();
 
-  const sin = useTransform(value, (value) => {
-    return Math.sin((value + offset * duration) / duration);
+  const saw = useTransform(value, (value) => {
+    return value % duration;
   });
 
-  return useTransform(sin, [-1, 1], range);
+  return useTransform(saw, [0, duration], range, options);
+};
+
+export const inverse_periodic_modulus_shifted = (
+  value: MotionValue,
+  duration: number,
+  range: [number, number],
+  shift?: number,
+  options?: TransformOptions
+) => {
+  const maxVal = duration * (1 - 1 / (1 + (shift || 9999)));
+
+  const saw = useTransform(value, (value) => {
+    return maxVal - (value % duration);
+  });
+
+  return useTransform(saw, [0, maxVal], range, options);
 };
 
 export const around = (

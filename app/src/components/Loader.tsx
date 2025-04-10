@@ -1,16 +1,33 @@
 import * as React from "react";
 import { useCallback } from "react";
 import { easeOut, motion, useTime, useTransform } from "motion/react";
-import { periodic_modulus } from "../../utils";
+import {
+  periodic,
+  perc,
+  blur,
+  around,
+  periodic_modulus,
+  inverse_periodic_modulus_shifted,
+} from "../utils";
 
 type LoaderProps = { hidden: boolean; caption: string };
 
 export const Loader: React.FC<LoaderProps> = ({ hidden, caption }) => {
   const t = useCallback(useTime, [])();
 
-  const scale = periodic_modulus(t, 14000, [0, 7], { easeOut: easeOut });
-  const opacity = periodic_modulus(t, 14000, [0.5, 0], { easeOut: easeOut });
+  const pulseDuration = 14000;
+
+  const scale = periodic_modulus(t, pulseDuration, [0, 7], { ease: easeOut });
+  const opacity = periodic_modulus(t, pulseDuration, [0.5, 0], {
+    ease: easeOut,
+  });
   const rotate = useTransform(t, (value) => value / 100);
+  const pulse = inverse_periodic_modulus_shifted(
+    t,
+    pulseDuration,
+    [1, 1.05],
+    0.025
+  );
 
   return (
     <>
@@ -32,6 +49,7 @@ export const Loader: React.FC<LoaderProps> = ({ hidden, caption }) => {
             className="relative h-full w-full top-0 left-0"
             style={{
               rotate,
+              scale: pulse,
             }}
           >
             <div className="relative w-1/1 h-1/2 rounded-t-full bg-white">

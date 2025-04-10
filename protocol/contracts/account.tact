@@ -2,12 +2,14 @@ import "@stdlib/ownable";
 import "./auctions";
 import "./controller";
 
-struct AuctionMeta {
+struct AuctionConfig {
     id: Int;
     name: String;
     description: String;
     address: Address;
     type: String;
+    ends_at: Int as uint64;
+    minimal_amount: Int as uint128;
     ended: Bool;
     refund: Bool;
 }
@@ -50,8 +52,8 @@ message CreateBasicAuction {
     id: Int as uint64;
     name: String;
     description: String;
-    minimalAmount: Int;
-    endsAt: Int as uint64;
+    minimal_amount: Int;
+    ends_at: Int as uint64;
 }
 
 message CleanUp {}
@@ -65,7 +67,7 @@ struct AccountData {
     max_allowance: Int;
     allowance: Int;
     balance: Int;
-    auctions: map<Int, AuctionMeta>;
+    auctions: map<Int, AuctionConfig>;
     chat_id: Int;
     referree: Address?;
 }
@@ -81,7 +83,7 @@ contract Account(
     service_comission: Int as uint16,
     referral_comission: Int as uint16,
     chat_id: Int,
-    auctions: map<Int, AuctionMeta>,
+    auctions: map<Int, AuctionConfig>,
     max_allowance: Int,
     allowance: Int,
     initialised: Bool,
@@ -149,7 +151,7 @@ contract Account(
         throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner || sender == self.collector);
 
         let allowance = 10;
-        let auctions: map<Int, AuctionMeta> = emptyMap();
+        let auctions: map<Int, AuctionConfig> = emptyMap();
 
         foreach (key, auction in self.auctions) {
             if !auction.ended {
@@ -165,28 +167,33 @@ contract Account(
     receive(msg: CreateBasicAuction) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
         throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
-        throwUnless(self.ERRORS_BAD_AUCTION_TOO_SHORT, msg.endsAt > now() + self.MINIMAL_AUCTION_TIMESPAN);
-        throwUnless(self.ERRORS_BAD_AUCTION_TOO_LONG, msg.endsAt < now() + self.MAXIMAL_AUCTION_TIMESPAN);
+        throwUnless(self.ERRORS_BAD_AUCTION_TOO_SHORT, msg.ends_at > now() + self.MINIMAL_AUCTION_TIMESPAN);
+        throwUnless(self.ERRORS_BAD_AUCTION_TOO_LONG, msg.ends_at < now() + self.MAXIMAL_AUCTION_TIMESPAN);
         throwUnless(self.ERRORS_NOT_ENOUGH_ALLOWANCE, self.allowance > 0);
         throwUnless(self.ERRORS_AUCTION_ALREADY_EXISTS, !self.auctions.exists(msg.id));
 
         let init = initOf BasicAuction(
             msg.id,
+            msg.name,
+            msg.description,
             self.owner,
             myAddress(),
             self.collector,
-            msg.minimalAmount,
-            msg.endsAt,
+            msg.minimal_amount,
+            msg.ends_at,
             self.chat_id,
             null,
             false,
+            false,
         );
 
-        let meta = AuctionMeta {
+        let meta = AuctionConfig {
             id: msg.id,
             name: msg.name,
             description: msg.description,
             address: contractAddress(init),
+            ends_at: msg.ends_at,
+            minimal_amount: msg.minimal_amount,
             type: "basic",
             ended: false,
             refund: false,
@@ -195,8 +202,8 @@ contract Account(
         self.auctions.set(msg.id, meta);
 
         deploy(DeployParameters {
-            mode: SendDefaultMode,
-            value: ton("0.1"),
+            mode: SendDefaultMode | SendRemainingValue,
+            value: ton("0"),
             bounce: true,
             init: init,
         });
@@ -296,7 +303,7 @@ contract Account(
         return self.allowance;
     }
 
-    get fun auction(id: Int): AuctionMeta? {
+    get fun auction(id: Int): AuctionConfig? {
         return self.auctions.get(id);
     }
 

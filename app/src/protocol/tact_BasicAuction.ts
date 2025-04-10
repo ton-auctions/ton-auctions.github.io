@@ -664,18 +664,20 @@ function dictValueParserChangeOwnerOk(): DictionaryValue<ChangeOwnerOk> {
     }
 }
 
-export type AuctionMeta = {
-    $$type: 'AuctionMeta';
+export type AuctionConfig = {
+    $$type: 'AuctionConfig';
     id: bigint;
     name: string;
     description: string;
     address: Address;
     type: string;
+    ends_at: bigint;
+    minimal_amount: bigint;
     ended: boolean;
     refund: boolean;
 }
 
-export function storeAuctionMeta(src: AuctionMeta) {
+export function storeAuctionConfig(src: AuctionConfig) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeInt(src.id, 257);
@@ -683,64 +685,74 @@ export function storeAuctionMeta(src: AuctionMeta) {
         b_0.storeStringRefTail(src.description);
         b_0.storeAddress(src.address);
         b_0.storeStringRefTail(src.type);
+        b_0.storeUint(src.ends_at, 64);
+        b_0.storeUint(src.minimal_amount, 128);
         b_0.storeBit(src.ended);
         b_0.storeBit(src.refund);
     };
 }
 
-export function loadAuctionMeta(slice: Slice) {
+export function loadAuctionConfig(slice: Slice) {
     const sc_0 = slice;
     const _id = sc_0.loadIntBig(257);
     const _name = sc_0.loadStringRefTail();
     const _description = sc_0.loadStringRefTail();
     const _address = sc_0.loadAddress();
     const _type = sc_0.loadStringRefTail();
+    const _ends_at = sc_0.loadUintBig(64);
+    const _minimal_amount = sc_0.loadUintBig(128);
     const _ended = sc_0.loadBit();
     const _refund = sc_0.loadBit();
-    return { $$type: 'AuctionMeta' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ended: _ended, refund: _refund };
+    return { $$type: 'AuctionConfig' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, ended: _ended, refund: _refund };
 }
 
-function loadTupleAuctionMeta(source: TupleReader) {
+function loadTupleAuctionConfig(source: TupleReader) {
     const _id = source.readBigNumber();
     const _name = source.readString();
     const _description = source.readString();
     const _address = source.readAddress();
     const _type = source.readString();
+    const _ends_at = source.readBigNumber();
+    const _minimal_amount = source.readBigNumber();
     const _ended = source.readBoolean();
     const _refund = source.readBoolean();
-    return { $$type: 'AuctionMeta' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ended: _ended, refund: _refund };
+    return { $$type: 'AuctionConfig' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, ended: _ended, refund: _refund };
 }
 
-function loadGetterTupleAuctionMeta(source: TupleReader) {
+function loadGetterTupleAuctionConfig(source: TupleReader) {
     const _id = source.readBigNumber();
     const _name = source.readString();
     const _description = source.readString();
     const _address = source.readAddress();
     const _type = source.readString();
+    const _ends_at = source.readBigNumber();
+    const _minimal_amount = source.readBigNumber();
     const _ended = source.readBoolean();
     const _refund = source.readBoolean();
-    return { $$type: 'AuctionMeta' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ended: _ended, refund: _refund };
+    return { $$type: 'AuctionConfig' as const, id: _id, name: _name, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, ended: _ended, refund: _refund };
 }
 
-function storeTupleAuctionMeta(source: AuctionMeta) {
+function storeTupleAuctionConfig(source: AuctionConfig) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.id);
     builder.writeString(source.name);
     builder.writeString(source.description);
     builder.writeAddress(source.address);
     builder.writeString(source.type);
+    builder.writeNumber(source.ends_at);
+    builder.writeNumber(source.minimal_amount);
     builder.writeBoolean(source.ended);
     builder.writeBoolean(source.refund);
     return builder.build();
 }
 
-function dictValueParserAuctionMeta(): DictionaryValue<AuctionMeta> {
+function dictValueParserAuctionConfig(): DictionaryValue<AuctionConfig> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeAuctionMeta(src)).endCell());
+            builder.storeRef(beginCell().store(storeAuctionConfig(src)).endCell());
         },
         parse: (src) => {
-            return loadAuctionMeta(src.loadRef().beginParse());
+            return loadAuctionConfig(src.loadRef().beginParse());
         }
     }
 }
@@ -1125,49 +1137,49 @@ export type CreateBasicAuction = {
     id: bigint;
     name: string;
     description: string;
-    minimalAmount: bigint;
-    endsAt: bigint;
+    minimal_amount: bigint;
+    ends_at: bigint;
 }
 
 export function storeCreateBasicAuction(src: CreateBasicAuction) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(3890680962, 32);
+        b_0.storeUint(3773222016, 32);
         b_0.storeUint(src.id, 64);
         b_0.storeStringRefTail(src.name);
         b_0.storeStringRefTail(src.description);
-        b_0.storeInt(src.minimalAmount, 257);
-        b_0.storeUint(src.endsAt, 64);
+        b_0.storeInt(src.minimal_amount, 257);
+        b_0.storeUint(src.ends_at, 64);
     };
 }
 
 export function loadCreateBasicAuction(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3890680962) { throw Error('Invalid prefix'); }
+    if (sc_0.loadUint(32) !== 3773222016) { throw Error('Invalid prefix'); }
     const _id = sc_0.loadUintBig(64);
     const _name = sc_0.loadStringRefTail();
     const _description = sc_0.loadStringRefTail();
-    const _minimalAmount = sc_0.loadIntBig(257);
-    const _endsAt = sc_0.loadUintBig(64);
-    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimalAmount: _minimalAmount, endsAt: _endsAt };
+    const _minimal_amount = sc_0.loadIntBig(257);
+    const _ends_at = sc_0.loadUintBig(64);
+    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
 }
 
 function loadTupleCreateBasicAuction(source: TupleReader) {
     const _id = source.readBigNumber();
     const _name = source.readString();
     const _description = source.readString();
-    const _minimalAmount = source.readBigNumber();
-    const _endsAt = source.readBigNumber();
-    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimalAmount: _minimalAmount, endsAt: _endsAt };
+    const _minimal_amount = source.readBigNumber();
+    const _ends_at = source.readBigNumber();
+    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
 }
 
 function loadGetterTupleCreateBasicAuction(source: TupleReader) {
     const _id = source.readBigNumber();
     const _name = source.readString();
     const _description = source.readString();
-    const _minimalAmount = source.readBigNumber();
-    const _endsAt = source.readBigNumber();
-    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimalAmount: _minimalAmount, endsAt: _endsAt };
+    const _minimal_amount = source.readBigNumber();
+    const _ends_at = source.readBigNumber();
+    return { $$type: 'CreateBasicAuction' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
 }
 
 function storeTupleCreateBasicAuction(source: CreateBasicAuction) {
@@ -1175,8 +1187,8 @@ function storeTupleCreateBasicAuction(source: CreateBasicAuction) {
     builder.writeNumber(source.id);
     builder.writeString(source.name);
     builder.writeString(source.description);
-    builder.writeNumber(source.minimalAmount);
-    builder.writeNumber(source.endsAt);
+    builder.writeNumber(source.minimal_amount);
+    builder.writeNumber(source.ends_at);
     return builder.build();
 }
 
@@ -1242,7 +1254,7 @@ export type AccountData = {
     max_allowance: bigint;
     allowance: bigint;
     balance: bigint;
-    auctions: Dictionary<bigint, AuctionMeta>;
+    auctions: Dictionary<bigint, AuctionConfig>;
     chat_id: bigint;
     referree: Address | null;
 }
@@ -1259,7 +1271,7 @@ export function storeAccountData(src: AccountData) {
         const b_1 = new Builder();
         b_1.storeInt(src.allowance, 257);
         b_1.storeInt(src.balance, 257);
-        b_1.storeDict(src.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta());
+        b_1.storeDict(src.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig());
         b_1.storeInt(src.chat_id, 257);
         const b_2 = new Builder();
         b_2.storeAddress(src.referree);
@@ -1279,7 +1291,7 @@ export function loadAccountData(slice: Slice) {
     const sc_1 = sc_0.loadRef().beginParse();
     const _allowance = sc_1.loadIntBig(257);
     const _balance = sc_1.loadIntBig(257);
-    const _auctions = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), sc_1);
+    const _auctions = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), sc_1);
     const _chat_id = sc_1.loadIntBig(257);
     const sc_2 = sc_1.loadRef().beginParse();
     const _referree = sc_2.loadMaybeAddress();
@@ -1295,7 +1307,7 @@ function loadTupleAccountData(source: TupleReader) {
     const _max_allowance = source.readBigNumber();
     const _allowance = source.readBigNumber();
     const _balance = source.readBigNumber();
-    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), source.readCellOpt());
+    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), source.readCellOpt());
     const _chat_id = source.readBigNumber();
     const _referree = source.readAddressOpt();
     return { $$type: 'AccountData' as const, initialised: _initialised, version: _version, owner: _owner, service_comission: _service_comission, referral_comission: _referral_comission, max_allowance: _max_allowance, allowance: _allowance, balance: _balance, auctions: _auctions, chat_id: _chat_id, referree: _referree };
@@ -1310,7 +1322,7 @@ function loadGetterTupleAccountData(source: TupleReader) {
     const _max_allowance = source.readBigNumber();
     const _allowance = source.readBigNumber();
     const _balance = source.readBigNumber();
-    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), source.readCellOpt());
+    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), source.readCellOpt());
     const _chat_id = source.readBigNumber();
     const _referree = source.readAddressOpt();
     return { $$type: 'AccountData' as const, initialised: _initialised, version: _version, owner: _owner, service_comission: _service_comission, referral_comission: _referral_comission, max_allowance: _max_allowance, allowance: _allowance, balance: _balance, auctions: _auctions, chat_id: _chat_id, referree: _referree };
@@ -1326,7 +1338,7 @@ function storeTupleAccountData(source: AccountData) {
     builder.writeNumber(source.max_allowance);
     builder.writeNumber(source.allowance);
     builder.writeNumber(source.balance);
-    builder.writeCell(source.auctions.size > 0 ? beginCell().storeDictDirect(source.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta()).endCell() : null);
+    builder.writeCell(source.auctions.size > 0 ? beginCell().storeDictDirect(source.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig()).endCell() : null);
     builder.writeNumber(source.chat_id);
     builder.writeAddress(source.referree);
     return builder.build();
@@ -1351,7 +1363,7 @@ export type Account$Data = {
     service_comission: bigint;
     referral_comission: bigint;
     chat_id: bigint;
-    auctions: Dictionary<bigint, AuctionMeta>;
+    auctions: Dictionary<bigint, AuctionConfig>;
     max_allowance: bigint;
     allowance: bigint;
     initialised: boolean;
@@ -1367,7 +1379,7 @@ export function storeAccount$Data(src: Account$Data) {
         b_0.storeUint(src.referral_comission, 16);
         const b_1 = new Builder();
         b_1.storeInt(src.chat_id, 257);
-        b_1.storeDict(src.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta());
+        b_1.storeDict(src.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig());
         b_1.storeInt(src.max_allowance, 257);
         b_1.storeInt(src.allowance, 257);
         b_1.storeBit(src.initialised);
@@ -1384,7 +1396,7 @@ export function loadAccount$Data(slice: Slice) {
     const _referral_comission = sc_0.loadUintBig(16);
     const sc_1 = sc_0.loadRef().beginParse();
     const _chat_id = sc_1.loadIntBig(257);
-    const _auctions = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), sc_1);
+    const _auctions = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), sc_1);
     const _max_allowance = sc_1.loadIntBig(257);
     const _allowance = sc_1.loadIntBig(257);
     const _initialised = sc_1.loadBit();
@@ -1398,7 +1410,7 @@ function loadTupleAccount$Data(source: TupleReader) {
     const _service_comission = source.readBigNumber();
     const _referral_comission = source.readBigNumber();
     const _chat_id = source.readBigNumber();
-    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), source.readCellOpt());
+    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), source.readCellOpt());
     const _max_allowance = source.readBigNumber();
     const _allowance = source.readBigNumber();
     const _initialised = source.readBoolean();
@@ -1412,7 +1424,7 @@ function loadGetterTupleAccount$Data(source: TupleReader) {
     const _service_comission = source.readBigNumber();
     const _referral_comission = source.readBigNumber();
     const _chat_id = source.readBigNumber();
-    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta(), source.readCellOpt());
+    const _auctions = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig(), source.readCellOpt());
     const _max_allowance = source.readBigNumber();
     const _allowance = source.readBigNumber();
     const _initialised = source.readBoolean();
@@ -1427,7 +1439,7 @@ function storeTupleAccount$Data(source: Account$Data) {
     builder.writeNumber(source.service_comission);
     builder.writeNumber(source.referral_comission);
     builder.writeNumber(source.chat_id);
-    builder.writeCell(source.auctions.size > 0 ? beginCell().storeDictDirect(source.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionMeta()).endCell() : null);
+    builder.writeCell(source.auctions.size > 0 ? beginCell().storeDictDirect(source.auctions, Dictionary.Keys.BigInt(257), dictValueParserAuctionConfig()).endCell() : null);
     builder.writeNumber(source.max_allowance);
     builder.writeNumber(source.allowance);
     builder.writeBoolean(source.initialised);
@@ -1549,87 +1561,6 @@ function dictValueParserWinner(): DictionaryValue<Winner> {
     }
 }
 
-export type AuctionData = {
-    $$type: 'AuctionData';
-    id: bigint;
-    owner_account: Address;
-    minimal_amount: bigint;
-    ends_at: bigint;
-    winner: Winner | null;
-    ended: boolean;
-}
-
-export function storeAuctionData(src: AuctionData) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(src.id, 64);
-        b_0.storeAddress(src.owner_account);
-        b_0.storeUint(src.minimal_amount, 128);
-        b_0.storeUint(src.ends_at, 64);
-        if (src.winner !== null && src.winner !== undefined) { b_0.storeBit(true); b_0.store(storeWinner(src.winner)); } else { b_0.storeBit(false); }
-        b_0.storeBit(src.ended);
-    };
-}
-
-export function loadAuctionData(slice: Slice) {
-    const sc_0 = slice;
-    const _id = sc_0.loadUintBig(64);
-    const _owner_account = sc_0.loadAddress();
-    const _minimal_amount = sc_0.loadUintBig(128);
-    const _ends_at = sc_0.loadUintBig(64);
-    const _winner = sc_0.loadBit() ? loadWinner(sc_0) : null;
-    const _ended = sc_0.loadBit();
-    return { $$type: 'AuctionData' as const, id: _id, owner_account: _owner_account, minimal_amount: _minimal_amount, ends_at: _ends_at, winner: _winner, ended: _ended };
-}
-
-function loadTupleAuctionData(source: TupleReader) {
-    const _id = source.readBigNumber();
-    const _owner_account = source.readAddress();
-    const _minimal_amount = source.readBigNumber();
-    const _ends_at = source.readBigNumber();
-    const _winner_p = source.readTupleOpt();
-    const _winner = _winner_p ? loadTupleWinner(_winner_p) : null;
-    const _ended = source.readBoolean();
-    return { $$type: 'AuctionData' as const, id: _id, owner_account: _owner_account, minimal_amount: _minimal_amount, ends_at: _ends_at, winner: _winner, ended: _ended };
-}
-
-function loadGetterTupleAuctionData(source: TupleReader) {
-    const _id = source.readBigNumber();
-    const _owner_account = source.readAddress();
-    const _minimal_amount = source.readBigNumber();
-    const _ends_at = source.readBigNumber();
-    const _winner_p = source.readTupleOpt();
-    const _winner = _winner_p ? loadTupleWinner(_winner_p) : null;
-    const _ended = source.readBoolean();
-    return { $$type: 'AuctionData' as const, id: _id, owner_account: _owner_account, minimal_amount: _minimal_amount, ends_at: _ends_at, winner: _winner, ended: _ended };
-}
-
-function storeTupleAuctionData(source: AuctionData) {
-    const builder = new TupleBuilder();
-    builder.writeNumber(source.id);
-    builder.writeAddress(source.owner_account);
-    builder.writeNumber(source.minimal_amount);
-    builder.writeNumber(source.ends_at);
-    if (source.winner !== null && source.winner !== undefined) {
-        builder.writeTuple(storeTupleWinner(source.winner));
-    } else {
-        builder.writeTuple(null);
-    }
-    builder.writeBoolean(source.ended);
-    return builder.build();
-}
-
-function dictValueParserAuctionData(): DictionaryValue<AuctionData> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeAuctionData(src)).endCell());
-        },
-        parse: (src) => {
-            return loadAuctionData(src.loadRef().beginParse());
-        }
-    }
-}
-
 export type Resolve = {
     $$type: 'Resolve';
 }
@@ -1715,6 +1646,8 @@ function dictValueParserDelete(): DictionaryValue<Delete> {
 export type BasicAuction$Data = {
     $$type: 'BasicAuction$Data';
     id: bigint;
+    name: string;
+    description: string;
     owner: Address;
     owner_account: Address;
     collector: Address;
@@ -1723,12 +1656,15 @@ export type BasicAuction$Data = {
     owner_chat_id: bigint;
     winner: Winner | null;
     ended: boolean;
+    refund: boolean;
 }
 
 export function storeBasicAuction$Data(src: BasicAuction$Data) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeUint(src.id, 64);
+        b_0.storeStringRefTail(src.name);
+        b_0.storeStringRefTail(src.description);
         b_0.storeAddress(src.owner);
         b_0.storeAddress(src.owner_account);
         b_0.storeAddress(src.collector);
@@ -1738,6 +1674,7 @@ export function storeBasicAuction$Data(src: BasicAuction$Data) {
         b_1.storeInt(src.owner_chat_id, 257);
         if (src.winner !== null && src.winner !== undefined) { b_1.storeBit(true); b_1.store(storeWinner(src.winner)); } else { b_1.storeBit(false); }
         b_1.storeBit(src.ended);
+        b_1.storeBit(src.refund);
         b_0.storeRef(b_1.endCell());
     };
 }
@@ -1745,6 +1682,8 @@ export function storeBasicAuction$Data(src: BasicAuction$Data) {
 export function loadBasicAuction$Data(slice: Slice) {
     const sc_0 = slice;
     const _id = sc_0.loadUintBig(64);
+    const _name = sc_0.loadStringRefTail();
+    const _description = sc_0.loadStringRefTail();
     const _owner = sc_0.loadAddress();
     const _owner_account = sc_0.loadAddress();
     const _collector = sc_0.loadAddress();
@@ -1754,11 +1693,14 @@ export function loadBasicAuction$Data(slice: Slice) {
     const _owner_chat_id = sc_1.loadIntBig(257);
     const _winner = sc_1.loadBit() ? loadWinner(sc_1) : null;
     const _ended = sc_1.loadBit();
-    return { $$type: 'BasicAuction$Data' as const, id: _id, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended };
+    const _refund = sc_1.loadBit();
+    return { $$type: 'BasicAuction$Data' as const, id: _id, name: _name, description: _description, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended, refund: _refund };
 }
 
 function loadTupleBasicAuction$Data(source: TupleReader) {
     const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _description = source.readString();
     const _owner = source.readAddress();
     const _owner_account = source.readAddress();
     const _collector = source.readAddress();
@@ -1768,11 +1710,14 @@ function loadTupleBasicAuction$Data(source: TupleReader) {
     const _winner_p = source.readTupleOpt();
     const _winner = _winner_p ? loadTupleWinner(_winner_p) : null;
     const _ended = source.readBoolean();
-    return { $$type: 'BasicAuction$Data' as const, id: _id, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended };
+    const _refund = source.readBoolean();
+    return { $$type: 'BasicAuction$Data' as const, id: _id, name: _name, description: _description, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended, refund: _refund };
 }
 
 function loadGetterTupleBasicAuction$Data(source: TupleReader) {
     const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _description = source.readString();
     const _owner = source.readAddress();
     const _owner_account = source.readAddress();
     const _collector = source.readAddress();
@@ -1782,12 +1727,15 @@ function loadGetterTupleBasicAuction$Data(source: TupleReader) {
     const _winner_p = source.readTupleOpt();
     const _winner = _winner_p ? loadTupleWinner(_winner_p) : null;
     const _ended = source.readBoolean();
-    return { $$type: 'BasicAuction$Data' as const, id: _id, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended };
+    const _refund = source.readBoolean();
+    return { $$type: 'BasicAuction$Data' as const, id: _id, name: _name, description: _description, owner: _owner, owner_account: _owner_account, collector: _collector, minimal_amount: _minimal_amount, ends_at: _ends_at, owner_chat_id: _owner_chat_id, winner: _winner, ended: _ended, refund: _refund };
 }
 
 function storeTupleBasicAuction$Data(source: BasicAuction$Data) {
     const builder = new TupleBuilder();
     builder.writeNumber(source.id);
+    builder.writeString(source.name);
+    builder.writeString(source.description);
     builder.writeAddress(source.owner);
     builder.writeAddress(source.owner_account);
     builder.writeAddress(source.collector);
@@ -1800,6 +1748,7 @@ function storeTupleBasicAuction$Data(source: BasicAuction$Data) {
         builder.writeTuple(null);
     }
     builder.writeBoolean(source.ended);
+    builder.writeBoolean(source.refund);
     return builder.build();
 }
 
@@ -2233,6 +2182,8 @@ function dictValueParserController$Data(): DictionaryValue<Controller$Data> {
  type BasicAuction_init_args = {
     $$type: 'BasicAuction_init_args';
     id: bigint;
+    name: string;
+    description: string;
     owner: Address;
     owner_account: Address;
     collector: Address;
@@ -2241,29 +2192,35 @@ function dictValueParserController$Data(): DictionaryValue<Controller$Data> {
     owner_chat_id: bigint;
     winner: Winner | null;
     ended: boolean;
+    refund: boolean;
 }
 
 function initBasicAuction_init_args(src: BasicAuction_init_args) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeUint(src.id, 64);
-        b_0.storeAddress(src.owner);
-        b_0.storeAddress(src.owner_account);
-        b_0.storeAddress(src.collector);
-        b_0.storeUint(src.minimal_amount, 128);
+        b_0.storeStringRefTail(src.name);
         const b_1 = new Builder();
+        b_1.storeStringRefTail(src.description);
+        b_1.storeAddress(src.owner);
+        b_1.storeAddress(src.owner_account);
+        b_1.storeAddress(src.collector);
+        b_1.storeUint(src.minimal_amount, 128);
         b_1.storeUint(src.ends_at, 64);
-        b_1.storeInt(src.owner_chat_id, 257);
-        if (src.winner !== null && src.winner !== undefined) { b_1.storeBit(true); b_1.store(storeWinner(src.winner)); } else { b_1.storeBit(false); }
-        b_1.storeBit(src.ended);
+        const b_2 = new Builder();
+        b_2.storeInt(src.owner_chat_id, 257);
+        if (src.winner !== null && src.winner !== undefined) { b_2.storeBit(true); b_2.store(storeWinner(src.winner)); } else { b_2.storeBit(false); }
+        b_2.storeBit(src.ended);
+        b_2.storeBit(src.refund);
+        b_1.storeRef(b_2.endCell());
         b_0.storeRef(b_1.endCell());
     };
 }
 
-async function BasicAuction_init(id: bigint, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean) {
-    const __code = Cell.fromHex('b5ee9c7241022a01000625000114ff00f4a413f4bcf2c80b01020162020a03f2d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d33ffa40fa40fa40d37fd401d0d33f810101d700d200019afa40d37fd23f55206f03916de201d20030104910481047104610456c190a925f0ae07029d74920c21f953109d31f0ade218210164a11f1bae3022182101e57efdebae3023a2003040601b65b38f8425360c70592307f945240c705e2f2e0ce08b392266e9170e2f2e0d17f8306702870c85982101fcbffc65003cb1fcb3fca00c927597013c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00106810571046103544300902725b08810101d700013129b3f2e0d0f8235230bcf2e0cbf8416f2430325315bef2e0c92a6eb3913ae30d4099126f031068105710461035440302050900d60a206ef2d0806f235331bcf2e0c921a7058064a90482101dcd650001b6095220a05240bcf2e0ca705410326d027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87101cb0312cb3fcb7f2acf16c9c88258c000000000000000000000000101cb67ccc970fb00012e8210ec533ec0bae3023a5f0801c00001c121b0dcf2c0820702fe303808b3f2e0d0f8235210b9f2e0d2f8425350c70592307f945230c705e2f2e0cec87201cb035280cb3f20c931c88258c000000000000000000000000101cb67ccc970fb00266e8e31830670277fc85982101fcbffc65003cb1fcb3fca00c92659027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30e55157f0809007e26206ef2d0806f2330318306277003c8598210a9ee5a8d5003cb1f810101cf00cb7fc9544633027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb000092c855805089cb3f5006cf165004cf1658cf16cb7f01c8cb3f12810101cf00226eb38e167f01ca0002206ef2d0806f2310345acf1612cb7fca3f95327058ca00e212ca00c901ccc9ed540201200b190201200c0e017dba882ed44d0d33ffa40fa40fa40d37fd401d0d33f810101d700d200019afa40d37fd23f55206f03916de201d20030104910481047104610456c19db3c6c9180d0002230201200f11017db4a3bda89a1a67ff481f481f481a6ffa803a1a67f020203ae01a4000335f481a6ffa47eaa40de0722dbc403a4006020922090208e208c208ad833b678d92301000022702012012170201201315017daf5076a268699ffd207d207d2069bfea00e8699fc08080eb80690000cd7d2069bfe91faa903781c8b6f100e9001808248824082388230822b60ced9e3648c014000af8235240bc017daf6b76a268699ffd207d207d2069bfea00e8699fc08080eb80690000cd7d2069bfe91faa903781c8b6f100e9001808248824082388230822b60ced9e3648c0160040216eb38e1921206ef2d0806f233031a7058064a90482101dcd650001b609e024017db0fdfb513434cffe903e903e9034dff5007434cfe0404075c034800066be9034dff48fd5481bc0e45b788074800c041244120411c41184115b0676cf1b2460180002240201201a250201201b230201581c1e017daf6076a268699ffd207d207d2069bfea00e8699fc08080eb80690000cd7d2069bfe91faa903781c8b6f100e9001808248824082388230822b60ced9e3648c01d0008f8276f1002016a1f21017ba077b513434cffe903e903e9034dff5007434cfe0404075c034800066be9034dff48fd5481bc0e45b788074800c041244120411c41184115b0676cf1b24620000222017ba243b513434cffe903e903e9034dff5007434cfe0404075c034800066be9034dff48fd5481bc0e45b788074800c041244120411c41184115b0676cf1b24622000228017db5921da89a1a67ff481f481f481a6ffa803a1a67f020203ae01a4000335f481a6ffa47eaa40de0722dbc403a4006020922090208e208c208ad833b678d923024000220020158262801a9b3657b513434cffe903e903e9034dff5007434cfe0404075c034800066be9034dff48fd5481bc0e45b788074800c041244120411c41184115b0676cf1b24481ba48c1b66481bbcb4201bc8dbc0f8881ba48c1b77a027000221017db379fb513434cffe903e903e9034dff5007434cfe0404075c034800066be9034dff48fd5481bc0e45b788074800c041244120411c41184115b0676cf1b2460290004216e62084bfa');
+async function BasicAuction_init(id: bigint, name: string, description: string, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean, refund: boolean) {
+    const __code = Cell.fromHex('b5ee9c7241022d01000781000114ff00f4a413f4bcf2c80b01020162020a02f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1c0d925f0de0702cd74920c21f95310cd31f0dde218210164a11f1bae3022182101e57efdeba030401c25b3bf8425370c70592307f945250c705e2f2e0ce0ab392296e9170e2f2e0d17f8306702b70c85982101fcbffc65003cb1fcb3fca00c928597013c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00109b108a10791068105710461035440306039a8f315b0b810101d70001312bb3f2e0d0f8235240bcf2e0cbf8416f2430325316bef2e0c9236eb39133e30d59126f03109b5518e03d208210ec533ec0bae3023d5f0b01c00001c121b0dcf2c08205060700d603206ef2d0806f235331bcf2e0c921a7058064a90482101dcd650001b6095220a05240bcf2e0ca705410326d027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87101cb0312cb3fcb7f23cf16c9c88258c000000000000000000000000101cb67ccc970fb0000c4c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed5402fe303b0ab3f2e0d0f8235220b9f2e0d2f8425360c70592307f945240c705e2f2e0cec87201cb035210cbfe7f2b6e8e4c3cc9c88258c000000000000000000000000101cb67ccc970fb007f8306702b7fc85982101fcbffc65003cb1fcb3fca00c92859027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30e109b080900ba2b206ef2d0806f233203cb3fc9c88258c000000000000000000000000101cb67ccc970fb0083062b7004c8598210a9ee5a8d5003cb1f810101cf00cb7fc95448135044027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb000b00e0108a107910681057104610354430c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed540201200b190201200c0e018bba882ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1cdb3c6cc180d0002240201200f11018bb4a3bda89a1a67fa803a003a803a1a803a003f481f481f481a6ffa67fa861a1020203ae01a4000335f481a6ffa47eaa40de0722dbc403a401a4006021582156d839b678d98301000022802012012170201201315018baf5076a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c014000af8235250bc018baf6b76a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c0160040226eb38e1922206ef2d0806f233031a7058064a90482101dcd650001b609e025018bb0fdfb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3060180002250201201a280201201b260201201c1e018bb1d8bb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b32601d0026f8288b5626173696382d544d302d595479a6280201201f21018baf6076a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c0200008f8276f1002016a22240189a077b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b306230002230189a243b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3062500022b018bb5921da89a1a67fa803a003a803a1a803a003f481f481f481a6ffa67fa861a1020203ae01a4000335f481a6ffa47eaa40de0722dbc403a401a4006021582156d839b678d983027000221020158292b01b7b3657b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b30481ba48c1b66481bbcb4201bc8dbc0f8881ba48c1b77a02a000222018bb379fb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b30602c0004226ee0f2b9bc');
     const builder = beginCell();
-    initBasicAuction_init_args({ $$type: 'BasicAuction_init_args', id, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended })(builder);
+    initBasicAuction_init_args({ $$type: 'BasicAuction_init_args', id, name, description, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended, refund })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
@@ -2358,7 +2315,7 @@ const BasicAuction_types: ABIType[] = [
     {"name":"BasechainAddress","header":null,"fields":[{"name":"hash","type":{"kind":"simple","type":"int","optional":true,"format":257}}]},
     {"name":"ChangeOwner","header":2174598809,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"ChangeOwnerOk","header":846932810,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"AuctionMeta","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"type","type":{"kind":"simple","type":"string","optional":false}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"AuctionConfig","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"type","type":{"kind":"simple","type":"string","optional":false}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"Profit","header":2850970253,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}}]},
     {"name":"Collect","header":1321421870,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}}]},
     {"name":"AuctionDeleted","header":533462982,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
@@ -2366,16 +2323,15 @@ const BasicAuction_types: ABIType[] = [
     {"name":"AccountInitialisation","header":null,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"Initialize","header":2208443317,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"ReferralCommission","header":3733998990,"fields":[]},
-    {"name":"CreateBasicAuction","header":3890680962,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"minimalAmount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"endsAt","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"CreateBasicAuction","header":3773222016,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"CleanUp","header":2848052031,"fields":[]},
-    {"name":"AccountData","header":null,"fields":[{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}},{"name":"version","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionMeta","valueFormat":"ref"}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
-    {"name":"Account$Data","header":null,"fields":[{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionMeta","valueFormat":"ref"}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"AccountData","header":null,"fields":[{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}},{"name":"version","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionConfig","valueFormat":"ref"}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
+    {"name":"Account$Data","header":null,"fields":[{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionConfig","valueFormat":"ref"}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"Bid","header":509079518,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
     {"name":"Winner","header":null,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":64}}]},
-    {"name":"AuctionData","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"winner","type":{"kind":"simple","type":"Winner","optional":true}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"Resolve","header":3964878528,"fields":[]},
     {"name":"Delete","header":373953009,"fields":[]},
-    {"name":"BasicAuction$Data","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner_chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"winner","type":{"kind":"simple","type":"Winner","optional":true}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"BasicAuction$Data","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner_chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"winner","type":{"kind":"simple","type":"Winner","optional":true}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"CreateAccount","header":241429993,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"AccountCreated","header":3905897037,"fields":[]},
     {"name":"ConfigureService","header":1770454153,"fields":[{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
@@ -2395,7 +2351,7 @@ const BasicAuction_opcodes = {
     "AccountDelete": 1792346535,
     "Initialize": 2208443317,
     "ReferralCommission": 3733998990,
-    "CreateBasicAuction": 3890680962,
+    "CreateBasicAuction": 3773222016,
     "CleanUp": 2848052031,
     "Bid": 509079518,
     "Resolve": 3964878528,
@@ -2420,6 +2376,7 @@ const BasicAuction_getters: ABIGetter[] = [
     {"name":"minimal_raise","methodId":93910,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"owner_chat_id","methodId":105501,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"balance","methodId":104128,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"data","methodId":100194,"arguments":[],"returnType":{"kind":"simple","type":"AuctionConfig","optional":false}},
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 
@@ -2434,6 +2391,7 @@ export const BasicAuction_getterMapping: { [key: string]: string } = {
     'minimal_raise': 'getMinimalRaise',
     'owner_chat_id': 'getOwnerChatId',
     'balance': 'getBalance',
+    'data': 'getData',
     'owner': 'getOwner',
 }
 
@@ -2479,12 +2437,12 @@ export class BasicAuction implements Contract {
     public static readonly errors = BasicAuction_errors_backward;
     public static readonly opcodes = BasicAuction_opcodes;
     
-    static async init(id: bigint, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean) {
-        return await BasicAuction_init(id, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended);
+    static async init(id: bigint, name: string, description: string, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean, refund: boolean) {
+        return await BasicAuction_init(id, name, description, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended, refund);
     }
     
-    static async fromInit(id: bigint, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean) {
-        const __gen_init = await BasicAuction_init(id, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended);
+    static async fromInit(id: bigint, name: string, description: string, owner: Address, owner_account: Address, collector: Address, minimal_amount: bigint, ends_at: bigint, owner_chat_id: bigint, winner: Winner | null, ended: boolean, refund: boolean) {
+        const __gen_init = await BasicAuction_init(id, name, description, owner, owner_account, collector, minimal_amount, ends_at, owner_chat_id, winner, ended, refund);
         const address = contractAddress(0, __gen_init);
         return new BasicAuction(address, __gen_init);
     }
@@ -2596,6 +2554,13 @@ export class BasicAuction implements Contract {
         const builder = new TupleBuilder();
         const source = (await provider.get('balance', builder.build())).stack;
         const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getData(provider: ContractProvider) {
+        const builder = new TupleBuilder();
+        const source = (await provider.get('data', builder.build())).stack;
+        const result = loadGetterTupleAuctionConfig(source);
         return result;
     }
     
