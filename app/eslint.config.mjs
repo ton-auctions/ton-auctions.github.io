@@ -10,6 +10,13 @@ export default tseslint.config({
   extends: [
     eslint.configs.recommended,
     tseslint.configs.recommended,
+    // tseslint.configs.recommendedTypeCheckedOnly,
     tseslint.configs.stylistic,
-  ]
+  ],
+  // languageOptions: {
+  //   parserOptions: {
+  //     projectService: true,
+  //     tsconfigRootDir: import.meta.dirname,
+  //   },
+  // },
 });
