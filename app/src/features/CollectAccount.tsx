@@ -13,13 +13,15 @@ import { useConnection } from "../hooks/ton";
 import { WalletV5 } from "../protocol/wallet_v5";
 import { loadAccountDelete } from "../protocol/tact_Account";
 
-interface DeleteAccountProps {
+interface CollectAccountProps {
   account: DeployedAccount;
   refreshAccount: () => void;
   wallet: OpenedContract<WalletV5>;
 }
 
-export const DeleteAccount: React.FC<DeleteAccountProps> = ({
+// TODO: create account action and use it for delete and connect
+// same with auction
+export const CollectAccount: React.FC<CollectAccountProps> = ({
   account,
   refreshAccount,
   wallet,
@@ -31,13 +33,13 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
 
   const controller = useServiceController();
 
-  const deleteAccount = useCallback(async () => {
+  const collectAccount = useCallback(async () => {
     if (!account) return;
     if (!conn) return;
     if (!wallet) return;
     if (!controller) return;
 
-    loader.show("Deleting account. Sending transaction.");
+    loader.show("Collecting moneys. Sending transaction.");
 
     ton
       .signSendAndWait({
@@ -51,17 +53,18 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
               value: toNano("0.05"),
             },
             {
-              $$type: "AccountDelete",
+              $$type: "Collect",
+              amount: 0n, // TODO: delete
             }
           );
         },
         testMessage: (cell) => {
           loadAccountDelete(cell.asSlice());
         },
-        updateLoader: (text) => loader.show(`Deleting account. ${text}`),
+        updateLoader: (text) => loader.show(`Collecting. ${text}`),
       })
       .catch((e) => {
-        alerts.addAlert("Error", `Can't delete account. ${e}`, 5000);
+        alerts.addAlert("Error", `Can't collect moneys. ${e}`, 5000);
       })
       .finally(() => loader.hide())
       .then(() => {
@@ -70,8 +73,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
   }, [account, conn, wallet, controller]);
 
   return (
-    <button className="btn btn-secondary grow" onClick={deleteAccount}>
-      DELETE ACCOUNT
+    <button className="btn btn-secondary grow" onClick={collectAccount}>
+      COLLECT {(Number(account.data.balance) / 1000000000).toFixed(1)} TON
     </button>
   );
 };

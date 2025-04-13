@@ -19,9 +19,7 @@ message Profit {
     amount: Int as uint128;
 }
 
-message Collect {
-    amount: Int as uint128;
-}
+message Collect {}
 
 message AuctionDeleted {
     id: Int as uint64;
@@ -291,15 +289,15 @@ contract Account(
         }
     }
 
-    receive(msg: Collect) {
+    receive(_: Collect) {
         throwUnless(self.ERRORS_AUCTION_NOT_INITIALISED, self.initialised);
         throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
 
         message(MessageParameters {
             mode: SendDefaultMode | SendRemainingBalance,
             to: self.owner,
-            value: msg.amount,
-            body: ReferralCommission {}.toCell(),
+            value: 0,
+            body: null,
         });
     }
 

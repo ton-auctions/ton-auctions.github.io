@@ -10,6 +10,7 @@ import { useWalletContract } from "./ConnectWallet";
 import { DeleteAccount } from "./DeleteAccount";
 
 import Copy from "../assets/copy.svg";
+import { CollectAccount } from "./CollectAccount";
 
 const shortenUrl = async (referral: string) => {
   const origin = window.location.origin;
@@ -65,6 +66,8 @@ export const Profile: React.FC<unknown> = () => {
 
         <div className="divider p-0 m-0 h-0"></div>
 
+        <p className="grow"></p>
+
         <div className="join pt-5 pl-5 pr-5">
           <label className="floating-label w-full">
             <input
@@ -82,7 +85,15 @@ export const Profile: React.FC<unknown> = () => {
           </button>
         </div>
 
-        <div className="flex">
+        <div className="flex p-5">
+          <CollectAccount
+            account={account}
+            refreshAccount={refreshAccount}
+            wallet={wallet}
+          />
+        </div>
+
+        <div className="flex px-5 pb-5">
           <DeleteAccount
             account={account}
             refreshAccount={refreshAccount}
