@@ -9,7 +9,6 @@ import {
   Route,
   Routes,
   useNavigate,
-  useParams,
   useSearchParams,
 } from "react-router";
 import { BaseLayout } from "./layouts/BaseLayout";
@@ -26,12 +25,11 @@ import { useEffect } from "react";
 const CONTROLLER_ADDRESS = "EQAoBwzUQDvHl8nak23mTMtiqGDWbbmh0alvu0Kc39OgXF9I";
 
 function About() {
-  const [params, _] = useSearchParams();
+  const [params] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!params.get("fwd")) return;
-    console.log(params.get("fwd"));
     navigate(`${params.get("fwd")}`);
   }, [params]);
 
@@ -48,10 +46,6 @@ function About() {
       </button>
     </div>
   );
-}
-
-function Fwd() {
-  return <>Redirrecting</>;
 }
 
 function SKIP(props: { name: string }) {
