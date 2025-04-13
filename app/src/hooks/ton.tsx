@@ -1,26 +1,5 @@
-import { Contract, OpenedContract, Sender, SenderArguments } from "@ton/core";
-import { useEffect, useState } from "react";
+import { Sender, SenderArguments } from "@ton/core";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-
-export function useInit<T>(func: () => Promise<T>, deps: any[] = []) {
-  const [state, setState] = useState<T | undefined>();
-
-  useEffect(() => {
-    (async () => {
-      setState(await func());
-    })();
-  }, deps);
-
-  return state;
-}
-
-export function useContractWrapper<T extends Contract>(client, contract: T) {
-  return useInit(async () => {
-    if (!client) return;
-
-    return client.open(contract) as OpenedContract<T>;
-  }, [client]);
-}
 
 export function useConnection(): { sender: Sender; connected: boolean } {
   // TODO: refactor

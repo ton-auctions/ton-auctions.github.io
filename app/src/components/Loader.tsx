@@ -1,16 +1,12 @@
 import * as React from "react";
 import { useCallback } from "react";
 import { easeOut, motion, useTime, useTransform } from "motion/react";
-import {
-  periodic,
-  perc,
-  blur,
-  around,
-  periodic_modulus,
-  inverse_periodic_modulus_shifted,
-} from "../utils";
+import { periodic_modulus, inverse_periodic_modulus_shifted } from "../utils";
 
-type LoaderProps = { hidden: boolean; caption: string };
+interface LoaderProps {
+  hidden: boolean;
+  caption: string;
+}
 
 export const Loader: React.FC<LoaderProps> = ({ hidden, caption }) => {
   const t = useCallback(useTime, [])();

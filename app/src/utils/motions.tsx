@@ -1,21 +1,12 @@
-import {
-  EasingFunction,
-  motion,
-  MotionValue,
-  TransformProperties,
-  useTime,
-  useTransform,
-} from "motion/react";
+import { EasingFunction, MotionValue, useTransform } from "motion/react";
 
-// import { periodic, perc, blur, around } from "../old/utils/motions";
-
-export const perc = (value) => {
+export const perc = (value: MotionValue<number>) => {
   return useTransform(value, (value) => {
     return `${value}%`;
   });
 };
 
-export const blur = (value) => {
+export const blur = (value: MotionValue<number>) => {
   return useTransform(value, (value) => {
     return `blur(${value}px)`;
   });
@@ -35,9 +26,9 @@ export const periodic = (
   return useTransform(sin, [-1, 1], range);
 };
 
-type TransformOptions = {
+interface TransformOptions {
   ease?: EasingFunction | EasingFunction[];
-};
+}
 
 export const periodic_modulus = (
   value: MotionValue,
@@ -45,8 +36,6 @@ export const periodic_modulus = (
   range: [number, number],
   options?: TransformOptions
 ) => {
-  const offset = Math.random();
-
   const saw = useTransform(value, (value) => {
     return value % duration;
   });

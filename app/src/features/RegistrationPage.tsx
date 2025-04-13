@@ -4,7 +4,7 @@ import { useParamsReferree } from "../hooks/referree";
 import { CleanButton } from "./CleanButton";
 import { RegisterButton } from "./RegisterButton";
 
-export const RegistrationPage: React.FC<{}> = () => {
+export const RegistrationPage: React.FC<unknown> = () => {
   const referree = useParamsReferree();
 
   return (

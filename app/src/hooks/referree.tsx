@@ -13,7 +13,7 @@ export const useParamsReferree = () => {
     try {
       referreeAddress = Address.parse(params.ref || "");
       setReferree(referreeAddress);
-    } catch (e) {
+    } catch {
       // TODO: Do smth
     }
   }, [params]);

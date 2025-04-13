@@ -1,35 +1,34 @@
 import React from "react";
 import axios from "axios";
-import moment from "moment";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUserAccount } from "../contexts/account";
 import { useTon } from "../contexts/tonClient";
+import { useAlerts } from "../contexts/alerts";
+
 import { useWalletContract } from "./ConnectWallet";
 import { DeleteAccount } from "./DeleteAccount";
-import { useAlerts } from "../contexts/alerts";
 
 import Copy from "../assets/copy.svg";
 
-const PAGA = "https://ton-auctions.github.io";
-
 const shortenUrl = async (referral: string) => {
+  const origin = window.location.origin;
   try {
     const response = await axios({
       method: "get",
       url: `https://is.gd/create.php`,
       params: {
-        url: `${PAGA}/r/${referral}`,
+        url: `${origin}/r/${referral}`,
         format: "simple",
       },
     });
     return response.data;
-  } catch (err) {
-    return `${PAGA}/r/${referral}`;
+  } catch {
+    return `${origin}/r/${referral}`;
   }
 };
 
-export const Profile: React.FC<{}> = () => {
+export const Profile: React.FC<unknown> = () => {
   const { account, refreshAccount } = useUserAccount();
   const ref = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(null);
@@ -50,8 +49,12 @@ export const Profile: React.FC<{}> = () => {
 
     await navigator.clipboard.writeText(ref.current.value);
 
-    alerts.addAlert("Copied!", 10000);
+    alerts.addAlert("Hooray", "Copied!", 3000);
   }, [ref]);
+
+  // TODO: move into components with non null props
+  if (!account) return <></>;
+  if (!wallet) return <></>;
 
   return (
     <div className="max-h-dvh min-w-xs mx-auto text-gray-100 w-xs">
@@ -81,9 +84,9 @@ export const Profile: React.FC<{}> = () => {
 
         <div className="flex">
           <DeleteAccount
-            account={account!}
+            account={account}
             refreshAccount={refreshAccount}
-            wallet={wallet!}
+            wallet={wallet}
           />
         </div>
       </div>

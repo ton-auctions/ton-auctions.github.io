@@ -1,28 +1,23 @@
-import { Address, OpenedContract, toNano } from "@ton/core";
-import { WalletV5 } from "../protocol/wallet_v5";
-import { DeployedAccount } from "../contexts/account";
-import { useConnection } from "../hooks/ton";
-import { useLoader } from "../contexts/loader";
-import { useServiceController } from "../contexts/serviceController";
-import { useCallback } from "react";
 import React from "react";
-import { TonContextValue, useTon } from "../contexts/tonClient";
-import { loadAccountDelete } from "../protocol/tact_Account";
-import { useAlerts } from "../contexts/alerts";
+import { useCallback } from "react";
+import { OpenedContract, toNano } from "@ton/core";
 
-type DeleteAccountProps = {
+import { DeployedAccount } from "../contexts/account";
+import { useLoader } from "../contexts/loader";
+import { useAlerts } from "../contexts/alerts";
+import { useTon } from "../contexts/tonClient";
+import { useServiceController } from "../contexts/serviceController";
+
+import { useConnection } from "../hooks/ton";
+
+import { WalletV5 } from "../protocol/wallet_v5";
+import { loadAccountDelete } from "../protocol/tact_Account";
+
+interface DeleteAccountProps {
   account: DeployedAccount;
   refreshAccount: () => void;
   wallet: OpenedContract<WalletV5>;
-};
-
-const waitTillExists = async (client: TonContextValue, src: Address) => {
-  let contractExists = true;
-  while (contractExists) {
-    contractExists = await client.client.isContractDeployed(src);
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  }
-};
+}
 
 export const DeleteAccount: React.FC<DeleteAccountProps> = ({
   account,
@@ -66,7 +61,7 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
         updateLoader: (text) => loader.show(`Deleting account. ${text}`),
       })
       .catch((e) => {
-        alerts.addAlert(`Can't delete account. ${e}`, 5000);
+        alerts.addAlert("Error", `Can't delete account. ${e}`, 5000);
       })
       .finally(() => loader.hide())
       .then(() => {

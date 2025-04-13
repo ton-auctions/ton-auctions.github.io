@@ -8,13 +8,13 @@ export const loaderState = proxy({
   caption: "Loading",
 });
 
-export type LoaderContextValue = {
+export interface LoaderContextValue {
   show(caption: string): void;
   hide(): string;
-};
+}
 
-var _showTimeout: NodeJS.Timeout;
-var _hideTimeout: NodeJS.Timeout;
+let _showTimeout: NodeJS.Timeout;
+let _hideTimeout: NodeJS.Timeout;
 
 const contextValue = {
   show: (caption: string) => {

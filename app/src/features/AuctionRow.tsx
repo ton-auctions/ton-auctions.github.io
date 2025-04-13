@@ -1,22 +1,25 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import moment from "moment";
-
-import { DeployedAccount, useUserAccount } from "../contexts/account";
-import { AuctionConfig, loadDelete } from "../protocol";
-import { BasicAuction } from "../protocol/tact_BasicAuction";
-import { useTon } from "../contexts/tonClient";
-import { useConnection } from "../hooks/ton";
 import { toNano } from "@ton/core";
-import { useWalletContract } from "./ConnectWallet";
+
+import { useUserAccount } from "../contexts/account";
+import { useTon } from "../contexts/tonClient";
 import { useLoader } from "../contexts/loader";
 import { useAlerts } from "../contexts/alerts";
-import Copy from "../assets/copy.svg";
-import { useLocation, useNavigate } from "react-router";
 
-type AuctionRowProps = {
+import { useConnection } from "../hooks/ton";
+
+import { AuctionConfig, loadDelete } from "../protocol";
+import { BasicAuction } from "../protocol/tact_BasicAuction";
+
+import { useWalletContract } from "./ConnectWallet";
+
+import Copy from "../assets/copy.svg";
+
+interface AuctionRowProps {
   auction: AuctionConfig;
   tonUsdPrice: number;
-};
+}
 
 export const AuctionRow: React.FC<AuctionRowProps> = ({
   auction,
@@ -24,8 +27,6 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
 }) => {
   const loader = useLoader();
   const alerts = useAlerts();
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const now = moment();
 
@@ -49,6 +50,8 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
   const wallet = useWalletContract(ton);
 
   const stopAuction = useCallback(async () => {
+    if (!wallet) return;
+
     loader.show("Stopping auction.");
 
     const auctionContract = ton.cachedOpenContract(
@@ -58,7 +61,7 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
     ton
       .signSendAndWait({
         checkAddress: auctionContract.address,
-        checkTransactionFrom: wallet?.address!,
+        checkTransactionFrom: wallet.address,
         send: async () => {
           await auctionContract.send(
             connection.sender,
@@ -75,7 +78,7 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
         testMessage: (cell) => loadDelete(cell.asSlice()),
       })
       .catch((e) => {
-        alerts.addAlert(`Something went wrong. ${e}.`, 5000);
+        alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();
@@ -104,7 +107,7 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
         </div>
         <div className="mt-3" onClick={() => refreshAccount()}>
           <b>Minimal Bid:</b> {minimal_amount.toFixed(1)} TON (
-          {(minimal_amount / tonUsdPrice!).toFixed(1)} USD)
+          {(minimal_amount / tonUsdPrice).toFixed(1)} USD)
         </div>
         <div
           hidden={auction.ended}

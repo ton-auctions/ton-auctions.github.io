@@ -19,7 +19,7 @@ export const Test = () => {
 
   const runTest = useCallback(async () => {
     if (!controller.loaded) return;
-    if (account.account === undefined) return;
+    if (!account.account) return;
 
     ton
       .signSendAndWait({
@@ -42,7 +42,7 @@ export const Test = () => {
         testMessage: (cell) => loadTest(cell.asSlice()),
       })
       .catch((e) => {
-        alerts.addAlert(`Something went wrong. ${e}.`, 5000);
+        alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();

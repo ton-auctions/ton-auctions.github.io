@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUserAccount } from "../contexts/account";
-import { Link, useNavigate } from "react-router";
-import { AuctionRow } from "./AuctionRow";
+import { Link } from "react-router";
+
+import { AuctionConfig } from "../protocol";
+
 import { useTonPriceOracle } from "../hooks/priceOracle";
 
-export const Auctions: React.FC<{}> = () => {
+import { AuctionRow } from "./AuctionRow";
+
+export const Auctions: React.FC<unknown> = () => {
   const { account } = useUserAccount();
   const tonUsdPair = Number(useTonPriceOracle()) / 1000000000;
+  const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
 
-  const auctions = account!.data.auctions.values();
+  useEffect(() => {
+    if (!account) return;
+
+    setAuctions(account.data.auctions.values());
+  }, [account]);
 
   if (auctions.length == 0) {
     return (
@@ -25,6 +34,8 @@ export const Auctions: React.FC<{}> = () => {
     );
   }
 
+  if (!account) return <></>;
+
   return (
     <div className="max-h-dvh min-w-xs snap-y snap-proximity mx-auto text-gray-100 overflow-y-auto pb-10">
       <div className="flex flex-none h-25 justify-center"></div>
@@ -32,8 +43,8 @@ export const Auctions: React.FC<{}> = () => {
       <ul className="flex-col mx-auto bg-base-100 rounded-box shadow-md w-xs">
         <li className="flex join">
           <h1 className="p-4 text-nowrap align-baseline">
-            My auctions ({account!.data.max_allowance - account!.data.allowance}
-            /{account!.data.max_allowance})
+            My auctions ({account.data.max_allowance - account.data.allowance}/
+            {account.data.max_allowance})
           </h1>
           <span className="grow"></span>
           <span className="mt-2 mr-2 text-nowrap align-baseline">

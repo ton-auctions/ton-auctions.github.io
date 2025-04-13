@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useTonConnectUI } from "@tonconnect/ui-react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { TonContextValue } from "../contexts/tonClient";
 import { useState } from "react";
 import { Address, OpenedContract } from "@ton/core";

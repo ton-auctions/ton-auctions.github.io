@@ -3,13 +3,13 @@ import { TonClientProvider } from "../contexts/tonClient";
 import { ServiceControllerProvider } from "../contexts/serviceController";
 import { Background } from "../components/Background";
 import { LoaderProvider } from "../contexts/loader";
-import { Link, Outlet } from "react-router";
+import { Outlet } from "react-router";
 import { AlertContextProvider } from "../contexts/alerts";
 
-type BaseLayoutProps = {
+interface BaseLayoutProps {
   controllerAddress: string;
   apiKey: string;
-};
+}
 
 export const BaseLayout: React.FC<BaseLayoutProps> = ({
   controllerAddress,
@@ -18,7 +18,6 @@ export const BaseLayout: React.FC<BaseLayoutProps> = ({
   return (
     <TonClientProvider
       endpointV2="https://testnet.toncenter.com/api/v2/jsonRPC"
-      endpointV3="https://testnet.toncenter.com/api/v3/"
       apiKey={apiKey}
     >
       <ServiceControllerProvider address={controllerAddress}>

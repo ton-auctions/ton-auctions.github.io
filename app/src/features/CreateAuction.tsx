@@ -20,11 +20,11 @@ import { BasicAuction } from "../protocol";
 
 import Ton from "../assets/ton.svg";
 
-type CreateAuctionFormProps = {
+interface CreateAuctionFormProps {
   account: DeployedAccount;
   wallet: OpenedContract<WalletV5>;
   onAccountChange: () => void;
-};
+}
 
 export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
   account,
@@ -56,7 +56,7 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
       id,
       name,
       description,
-      wallet!.address,
+      wallet.address,
       account.address,
       controller.contract.address,
       minimal_amount,
@@ -89,10 +89,10 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
           );
         },
         updateLoader: (text) => loader.show(`Creating Auction. ${text}`),
-        testMessage: (cell) => true,
+        testMessage: () => true,
       })
       .catch((e) => {
-        alerts.addAlert(`Something went wrong. ${e}.`, 5000);
+        alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();
@@ -228,17 +228,20 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
   );
 };
 
-export const CreateAuction: React.FC<{}> = () => {
+export const CreateAuction: React.FC<unknown> = () => {
   const { account, refreshAccount } = useUserAccount();
   const ton = useTon();
   const wallet = useWalletContract(ton);
+
+  if (!account) return <></>;
+  if (!wallet) return <></>;
 
   return (
     <div className="max-h-dvh min-w-xs mx-auto text-gray-100">
       <div className="flex flex-none h-21 justify-center"></div>
       <CreateAuctionForm
-        account={account!}
-        wallet={wallet!}
+        account={account}
+        wallet={wallet}
         onAccountChange={refreshAccount}
       ></CreateAuctionForm>
     </div>

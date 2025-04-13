@@ -1,15 +1,14 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { Address } from "@ton/core";
 import { useTonWallet } from "@tonconnect/ui-react";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { Account, AccountContextProvider } from "../contexts/account";
-import { Account as AccountWrapper } from "../protocol";
-import React, { useState } from "react";
+
 import { useTon } from "../contexts/tonClient";
+import { Account, AccountContextProvider } from "../contexts/account";
 import { useLoader } from "../contexts/loader";
 import { useServiceController } from "../contexts/serviceController";
-import { useEffect } from "react";
-import { Address, Dictionary } from "@ton/core";
-import { useCallback } from "react";
 import { useNavbarControls } from "../contexts/navbar";
+
 import { Drawer } from "../features/Drawer";
 import { getAccountWrapper } from "../utils/addresses";
 
@@ -88,7 +87,7 @@ export const AccountZone = () => {
 
     navBarControls.setShowBurger(false);
 
-    if (account === undefined) return;
+    if (!account) return;
 
     if (!account.deployed) {
       navigate("/app/register", {
@@ -107,7 +106,7 @@ export const AccountZone = () => {
   }
 
   return (
-    <AccountContextProvider account={account!} refreshAccount={refreshAccount}>
+    <AccountContextProvider account={account} refreshAccount={refreshAccount}>
       <Drawer>
         <Outlet />
       </Drawer>

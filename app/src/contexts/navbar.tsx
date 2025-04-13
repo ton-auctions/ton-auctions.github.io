@@ -1,16 +1,14 @@
 import React from "react";
 
-import { Address, OpenedContract } from "@ton/core";
 import { createContext } from "react";
 import { useContext } from "react";
-import { Account as AccountWrapper, AccountData } from "../protocol";
 
-type NavbarControls = {
+interface NavbarControls {
   setShowBurger: (value: boolean) => void;
-};
+}
 
 export const NavbarContext = createContext<NavbarControls>({
-  setShowBurger: (value: boolean) => false,
+  setShowBurger: () => false,
 });
 
 type AccountContextProviderProps = React.PropsWithChildren & {

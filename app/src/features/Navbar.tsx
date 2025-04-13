@@ -1,13 +1,13 @@
-import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import React, { useCallback } from "react";
+import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
+import { useNavigate } from "react-router";
+
 import Exit from "../assets/exit.svg";
 import Burger from "../assets/burger.svg";
-import { useNavigate } from "react-router";
-import { useUserAccount } from "../contexts/account";
 
-type NavbarProps = {
+interface NavbarProps {
   withBurger: boolean;
-};
+}
 
 export const Navbar: React.FC<NavbarProps> = ({ withBurger }) => {
   const wallet = useTonWallet();

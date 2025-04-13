@@ -20,8 +20,6 @@ import { RegisterButton } from "./RegisterButton";
 
 import Ton from "../assets/ton.svg";
 
-type AuctionRowProps = {};
-
 const useAuctionContract = (
   address?: string
 ): [OpenedContract<BasicAuction> | undefined, AuctionData | undefined] => {
@@ -49,7 +47,7 @@ const useAuctionContract = (
       .then((val) => {
         setContractData(val);
       })
-      .catch((z) => {
+      .catch(() => {
         // TODO: alert;
       })
       .finally(() => loader.hide());
@@ -58,7 +56,7 @@ const useAuctionContract = (
   return [auctionContract, auctionData];
 };
 
-export const AuctionPublic: React.FC<AuctionRowProps> = ({}) => {
+export const AuctionPublic: React.FC<unknown> = () => {
   const loader = useLoader();
   const alerts = useAlerts();
 
@@ -72,7 +70,6 @@ export const AuctionPublic: React.FC<AuctionRowProps> = ({}) => {
   const connection = useConnection();
   const wallet = useWalletContract(ton);
 
-  const [minimalRaise, setMinimalRaise] = useState<number | undefined>();
   const [minimalBid, setMinimalBid] = useState(0);
 
   const [auctionContract, auctionData] = useAuctionContract(address);
@@ -82,7 +79,6 @@ export const AuctionPublic: React.FC<AuctionRowProps> = ({}) => {
     const minimalRaise = Number(auctionData.minimal_raise) / 1000000000;
     const minimalAmount = Number(auctionData.minimal_amount) / 1000000000;
 
-    setMinimalRaise(minimalRaise);
     setMinimalBid(minimalAmount + minimalRaise);
   }, [auctionData]);
 
@@ -115,7 +111,7 @@ export const AuctionPublic: React.FC<AuctionRowProps> = ({}) => {
         updateLoader: (text) => loader.show(`Placing bid. ${text}`),
       })
       .catch((e) => {
-        alerts.addAlert(`Can't bid. ${e}`, 5000);
+        alerts.addAlert("Error", `Can't bid. ${e}`, 5000);
       })
       .finally(() => loader.hide())
       .then(() => {
@@ -194,7 +190,7 @@ export const AuctionPublic: React.FC<AuctionRowProps> = ({}) => {
 
             <div className="mt-3" onClick={() => refreshAccount()}>
               <b>Minimal Bid:</b> {minimalBid.toFixed(1)} TON (
-              {(minimalBid / tonUsdPair!).toFixed(1)} USD)
+              {(minimalBid / tonUsdPair).toFixed(1)} USD)
             </div>
 
             <div className="join mt-4">

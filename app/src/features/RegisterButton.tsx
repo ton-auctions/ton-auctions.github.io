@@ -12,9 +12,9 @@ import { getAccountWrapper } from "../utils/addresses";
 import { loadInitialize } from "../protocol/tact_Account";
 import React from "react";
 
-type RegisterButtonProps = {
+interface RegisterButtonProps {
   referree?: Address;
-};
+}
 
 export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
   const loader = useLoader();

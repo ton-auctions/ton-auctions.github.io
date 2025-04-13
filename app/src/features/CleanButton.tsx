@@ -14,7 +14,7 @@ import { useAlerts } from "../contexts/alerts";
 
 import { loadCleanInitialiser } from "../protocol/tact_Account";
 
-export const CleanButton: React.FC<{}> = () => {
+export const CleanButton: React.FC<unknown> = () => {
   const loader = useLoader();
   const alerts = useAlerts();
   const ton = useTon();
@@ -43,7 +43,6 @@ export const CleanButton: React.FC<{}> = () => {
             { value: toNano("0.05"), bounce: true },
             {
               $$type: "CleanInitialiser",
-              address: wallet.address,
             }
           );
         },
@@ -51,7 +50,7 @@ export const CleanButton: React.FC<{}> = () => {
         testMessage: (cell) => loadCleanInitialiser(cell.asSlice()),
       })
       .catch((e) => {
-        alerts.addAlert(`Something went wrong. ${e}.`, 5000);
+        alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();

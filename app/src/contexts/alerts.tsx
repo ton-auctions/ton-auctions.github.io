@@ -1,36 +1,38 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { createContext } from "react";
 import { useContext } from "react";
 
-type AlertData = {
+interface AlertData {
   id: string;
   title: string;
   text: string;
   timeout: number;
-};
+}
 
-type AlertContextValue = {
+interface AlertContextValue {
   addAlert: (title: string, text: string, timeout: number) => void;
-};
+}
 
 export const AlertContext = createContext<AlertContextValue>({
-  addAlert: (title: string, text: string, timeout: number) => {},
+  addAlert: () => {
+    throw new Error("Uninmplemeted addAlert");
+  },
 });
 
-type AlertProps = {
+interface AlertProps {
   title: string;
   text: string;
   timeout: number;
   onTimeout: () => void;
-};
+}
 
 const Alert: React.FC<AlertProps> = ({ title, text, timeout, onTimeout }) => {
   useEffect(() => {
     console.log(onTimeout, timeout);
     const timeoutHandle = setTimeout(onTimeout, timeout);
     return () => {
-      // clearTimeout(timeoutHandle);
+      clearTimeout(timeoutHandle);
     };
   }, []);
 
@@ -79,7 +81,7 @@ export const AlertContextProvider: React.FC<React.PropsWithChildren> = ({
       <>
         {children}
         <div className="absolute bottom-0 stack h-20 w-full z-100">
-          {alerts.map((a, idx) => (
+          {alerts.map((a) => (
             <Alert
               key={a.id}
               title={a.title}

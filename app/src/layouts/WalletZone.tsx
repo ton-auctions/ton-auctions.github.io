@@ -1,10 +1,11 @@
-import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import React, { useEffect, useState } from "react";
+import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { Outlet, useLocation, useNavigate } from "react-router";
+
 import { useLoader } from "../contexts/loader";
+import { NavbarContextProvider } from "../contexts/navbar";
+
 import { Navbar } from "../features/Navbar";
-import { useUserAccount } from "../contexts/account";
-import { NavbarContext, NavbarContextProvider } from "../contexts/navbar";
 
 export const WalletZone = () => {
   const [ui] = useTonConnectUI();

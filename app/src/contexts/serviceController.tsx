@@ -5,14 +5,14 @@ import { Controller } from "../protocol";
 import { TonContextValue, useTon } from "./tonClient";
 import { useContext } from "react";
 
-type UninitialisedController = {
+interface UninitialisedController {
   loaded: false;
-};
+}
 
-type InitilisedController = {
+interface InitilisedController {
   loaded: true;
   contract: OpenedContract<Controller>;
-};
+}
 
 type ControllerContract = UninitialisedController | InitilisedController;
 

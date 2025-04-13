@@ -5,27 +5,22 @@ import { createContext } from "react";
 import { useContext } from "react";
 import { Account as AccountWrapper, AccountData } from "../protocol";
 
-export type UndeployedAccount = {
-  address?: Address;
-  deployed: false;
-};
-
-export type DeployedAccount = {
+export interface DeployedAccount {
   address: Address;
   deployed: true;
   contract: OpenedContract<AccountWrapper>;
   data: AccountData;
-};
+}
 
-export type Account = UndeployedAccount | DeployedAccount;
-
-type AccountValue = {
+interface AccountValue {
   account?: DeployedAccount;
   refreshAccount: () => void;
-};
+}
 
 export const AccountContext = createContext<AccountValue>({
-  refreshAccount: () => {},
+  refreshAccount: () => {
+    throw new Error("refreshAccount function must be overridden");
+  },
 });
 
 type AccountContextProviderProps = React.PropsWithChildren & {

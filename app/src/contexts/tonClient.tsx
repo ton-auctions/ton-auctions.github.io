@@ -12,13 +12,13 @@ import { useContext } from "react";
 import { createContext } from "react";
 import { proxy, useSnapshot } from "valtio";
 
-type ClientState = {
+interface ClientState {
   apiKey?: string;
-};
+}
 
 const clientState = proxy<ClientState>({});
 
-export type TonContextValue = {
+export interface TonContextValue {
   client: TonClient;
 
   cachedOpenContract: <T extends Contract>(src: T) => OpenedContract<T>;
@@ -44,29 +44,29 @@ export type TonContextValue = {
   }) => Promise<void>;
 
   setApiKey: (apiKey: string) => void;
-};
+}
 
-export type Message = {
+export interface Message {
   hash: Buffer<ArrayBufferLike>;
   source: Address;
   destination: Address;
   value: bigint;
   bounce: boolean;
   bounced: boolean;
-};
+}
 
-export type Tx = {
+export interface Tx {
   account: Address;
   lt: bigint;
   hash: Buffer<ArrayBufferLike>;
   now: number;
   end_status: string; // TODO: enum?
   in: Message;
-};
+}
 
 const createContextValue = (endpointV2: string, apiKey?: string) => {
   const client = new TonClient({ endpoint: endpointV2, apiKey });
-  const _cache = new Map<string, any>();
+  const _cache = new Map<string, OpenedContract<Contract>>();
   const ton = {
     client: client,
     cachedOpenContract: <T extends Contract>(src: T): OpenedContract<T> => {
@@ -76,7 +76,7 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
         _cache.set(key, client.open(src));
       }
 
-      return _cache.get(key);
+      return _cache.get(key) as OpenedContract<T>;
     },
     setApiKey: (apiKey: string) => {
       if (clientState.apiKey == apiKey) return;
@@ -92,8 +92,7 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
       limit?: number;
       testMessage?: (cell: Cell) => void;
     }) => {
-      var tx: Transaction[] = [];
-      while (tx.length == 0) {
+      while (true) {
         try {
           const all_txs = await client.getTransactions(params.at_address, {
             limit: params.limit ?? 5,
@@ -119,7 +118,7 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
               if (!tx.inMessage) return false;
               try {
                 params.testMessage(tx.inMessage?.body);
-              } catch (e) {
+              } catch {
                 return false;
               }
               return true;
@@ -131,13 +130,12 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
           await new Promise((resolve) =>
             setTimeout(resolve, params.timeout || 1000)
           );
-        } catch (e) {
+        } catch {
           await new Promise((resolve) =>
             setTimeout(resolve, params.timeout || 1000)
           );
         }
       }
-      return [];
     },
 
     signSendAndWait: async (params: {
@@ -185,14 +183,12 @@ export const TonClientContext = createContext<TonContextValue>(
 
 type TonClientProviderProps = React.PropsWithChildren & {
   endpointV2: string;
-  endpointV3: string;
   apiKey: string;
 };
 
 export const TonClientProvider: React.FC<TonClientProviderProps> = ({
   children,
   endpointV2,
-  endpointV3,
   apiKey,
 }) => {
   clientState.apiKey = clientState.apiKey || apiKey;
