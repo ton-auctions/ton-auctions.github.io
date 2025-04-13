@@ -69,6 +69,9 @@ jobs:
       - name: Copy Logo
         run: cp ./public/logo.png ./dist/logo.png
         working-directory: ./app
+      - name: Copy Manifest
+        run: cp ./public/ton-connect-manifest.json ./dist/ton-connect-manifest.json
+        working-directory: ./app
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
