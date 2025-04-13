@@ -24,13 +24,13 @@ export const Navbar: React.FC<NavbarProps> = ({ withBurger }) => {
       <label
         hidden={!withBurger}
         htmlFor="my-drawer"
-        className="p-3 hover:darken"
+        className="p-3 btn btn-link"
       >
         <Burger width="30" height="30" />
       </label>
       <div className="flex-1 text-xl pl-2">BidTon</div>
       {wallet && (
-        <div className="flex-none pr-2" onClick={disconnect}>
+        <div className="flex-none pr-2 btn btn-link" onClick={disconnect}>
           <Exit width="30" height="30" />
         </div>
       )}

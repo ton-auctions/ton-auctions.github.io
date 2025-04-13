@@ -17,6 +17,24 @@ describe("Controller", () => {
 
   const sk = new PrivateKey();
 
+  const getAccountWrapper = async (
+    controller: SandboxContract<Controller>,
+    address: Address,
+  ) => {
+    return await Account.fromInit(
+      controller.address,
+      address,
+      null,
+      0n,
+      0n,
+      0n,
+      Dictionary.empty(),
+      0n,
+      0n,
+      false,
+    );
+  };
+
   beforeEach(async () => {
     blockchain = await Blockchain.create();
     owner1 = await blockchain.treasury("owner1");
@@ -184,18 +202,16 @@ describe("Controller", () => {
       success: true,
       deploy: false,
     });
-    const accountAddress = await controller.getUserAccount(user.address);
-    expect(accountAddress).toBeInstanceOf(Address);
-    expect(accountAddress).not.toBeNull();
+
+    const accountWrapper = await getAccountWrapper(controller, user.address);
+
     expect(createAccountResult.transactions).toHaveTransaction({
       from: controller.address,
-      to: accountAddress!,
+      to: accountWrapper.address!,
       success: true,
       deploy: true,
     });
-    const userAccount = blockchain.openContract(
-      Account.fromAddress(accountAddress!),
-    );
+    const userAccount = blockchain.openContract(accountWrapper);
     const data = await userAccount.getData();
     expect(data.version).toBe(1n);
     expect(data.owner.toString()).toBe(user.address.toString());
@@ -223,18 +239,15 @@ describe("Controller", () => {
       success: true,
       deploy: false,
     });
-    const accountAddress = await controller.getUserAccount(user.address);
-    expect(accountAddress).toBeInstanceOf(Address);
-    expect(accountAddress).not.toBeNull();
+
+    const accountWrapper = await getAccountWrapper(controller, user.address);
     expect(createAccountResult.transactions).toHaveTransaction({
       from: controller.address,
-      to: accountAddress!,
+      to: accountWrapper.address!,
       success: true,
       deploy: true,
     });
-    const userAccount = blockchain.openContract(
-      Account.fromAddress(accountAddress!),
-    );
+    const userAccount = blockchain.openContract(accountWrapper);
     const data = await userAccount.getData();
     expect(data.version).toBe(1n);
     expect(data.owner.toString()).toBe(user.address.toString());
@@ -267,11 +280,10 @@ describe("Controller", () => {
       inMessageBounceable: true,
       aborted: true,
     });
-    const accountAddress = await controller.getUserAccount(user.address);
 
-    let address = blockchain.openContract(Account.fromAddress(accountAddress));
-
-    expect(address.init).toBeUndefined();
+    const accountWrapper = await getAccountWrapper(controller, user.address);
+    let contract = await blockchain.getContract(accountWrapper.address);
+    expect(contract.accountState?.type).toBe("uninit");
   });
 
   it.skip("should abort creating user account if not enough moneys", async () => {
@@ -297,9 +309,9 @@ describe("Controller", () => {
       aborted: true,
       exitCode: Number(Controller.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT),
     });
-    const accountAddress = await controller.getUserAccount(user.address);
 
-    let address = blockchain.openContract(Account.fromAddress(accountAddress));
+    const accountWrapper = await getAccountWrapper(controller, user.address);
+    let address = blockchain.openContract(accountWrapper);
 
     expect(address.init).toBeUndefined();
   });
@@ -319,27 +331,25 @@ describe("Controller", () => {
       },
     );
 
-    let account_address = await controller.getUserAccount(user.address);
+    const accountWrapper = await getAccountWrapper(controller, user.address);
 
     expect(result1.transactions).toHaveTransaction({
       from: controller.address,
-      to: account_address,
+      to: accountWrapper.address,
       success: true,
       aborted: false,
       deploy: true,
     });
 
     expect(result1.transactions).toHaveTransaction({
-      from: account_address,
+      from: accountWrapper.address,
       to: controller.address,
       success: true,
       aborted: false,
       deploy: false,
     });
 
-    const account = blockchain.openContract(
-      Account.fromAddress(account_address),
-    );
+    const account = blockchain.openContract(accountWrapper);
 
     const data = await account.getData();
 

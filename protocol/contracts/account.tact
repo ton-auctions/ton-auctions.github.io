@@ -56,6 +56,14 @@ message CreateBasicAuction {
     ends_at: Int as uint64;
 }
 
+struct CreateBasicAuctionData {
+    id: Int as uint64;
+    name: String;
+    description: String;
+    minimal_amount: Int;
+    ends_at: Int as uint64;
+}
+
 message CleanUp {}
 
 struct AccountData {
@@ -305,6 +313,26 @@ contract Account(
 
     get fun auction(id: Int): AuctionConfig? {
         return self.auctions.get(id);
+    }
+
+    get fun auctionAddress(
+        data: CreateBasicAuctionData,
+    ): Address {
+        let init = initOf BasicAuction(
+            data.id,
+            data.name,
+            data.description,
+            self.owner,
+            myAddress(),
+            self.collector,
+            data.minimal_amount,
+            data.ends_at,
+            self.chat_id,
+            null,
+            false,
+            false,
+        );
+        return contractAddress(init);
     }
 
     get fun data(): AccountData {

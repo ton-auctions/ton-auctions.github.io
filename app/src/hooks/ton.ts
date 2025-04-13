@@ -1,4 +1,4 @@
-import { Contract, OpenedContract, Sender, SenderArguments } from "@ton/ton";
+import { Contract, OpenedContract, Sender, SenderArguments } from "@ton/core";
 import { useEffect, useState } from "react";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 

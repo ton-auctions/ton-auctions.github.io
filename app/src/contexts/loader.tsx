@@ -8,7 +8,7 @@ export const loaderState = proxy({
   caption: "Loading",
 });
 
-type LoaderContextValue = {
+export type LoaderContextValue = {
   show(caption: string): void;
   hide(): string;
 };

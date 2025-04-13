@@ -13,6 +13,22 @@ message Resolve {}
 
 message Delete {}
 
+struct AuctionData {
+    id: Int;
+    name: String;
+    owner_account: Address;
+    description: String;
+    address: Address;
+    type: String;
+    ends_at: Int as uint64;
+    minimal_amount: Int as uint128;
+    balance: Int;
+    ended: Bool;
+    refund: Bool;
+    winner: Address?;
+    minimal_raise: Int as int128;
+}
+
 contract BasicAuction(
     id: Int as uint64,
     name: String,
@@ -26,7 +42,7 @@ contract BasicAuction(
     winner: Winner?,
     ended: Bool,
     refund: Bool,
-) with Ownable {
+) {
     const ERRORS_BID_IS_TOO_SMALL: Int = 201;
     const ERRORS_BID_RAISE_IS_TOO_SMALL: Int = 202;
     const ERRORS_FINISHED: Int = 203;
@@ -150,28 +166,8 @@ contract BasicAuction(
         return self.id;
     }
 
-    get fun has_ended(): Bool {
-        return self.ended;
-    }
-
-    get fun can_be_resolved(): Bool {
-        return self.ends_at > now();
-    }
-
-    get fun can_be_deleted(): Bool {
-        return self.winner == null;
-    }
-
     get fun winner(): Winner? {
         return self.winner;
-    }
-
-    get fun ends_at(): Int {
-        return self.ends_at;
-    }
-
-    get fun minimal_amount(): Int {
-        return self.minimal_amount;
     }
 
     get fun minimal_raise(): Int {
@@ -191,10 +187,20 @@ contract BasicAuction(
         return myBalance();
     }
 
-    get fun data(): AuctionConfig {
-        return AuctionConfig {
+    get fun data(): AuctionData {
+        let minimal_raise = self.minimal_amount;
+        if self.winner != null {
+            let five_percent = self.winner!!.amount * 5 / 100;
+            minimal_raise = max(self.MINIMAL_RAISE, five_percent);
+        }
+
+        let winner: Address? = null;
+        if self.winner != null { winner = self.winner!!.address }
+
+        return AuctionData {
             id: self.id,
             name: self.name,
+            owner_account: self.owner,
             description: self.description,
             address: myAddress(),
             type: "basic",
@@ -202,6 +208,9 @@ contract BasicAuction(
             minimal_amount: self.minimal_amount,
             ended: self.ended,
             refund: self.refund,
+            balance: myBalance(),
+            winner: winner,
+            minimal_raise: minimal_raise,
         };
     }
 }

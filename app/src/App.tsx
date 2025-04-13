@@ -6,15 +6,16 @@ import React from "react";
 
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { BaseLayout } from "./layouts/BaseLayout";
-import { Registration } from "./features/Registration";
+import { RegistrationPage } from "./features/RegistrationPage";
 import { CreateAuction } from "./features/CreateAuction";
 import { AccountZone } from "./layouts/AccountZone";
 import { WalletZone } from "./layouts/WalletZone";
 
 import { Profile } from "./features/Profile";
 import { Auctions } from "./features/Auctions";
+import { AuctionPublic } from "./features/AuctionPublic";
 
-const CONTROLLER_ADDRESS = "EQCjIf7UE-3wYk0ZXLGmYma0541x5HDqH9Eoq1QPckXiZ-CK";
+const CONTROLLER_ADDRESS = "EQC-FtV545kd5EweOfG7FReI5KEYR8eC-yT3zzeyz2iTcOD0";
 
 function About() {
   const navigate = useNavigate();
@@ -57,13 +58,14 @@ function App() {
           <Route path="auction/:address" element={<SKIP name="auction" />} />
 
           <Route path="r" element={<WalletZone />}>
-            <Route path=":ref" element={<Registration />} />
+            <Route path=":ref" element={<RegistrationPage />} />
           </Route>
 
           <Route path="app" element={<WalletZone />}>
             <Route index element={<Navigate to="account" />} />
 
-            <Route path="register" element={<Registration />} />
+            <Route path="register" element={<RegistrationPage />} />
+            <Route path="auction/:address" element={<AuctionPublic />} />
 
             <Route path="account" element={<AccountZone />}>
               <Route index element={<Auctions />} />

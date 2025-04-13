@@ -17,7 +17,7 @@ export const Loader: React.FC<LoaderProps> = ({ hidden, caption }) => {
 
   const pulseDuration = 14000;
 
-  const scale = periodic_modulus(t, pulseDuration, [0, 7], { ease: easeOut });
+  const scale = periodic_modulus(t, pulseDuration, [0.8, 7], { ease: easeOut });
   const opacity = periodic_modulus(t, pulseDuration, [0.5, 0], {
     ease: easeOut,
   });

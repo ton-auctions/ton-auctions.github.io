@@ -7,6 +7,8 @@ import { useServiceController } from "../contexts/serviceController";
 import { useCallback } from "react";
 import React from "react";
 import { TonContextValue, useTon } from "../contexts/tonClient";
+import { loadAccountDelete } from "../protocol/tact_Account";
+import { useAlerts } from "../contexts/alerts";
 
 type DeleteAccountProps = {
   account: DeployedAccount;
@@ -27,10 +29,9 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
   refreshAccount,
   wallet,
 }) => {
-  if (!account.deployed) return;
-
   const conn = useConnection();
   const loader = useLoader();
+  const alerts = useAlerts();
   const ton = useTon();
 
   const controller = useServiceController();
@@ -41,26 +42,40 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     if (!wallet) return;
     if (!controller) return;
 
-    loader.show("Creating account. Sending transaction.");
+    loader.show("Deleting account. Sending transaction.");
 
-    await account.contract.send(
-      conn.sender,
-      {
-        value: toNano("0.05"),
-      },
-      {
-        $$type: "AccountDelete",
-      }
-    );
-
-    loader.show("Deleting account. Waiting for transaction to settle.");
-    await waitTillExists(ton, account.contract.address);
-    loader.hide();
-    refreshAccount();
-  }, [account]);
+    ton
+      .signSendAndWait({
+        checkAddress: account.contract.address,
+        checkTransactionFrom: wallet.address,
+        checkTimeout: 10000,
+        send: async () => {
+          await account.contract.send(
+            conn.sender,
+            {
+              value: toNano("0.05"),
+            },
+            {
+              $$type: "AccountDelete",
+            }
+          );
+        },
+        testMessage: (cell) => {
+          loadAccountDelete(cell.asSlice());
+        },
+        updateLoader: (text) => loader.show(`Deleting account. ${text}`),
+      })
+      .catch((e) => {
+        alerts.addAlert(`Can't delete account. ${e}`, 5000);
+      })
+      .finally(() => loader.hide())
+      .then(() => {
+        refreshAccount();
+      });
+  }, [account, conn, wallet, controller]);
 
   return (
-    <button className="btn btn-secondary" onClick={deleteAccount}>
+    <button className="btn btn-secondary grow m-5" onClick={deleteAccount}>
       DELETE ACCOUNT
     </button>
   );

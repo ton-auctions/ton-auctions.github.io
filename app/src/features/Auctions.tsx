@@ -1,6 +1,6 @@
 import React from "react";
 import { useUserAccount } from "../contexts/account";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { AuctionRow } from "./AuctionRow";
 import { useTonPriceOracle } from "../hooks/priceOracle";
 
@@ -12,11 +12,11 @@ export const Auctions: React.FC<{}> = () => {
 
   if (auctions.length == 0) {
     return (
-      <div className="mx-auto text-gray-100">
-        <div className="flex flex-none h-20 justify-center"></div>
+      <div className="max-h-dvh min-w-xs snap-y snap-proximity mx-auto text-gray-100 overflow-y-auto pb-10">
+        <div className="flex flex-none h-25 justify-center"></div>
 
-        <div className="flex flex-col bg-base-100 rounded-box h-50 items-center mx-auto ml-5 mr-5">
-          <h1 className="p-5">No auctions, yet.</h1>
+        <div className="flex flex-col bg-base-100 rounded-box w-xs items-center mx-auto p-5">
+          <h1 className="pb-5">No auctions, yet.</h1>
           <Link to="/app/account/create">
             <button className="btn btn-primary">Create auction</button>
           </Link>
@@ -29,9 +29,18 @@ export const Auctions: React.FC<{}> = () => {
     <div className="max-h-dvh min-w-xs snap-y snap-proximity mx-auto text-gray-100 overflow-y-auto pb-10">
       <div className="flex flex-none h-25 justify-center"></div>
 
-      <ul className="mx-auto list bg-base-100 rounded-box shadow-md w-80">
-        <li>
-          <h1 className="p-4 mx-auto">My auctions</h1>
+      <ul className="flex-col mx-auto bg-base-100 rounded-box shadow-md w-xs">
+        <li className="flex join">
+          <h1 className="p-4 text-nowrap align-baseline">
+            My auctions ({account!.data.max_allowance - account!.data.allowance}
+            /{account!.data.max_allowance})
+          </h1>
+          <span className="grow"></span>
+          <span className="mt-2 mr-2 text-nowrap align-baseline">
+            <Link to="/app/account/create">
+              <button className="btn btn-ghost btn-circle">+</button>
+            </Link>
+          </span>
         </li>
 
         <div className="divider p-0 m-0 h-0"></div>
@@ -39,12 +48,7 @@ export const Auctions: React.FC<{}> = () => {
         {account &&
           auctions.map((auc) => {
             return (
-              <AuctionRow
-                key={auc.id}
-                auction={auc}
-                tonUsdPrice={tonUsdPair}
-                account={account}
-              />
+              <AuctionRow key={auc.id} auction={auc} tonUsdPrice={tonUsdPair} />
             );
           })}
       </ul>

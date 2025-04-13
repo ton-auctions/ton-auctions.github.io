@@ -1,16 +1,17 @@
 import { useTonWallet } from "@tonconnect/ui-react";
-import { Link, Navigate, Outlet, useLocation, useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import { Account, AccountContextProvider } from "../contexts/account";
 import { Account as AccountWrapper } from "../protocol";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useTon } from "../contexts/tonClient";
 import { useLoader } from "../contexts/loader";
 import { useServiceController } from "../contexts/serviceController";
 import { useEffect } from "react";
-import { Address } from "@ton/core";
+import { Address, Dictionary } from "@ton/core";
 import { useCallback } from "react";
 import { useNavbarControls } from "../contexts/navbar";
 import { Drawer } from "../features/Drawer";
+import { getAccountWrapper } from "../utils/addresses";
 
 const useAccountState = () => {
   const [refresher, setRefresher] = useState(0);
@@ -31,27 +32,28 @@ const useAccountState = () => {
     const walletAddress = Address.parse(walletAddressStr);
 
     const loadServiceAccount = async () => {
-      const accountAddress = await controller.contract.getUserAccount(
+      const accountWrapper = await getAccountWrapper(
+        controller.contract,
         walletAddress
       );
 
-      const isDeployed = await ton.client.isContractDeployed(accountAddress);
+      const isDeployed = await ton.client.isContractDeployed(
+        accountWrapper.address
+      );
 
       if (!isDeployed) {
         setAccount({
           deployed: false,
-          address: accountAddress,
+          address: accountWrapper.address,
         });
         return;
       }
 
-      const contract = ton.cachedOpenContract(
-        AccountWrapper.fromAddress(accountAddress)
-      );
+      const contract = ton.cachedOpenContract(accountWrapper);
       const data = await contract.getData();
 
       setAccount({
-        address: accountAddress,
+        address: accountWrapper.address,
         deployed: true,
         contract: contract,
         data: data,

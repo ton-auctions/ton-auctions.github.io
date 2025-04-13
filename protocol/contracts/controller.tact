@@ -13,7 +13,7 @@ message ConfigureService {
     referral_comission: Int as uint16;
 }
 
-message CleanInitialiser { address: Address }
+message CleanInitialiser {}
 
 message ConfigureAccount {
     address: Address;
@@ -74,9 +74,23 @@ contract Controller(
     }
 
     receive(msg: CleanInitialiser) {
-        let sender = sender();
-        throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
-        let _ = self.initialisers.del(msg.address);
+        let init = initOf Account(
+            myAddress(),
+            sender(),
+            null,
+            0, // service com
+            0, // referral com
+            0, // chat id
+            emptyMap(),
+            0, // max allow
+            0, // allow
+            false,
+        );
+
+        let user_account = contractAddress(init);
+
+        let _ = self.initialisers.del(user_account);
+        self.reply(null);
     }
 
     receive(msg: CreateAccount) {
@@ -159,22 +173,6 @@ contract Controller(
         self.initialisers.del(source);
     }
 
-    get fun userAccount(user: Address): Address {
-        let init = initOf Account(
-            myAddress(),
-            user,
-            null,
-            0, // service com
-            0, // referral com
-            0, // chat TODO: encrypt!
-            emptyMap(), // auctions
-            0, // max allowance
-            0, // allowance
-            false, // initialised
-        );
-        return contractAddress(init);
-    }
-
     get fun serviceComission(): Int {
         return self.service_comission;
     }
@@ -185,6 +183,23 @@ contract Controller(
 
     get fun balance(): Int {
         return myBalance();
+    }
+
+    get fun accountAddress(wallet: Address): Address {
+        let init = initOf Account(
+            myAddress(),
+            wallet,
+            null,
+            0, // service com
+            0, // referral com
+            0, // chat id
+            emptyMap(),
+            0, // max allow
+            0, // allow
+            false,
+        );
+
+        return contractAddress(init);
     }
 
     receive() {

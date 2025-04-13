@@ -4,7 +4,7 @@ import {
   Sender,
   SenderArguments,
   storeStateInit,
-} from "@ton/ton";
+} from "@ton/core";
 import { TonConnectUI } from "@tonconnect/ui-react";
 
 export class TonConnectProvider implements Sender {

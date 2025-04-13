@@ -1,5 +1,6 @@
 import React from "react";
 import axios from "axios";
+import moment from "moment";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useUserAccount } from "../contexts/account";
@@ -61,8 +62,8 @@ export const Profile: React.FC<{}> = () => {
 
         <div className="divider p-0 m-0 h-0"></div>
 
-        <div className="join p-5">
-          <label className="floating-label">
+        <div className="join pt-5 pl-5 pr-5">
+          <label className="floating-label w-full">
             <input
               ref={ref}
               type="text"
@@ -72,16 +73,19 @@ export const Profile: React.FC<{}> = () => {
             />
             <span>Referral link</span>
           </label>
+
           <button className="btn btn-primary w-10 p-0" onClick={copyCall}>
             <Copy width={25} height={25} />
           </button>
         </div>
 
-        <DeleteAccount
-          account={account!}
-          refreshAccount={refreshAccount}
-          wallet={wallet!}
-        />
+        <div className="flex">
+          <DeleteAccount
+            account={account!}
+            refreshAccount={refreshAccount}
+            wallet={wallet!}
+          />
+        </div>
       </div>
     </div>
   );

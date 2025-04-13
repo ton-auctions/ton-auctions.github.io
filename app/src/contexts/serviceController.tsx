@@ -1,4 +1,4 @@
-import { Address, OpenedContract, Transaction } from "@ton/ton";
+import { Address, OpenedContract } from "@ton/core";
 import React from "react";
 import { createContext } from "react";
 import { Controller } from "../protocol";

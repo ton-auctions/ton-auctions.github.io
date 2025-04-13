@@ -1203,6 +1203,75 @@ function dictValueParserCreateBasicAuction(): DictionaryValue<CreateBasicAuction
     }
 }
 
+export type CreateBasicAuctionData = {
+    $$type: 'CreateBasicAuctionData';
+    id: bigint;
+    name: string;
+    description: string;
+    minimal_amount: bigint;
+    ends_at: bigint;
+}
+
+export function storeCreateBasicAuctionData(src: CreateBasicAuctionData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(src.id, 64);
+        b_0.storeStringRefTail(src.name);
+        b_0.storeStringRefTail(src.description);
+        b_0.storeInt(src.minimal_amount, 257);
+        b_0.storeUint(src.ends_at, 64);
+    };
+}
+
+export function loadCreateBasicAuctionData(slice: Slice) {
+    const sc_0 = slice;
+    const _id = sc_0.loadUintBig(64);
+    const _name = sc_0.loadStringRefTail();
+    const _description = sc_0.loadStringRefTail();
+    const _minimal_amount = sc_0.loadIntBig(257);
+    const _ends_at = sc_0.loadUintBig(64);
+    return { $$type: 'CreateBasicAuctionData' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
+}
+
+function loadTupleCreateBasicAuctionData(source: TupleReader) {
+    const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _description = source.readString();
+    const _minimal_amount = source.readBigNumber();
+    const _ends_at = source.readBigNumber();
+    return { $$type: 'CreateBasicAuctionData' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
+}
+
+function loadGetterTupleCreateBasicAuctionData(source: TupleReader) {
+    const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _description = source.readString();
+    const _minimal_amount = source.readBigNumber();
+    const _ends_at = source.readBigNumber();
+    return { $$type: 'CreateBasicAuctionData' as const, id: _id, name: _name, description: _description, minimal_amount: _minimal_amount, ends_at: _ends_at };
+}
+
+function storeTupleCreateBasicAuctionData(source: CreateBasicAuctionData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.id);
+    builder.writeString(source.name);
+    builder.writeString(source.description);
+    builder.writeNumber(source.minimal_amount);
+    builder.writeNumber(source.ends_at);
+    return builder.build();
+}
+
+function dictValueParserCreateBasicAuctionData(): DictionaryValue<CreateBasicAuctionData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeCreateBasicAuctionData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadCreateBasicAuctionData(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type CleanUp = {
     $$type: 'CleanUp';
 }
@@ -1643,6 +1712,126 @@ function dictValueParserDelete(): DictionaryValue<Delete> {
     }
 }
 
+export type AuctionData = {
+    $$type: 'AuctionData';
+    id: bigint;
+    name: string;
+    owner_account: Address;
+    description: string;
+    address: Address;
+    type: string;
+    ends_at: bigint;
+    minimal_amount: bigint;
+    balance: bigint;
+    ended: boolean;
+    refund: boolean;
+    winner: Address | null;
+    minimal_raise: bigint;
+}
+
+export function storeAuctionData(src: AuctionData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeInt(src.id, 257);
+        b_0.storeStringRefTail(src.name);
+        b_0.storeAddress(src.owner_account);
+        b_0.storeStringRefTail(src.description);
+        b_0.storeAddress(src.address);
+        const b_1 = new Builder();
+        b_1.storeStringRefTail(src.type);
+        b_1.storeUint(src.ends_at, 64);
+        b_1.storeUint(src.minimal_amount, 128);
+        b_1.storeInt(src.balance, 257);
+        b_1.storeBit(src.ended);
+        b_1.storeBit(src.refund);
+        b_1.storeAddress(src.winner);
+        b_1.storeInt(src.minimal_raise, 128);
+        b_0.storeRef(b_1.endCell());
+    };
+}
+
+export function loadAuctionData(slice: Slice) {
+    const sc_0 = slice;
+    const _id = sc_0.loadIntBig(257);
+    const _name = sc_0.loadStringRefTail();
+    const _owner_account = sc_0.loadAddress();
+    const _description = sc_0.loadStringRefTail();
+    const _address = sc_0.loadAddress();
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _type = sc_1.loadStringRefTail();
+    const _ends_at = sc_1.loadUintBig(64);
+    const _minimal_amount = sc_1.loadUintBig(128);
+    const _balance = sc_1.loadIntBig(257);
+    const _ended = sc_1.loadBit();
+    const _refund = sc_1.loadBit();
+    const _winner = sc_1.loadMaybeAddress();
+    const _minimal_raise = sc_1.loadIntBig(128);
+    return { $$type: 'AuctionData' as const, id: _id, name: _name, owner_account: _owner_account, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, balance: _balance, ended: _ended, refund: _refund, winner: _winner, minimal_raise: _minimal_raise };
+}
+
+function loadTupleAuctionData(source: TupleReader) {
+    const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _owner_account = source.readAddress();
+    const _description = source.readString();
+    const _address = source.readAddress();
+    const _type = source.readString();
+    const _ends_at = source.readBigNumber();
+    const _minimal_amount = source.readBigNumber();
+    const _balance = source.readBigNumber();
+    const _ended = source.readBoolean();
+    const _refund = source.readBoolean();
+    const _winner = source.readAddressOpt();
+    const _minimal_raise = source.readBigNumber();
+    return { $$type: 'AuctionData' as const, id: _id, name: _name, owner_account: _owner_account, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, balance: _balance, ended: _ended, refund: _refund, winner: _winner, minimal_raise: _minimal_raise };
+}
+
+function loadGetterTupleAuctionData(source: TupleReader) {
+    const _id = source.readBigNumber();
+    const _name = source.readString();
+    const _owner_account = source.readAddress();
+    const _description = source.readString();
+    const _address = source.readAddress();
+    const _type = source.readString();
+    const _ends_at = source.readBigNumber();
+    const _minimal_amount = source.readBigNumber();
+    const _balance = source.readBigNumber();
+    const _ended = source.readBoolean();
+    const _refund = source.readBoolean();
+    const _winner = source.readAddressOpt();
+    const _minimal_raise = source.readBigNumber();
+    return { $$type: 'AuctionData' as const, id: _id, name: _name, owner_account: _owner_account, description: _description, address: _address, type: _type, ends_at: _ends_at, minimal_amount: _minimal_amount, balance: _balance, ended: _ended, refund: _refund, winner: _winner, minimal_raise: _minimal_raise };
+}
+
+function storeTupleAuctionData(source: AuctionData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.id);
+    builder.writeString(source.name);
+    builder.writeAddress(source.owner_account);
+    builder.writeString(source.description);
+    builder.writeAddress(source.address);
+    builder.writeString(source.type);
+    builder.writeNumber(source.ends_at);
+    builder.writeNumber(source.minimal_amount);
+    builder.writeNumber(source.balance);
+    builder.writeBoolean(source.ended);
+    builder.writeBoolean(source.refund);
+    builder.writeAddress(source.winner);
+    builder.writeNumber(source.minimal_raise);
+    return builder.build();
+}
+
+function dictValueParserAuctionData(): DictionaryValue<AuctionData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeAuctionData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadAuctionData(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type BasicAuction$Data = {
     $$type: 'BasicAuction$Data';
     id: bigint;
@@ -1857,6 +2046,53 @@ function dictValueParserAccountCreated(): DictionaryValue<AccountCreated> {
     }
 }
 
+export type Test = {
+    $$type: 'Test';
+    address: Address | null;
+}
+
+export function storeTest(src: Test) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(3338592498, 32);
+        b_0.storeAddress(src.address);
+    };
+}
+
+export function loadTest(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3338592498) { throw Error('Invalid prefix'); }
+    const _address = sc_0.loadMaybeAddress();
+    return { $$type: 'Test' as const, address: _address };
+}
+
+function loadTupleTest(source: TupleReader) {
+    const _address = source.readAddressOpt();
+    return { $$type: 'Test' as const, address: _address };
+}
+
+function loadGetterTupleTest(source: TupleReader) {
+    const _address = source.readAddressOpt();
+    return { $$type: 'Test' as const, address: _address };
+}
+
+function storeTupleTest(source: Test) {
+    const builder = new TupleBuilder();
+    builder.writeAddress(source.address);
+    return builder.build();
+}
+
+function dictValueParserTest(): DictionaryValue<Test> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTest(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTest(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type ConfigureService = {
     $$type: 'ConfigureService';
     service_comission: bigint;
@@ -1912,37 +2148,31 @@ function dictValueParserConfigureService(): DictionaryValue<ConfigureService> {
 
 export type CleanInitialiser = {
     $$type: 'CleanInitialiser';
-    address: Address;
 }
 
 export function storeCleanInitialiser(src: CleanInitialiser) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(2553827134, 32);
-        b_0.storeAddress(src.address);
+        b_0.storeUint(1364507255, 32);
     };
 }
 
 export function loadCleanInitialiser(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2553827134) { throw Error('Invalid prefix'); }
-    const _address = sc_0.loadAddress();
-    return { $$type: 'CleanInitialiser' as const, address: _address };
+    if (sc_0.loadUint(32) !== 1364507255) { throw Error('Invalid prefix'); }
+    return { $$type: 'CleanInitialiser' as const };
 }
 
 function loadTupleCleanInitialiser(source: TupleReader) {
-    const _address = source.readAddress();
-    return { $$type: 'CleanInitialiser' as const, address: _address };
+    return { $$type: 'CleanInitialiser' as const };
 }
 
 function loadGetterTupleCleanInitialiser(source: TupleReader) {
-    const _address = source.readAddress();
-    return { $$type: 'CleanInitialiser' as const, address: _address };
+    return { $$type: 'CleanInitialiser' as const };
 }
 
 function storeTupleCleanInitialiser(source: CleanInitialiser) {
     const builder = new TupleBuilder();
-    builder.writeAddress(source.address);
     return builder.build();
 }
 
@@ -2200,7 +2430,7 @@ function initController_init_args(src: Controller_init_args) {
 }
 
 async function Controller_init(owner1: Address, owner2: Address, service_comission: bigint, referral_comission: bigint, initialisers: Dictionary<Address, AccountInitialisation>) {
-    const __code = Cell.fromHex('b5ee9c7241026201001682000114ff00f4a413f4bcf2c80b01020162020c04c4d001d072d721d200d200fa4021103450666f04f86102f862ed44d0fa40fa40d30fd30ff40455406c1506925f06e07025d74920c21f953105d31f06de2182106986fc89bae302218210775374c8bae30221821098384f3ebae3022182100e63ede9ba03040506008e5f0402d30fd30f5932f8425330c70592307f945240c705e2f2e0c920c2fff2e0ca21c2fff2e0ca5301a0812710bbf2e0ca4014c855405054cf1658cf16cb0f12cb0ff400c9ed5401b85b04fa40d30fd30fd30f553034f8425370c70592307f945260c705e2f2e0c921c2fff2e0ca20c2fff2e0ca5ca0812710bbf2e0ca22441402c855308210775374c85005cb1f5003cf16cb0fcb0fcb0fc9104610351024706ddb3c5f0550006c5b04fa400131f8425340c70592307f945230c705e2f2e0c9500581010bf459304430c855405054cf1658cf16cb0f12cb0ff400c9ed5404fe8f695b04810101d70020d70b01c30093fa40019472d7216de21232f8416f2410235f03f8286d7053006d531110787088c8559150a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc95ce0362082101083e1b4bae302208210e8cf424dba0f07090b01fc705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d02981010b2259f40a6fa131925f0ae05475846e955b5358a070de461581010b50267a1034c855405045cb3f58206e95307001cb0192cf16e2cb0fcb0fcb0fc910394940206e953059f45930944133f413e20800c08040705a7f50926d55305f41f90001f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f9040003c8cf8580ca0012cccccf884008cbff01fa028069cf40cf8634f400c901fb004034c855405054cf1658cf16cb0f12cb0ff400c9ed5401f23034f8422581010b2259f40a6fa131b3925f06e081010b260259f40b6fa192306ddf206e92306d8e20d0d33f20d70b01c30093fa40019472d7216de201d30fd30fd30f55406c156f05e2206ef2d0806f25c85540821083a22bb55006cb1f14cb3f58206e95307001cb0192cf16e2cb0fcb0fcb0fc9103544300a0112f842017f6ddb3c5f055000de8e323034f8422581010b2259f40a6fa131b3925f06e0500581010bf459304430c855405054cf1658cf16cb0f12cb0ff400c9ed54e0365f042182100fcbef7bba915be001c00001c121b08e1f8100826d70f84270c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e0f2c0820201200d5a0133be38c76a2687d207d206987e987fa022aa0360aaa826d9e3628c0e01e8f8286d7053006d531110787088c8559150a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d00f0114ff00f4a413f4bcf2c80b10020162115102f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0fa40fa4020d70b01c30093fa40019472d7216de201d30fd30fd401d0810101d700f404810101d700810101d700d20030105a10591058105710566c1a0b8e9c098020d7217021d749c21f9430d31f01de8210e0e6cc80bae3025f0be0702ad74920121301eed33f0131228101012259f40c6fa131b3925f0be0228101012259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2910585f08f84201c705b3925f0be058810101f45a3008a4107910681057104610354104034b04f2c21f95310ad31f0bde21821083a22bb5ba8f5310485f0803d33f20d70b01c30093fa40019472d7216de201d30fd30fd30f554035f8425270c705f2e0cc08b3f2e0cf237f6f00c801308210e8cf424d01cb1fc9108a107910485e3310341023f842017f6ddb3ce0218210775374c8bae3022182101fcbffc6ba504b141500dc5b343407fa40d30fd30fd30f553034f84252a0c705f2e0ccf82813c705f2e0cc5226a114a010791068105710461035410403c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed5404fe8ee75b09d33fd20059322bf2e0ce238101012259f40c6fa131f2e0cc238101012259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f295bf84224c705f2e0cd7f8101010ae0218210a9c1d33fbae302218210e0e6cc80bae302214a16194702fe5f033828f2e0cef8425360c70592307f945270c705e2f2e0c97a6d22810101f4856fa520911295316d326d01e2908ecf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2921b3925f09e30d810101240259f4786fa5209402d4305895316d326d01e217180092810101295571c855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c9103412206e953059f45a30944133f415e202a5590096e85b32107910681057104610354403c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed5401d65b09d33fd401d001d401d001810101d700d33f5540352ef2e0cef84252c0c705f2e0c9f823814650a05250bcf2e0caf8238208278d00a05250b9f2e0cb2dc200f2e0d0268101012559f40c6fa131b3f2e0d1f8286d707027514751470456120456145139513e03561255201a02c488c855b150bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc95c1b450114ff00f4a413f4bcf2c80b1c0201621d2502f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1c0d925f0de0702cd74920c21f95310cd31f0dde218210164a11f1bae3022182101e57efdeba1e1f01c25b3bf8425370c70592307f945250c705e2f2e0ce0ab392296e9170e2f2e0d17f8306702b70c85982101fcbffc65003cb1fcb3fca00c928597013c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00109b108a10791068105710461035440321039a8f315b0b810101d70001312bb3f2e0d0f8235240bcf2e0cbf8416f2430325316bef2e0c9236eb39133e30d59126f03109b5518e03d208210ec533ec0bae3023d5f0b01c00001c121b0dcf2c08220212200d603206ef2d0806f235331bcf2e0c921a7058064a90482101dcd650001b6095220a05240bcf2e0ca705410326d027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87101cb0312cb3fcb7f23cf16c9c88258c000000000000000000000000101cb67ccc970fb0000c4c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed5402fe303b0ab3f2e0d0f8235220b9f2e0d2f8425360c70592307f945240c705e2f2e0cec87201cb035210cbfe7f2b6e8e4c3cc9c88258c000000000000000000000000101cb67ccc970fb007f8306702b7fc85982101fcbffc65003cb1fcb3fca00c92859027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30e109b232400ba2b206ef2d0806f233203cb3fc9c88258c000000000000000000000000101cb67ccc970fb0083062b7004c8598210a9ee5a8d5003cb1f810101cf00cb7fc95448135044027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb000b00e0108a107910681057104610354430c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed5402012026340201202729018bba882ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1cdb3c6cc18280002240201202a2c018bb4a3bda89a1a67fa803a003a803a1a803a003f481f481f481a6ffa67fa861a1020203ae01a4000335f481a6ffa47eaa40de0722dbc403a401a4006021582156d839b678d98302b0002280201202d320201202e30018baf5076a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c02f000af8235250bc018baf6b76a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c0310040226eb38e1922206ef2d0806f233031a7058064a90482101dcd650001b609e025018bb0fdfb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b306033000225020120354102012036400201203739018bb1d8bb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3260380026f8288b5626173696382d544d302d595479a6280201203a3b018baf6076a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c05f02016a3c3e0189a077b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3063d0002230189a243b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3063f00022b018bb5921da89a1a67fa803a003a803a1a803a003f481f481f481a6ffa67fa861a1020203ae01a4000335f481a6ffa47eaa40de0722dbc403a401a4006021582156d839b678d983061020158424301b7b3657b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b30481ba48c1b66481bbcb4201bc8dbc0f8881ba48c1b77a05d018bb379fb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3060440004226e01f6705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d08b5626173696382706105743144977707010241023557081010109c855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c9103641604601cc206e953059f45a30944133f415e28040705a7f50626d55305f41f90001f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f9040003c8cf8580ca0012cccccf884008cbff01fa028069cf40cf8634f400c901fb0008a51079106810571046103544034b03fe8210a9ee5a8dbae302218210de904d8eba8ee410895f093202f2e0cef8416f2443305230fa40fa0071d721fa00fa00306c6170f83a01ab005202b9925f03e0216e8e32327001206ef2d0806f00c801308210de904d8e01cb1fc94130027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30de02182104ec34c2e484c4d01f25b09810101d700d37f59322bf2e0ce238101012259f40c6fa131f2e0ccf8416f2430325033b608248101012359f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2931524bc705f2e0cd537ea8812710a904706f004901e6c8013082100fcbef7b01cb1fc912561459027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00517da8812710a9042f6eb38e32705610206ef2d0806f00c801308210de904d8e01cb1fc94130027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb009130e255057f8101010a4a019cc855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c91034206e953059f45a30944133f415e208a4107910681057104610354104034b0078c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed54005831706f00c8013082100fcbef7b01cb1fc94330027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb0002bcba8e41109a5f0a01d37f013102f2e0cef8425210c705f2e0c983066f00c801308210de904d8e01cb1fc913027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e03b2082106ad509a7bae302c0000ac1211ab0e3025f0af2c0824e4f0090108b5f0bf8425210c705f2e0c9708100a06d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00015c29925f0ae0f828c80182101083e1b458cb1f01cf16c9108a10791068105710461035443012f842017f6ddb3c5f0a5000a06d6d226eb3995b206ef2d0806f22019132e21024700304804250231036552212c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000201205253018bbe1a3f6a2687d207d20106b8580e18049fd2000ca396b90b6f100e987e987ea00e8408080eb807a02408080eb80408080eb80690018082d082c882c082b882b360d6d9e3650c6102012054580201485557018bb1d8bb51343e903e900835c2c070c024fe9000651cb5c85b788074c3f4c3f5007420404075c03d0120404075c020404075c034800c0416841644160415c4159b06b6cf1b2ae056002671f8276f102259546ba0546a805468b12d5611018bb1b03b51343e903e900835c2c070c024fe9000651cb5c85b788074c3f4c3f5007420404075c03d0120404075c020404075c034800c0416841644160415c4159b06b6cf1b28605f01bbba1eaed44d0fa40fa4020d70b01c30093fa40019472d7216de201d30fd30fd401d0810101d700f404810101d700810101d700d20030105a10591058105710566c1a5509db3c6ca1206e92306d99206ef2d0806f296f09e2206e92306dde8590070810101250259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e20201205b600201485c5e012fb39cfb51343e903e9034c3f4c3fd0115501b0576cf1b14605d000222012fb1b03b51343e903e9034c3f4c3fd0115501b0576cf1b14605f0008f8276f10012fbaaa2ed44d0fa40fa40d30fd30ff40455406c15db3c6c51861000221c60ae9e4');
+    const __code = Cell.fromHex('b5ee9c7241025901001701000114ff00f4a413f4bcf2c80b01020162020f04c4d001d072d721d200d200fa4021103450666f04f86102f862ed44d0fa40fa40d30fd30ff40455406c1506925f06e07025d74920c21f953105d31f06de218210c6fee0f2bae3022182106986fc89bae302218210775374c8bae3022182105154ba77ba0304050601905b0420d70b01c30093fa40019472d7216de231206eb38eac20206ef2d08001c8018210c6fee0f258cb1f01206e95307001cb0192cf16e2c9104610351024706ddb3c5f05925f06e22f008e5f0402d30fd30f5932f8425330c70592307f945240c705e2f2e0c920c2fff2e0ca21c2fff2e0ca5301a0812710bbf2e0ca4014c855405054cf1658cf16cb0f12cb0ff400c9ed5401b85b04fa40d30fd30fd30f553034f8425370c70592307f945260c705e2f2e0c921c2fff2e0ca20c2fff2e0ca5ca0812710bbf2e0ca22441402c855308210775374c85005cb1f5003cf16cb0fcb0fcb0fc9104610351024706ddb3c5f052f04fee3022182100e63ede9ba8f695b04810101d70020d70b01c30093fa40019472d7216de21232f8416f2410235f03f8286d7053006d531110787088c8559150a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc95ce0362082101083e1b4ba0717090b02fc5b34f828f8426d7053006d53117088c8559150a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0500581010bf459301708013c44306df842017f6ddb3cc855405054cf1658cf16cb0f12cb0ff400c9ed542f02fa705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d02981010b2259f40a6fa1318e8e5f0540346df842017f6ddb3c5f05e05475846e955b5358a070de461581010b50267a1034c855405045cb3f58206e95307001cb0192cf16e2cb0fcb0fcb0fc9103949402f0a00dc206e953059f45930944133f413e28040705a7f50926d55305f41f90001f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f9040003c8cf8580ca0012cccccf884008cbff01fa028069cf40cf8634f400c901fb004034c855405054cf1658cf16cb0f12cb0ff400c9ed5404fe8f5d3034f8422581010b2259f40a6fa131b38e8d3040346df842017f6ddb3c5f05e081010b260259f40b6fa192306ddf206e92306d8e20d0d33f20d70b01c30093fa40019472d7216de201d30fd30fd30f55406c156f05e2206ef2d0806f25e0208210e8cf424dbae302365f042182100fcbef7bba915be001c00001c121b02f0c0d0e0162c85540821083a22bb55006cb1f14cb3f58206e95307001cb0192cf16e2cb0fcb0fcb0fc910354430f842017f6ddb3c5f052f00643034f8422581010b2259f40a6fa131b3925f06e0500581010bf459304430c855405054cf1658cf16cb0f12cb0ff400c9ed54004a8e1f8100826d70f84270c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e0f2c08202015810130201481112012fb39cfb51343e903e9034c3f4c3fd0115501b0576cf1b146055012fb1b03b51343e903e9034c3f4c3fd0115501b0576cf1b14604e0202751415012eaaa2ed44d0fa40fa40d30fd30ff40455406c15db3c6c51320132abbbed44d0fa40fa40d30fd30ff40455406c155504db3c6c511601e8f8286d7053006d531110787088c8559150a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0170114ff00f4a413f4bcf2c80b18020162193002f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0fa40fa4020d70b01c30093fa40019472d7216de201d30fd30fd401d0810101d700f404810101d700810101d700d20030105a10591058105710566c1a0b8e9c098020d7217021d749c21f9430d31f01de8210e0e6cc80bae3025f0be0702ad749201a1b01eed33f0131228101012259f40c6fa131b3925f0be0228101012259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2910585f08f84201c705b3925f0be058810101f45a3008a4107910681057104610354104032a04c8c21f95310ad31f0bde218210c6fee0f2ba8eb45b396dc8018210c6fee0f258cb1f01206e95307001cb0192cf16e2c9108a10791068105710461035443012f842017f6ddb3c5f0ae021821083a22bb5bae302218210775374c8bae3022182101fcbffc6ba2f1c1d1e02a610485f0803d33f20d70b01c30093fa40019472d7216de201d30fd30fd30f554035f8425270c705f2e0cc08b3f2e0cf237f6f00c801308210e8cf424d01cb1fc9108a107910485e3310341023f842017f6ddb3c2f2a00dc5b343407fa40d30fd30fd30f553034f84252a0c705f2e0ccf82813c705f2e0cc5226a114a010791068105710461035410403c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed5404fe8ee75b09d33fd20059322bf2e0ce238101012259f40c6fa131f2e0cc238101012259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f295bf84224c705f2e0cd7f8101010ae0218210a9c1d33fbae302218210e0e6cc80bae30221291f222602fe5f033828f2e0cef8425360c70592307f945270c705e2f2e0c97a6d22810101f4856fa520911295316d326d01e2908ecf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2921b3925f09e30d810101240259f4786fa5209402d4305895316d326d01e220210092810101295571c855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c9103412206e953059f45a30944133f415e202a5590096e85b32107910681057104610354403c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed5401d65b09d33fd401d001d401d001810101d700d33f5540352ef2e0cef84252c0c705f2e0c9f823814650a05250bcf2e0caf8238208278d00a05250b9f2e0cb2dc200f2e0d0268101012559f40c6fa131b3f2e0d1f8286d707027514751470456120456145139513e03561255202302c488c855b150bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc95c3b2401f6705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d08b5626173696382706105743144977707010241023557081010109c855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c9103641602501cc206e953059f45a30944133f415e28040705a7f50626d55305f41f90001f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f9040003c8cf8580ca0012cccccf884008cbff01fa028069cf40cf8634f400c901fb0008a51079106810571046103544032a03fe8210a9ee5a8dbae302218210de904d8eba8ee410895f093202f2e0cef8416f2443305230fa40fa0071d721fa00fa00306c6170f83a01ab005202b9925f03e0216e8e32327001206ef2d0806f00c801308210de904d8e01cb1fc94130027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30de02182104ec34c2e272b2c01f25b09810101d700d37f59322bf2e0ce238101012259f40c6fa131f2e0ccf8416f2430325033b608248101012359f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e2206ef2d0806f2931524bc705f2e0cd537ea8812710a904706f002801e6c8013082100fcbef7b01cb1fc912561459027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00517da8812710a9042f6eb38e32705610206ef2d0806f00c801308210de904d8e01cb1fc94130027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb009130e255057f8101010a29019cc855805089810101cf00c85007cf16c95006ccc85005cf16c95004cc58cf16c858cf16c901cccb3fcb7fca00ca00c91034206e953059f45a30944133f415e208a4107910681057104610354104032a0078c8559050a9cf165007cf165005206e95307001cb0192cf16e213cb0fcb0f01c8810101cf0012f40012810101cf0013810101cf00ca00c901ccc9ed54005831706f00c8013082100fcbef7b01cb1fc94330027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb0002bcba8e41109a5f0a01d37f013102f2e0cef8425210c705f2e0c983066f00c801308210de904d8e01cb1fc913027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e03b2082106ad509a7bae302c0000ac1211ab0e3025f0af2c0822d2e0090108b5f0bf8425210c705f2e0c9708100a06d5a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00015c29925f0ae0f828c80182101083e1b458cb1f01cf16c9108a10791068105710461035443012f842017f6ddb3c5f0a2f00a06d6d226eb3995b206ef2d0806f22019132e21024700304804250231036552212c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000201203133018bbe1a3f6a2687d207d20106b8580e18049fd2000ca396b90b6f100e987e987ea00e8408080eb807a02408080eb80408080eb80690018082d082c882c082b882b360d6d9e3650c3200022102012034380201483537018bb1d8bb51343e903e900835c2c070c024fe9000651cb5c85b788074c3f4c3f5007420404075c03d0120404075c020404075c034800c0416841644160415c4159b06b6cf1b2ae036002671f8276f102259546ba0546a805468b12d5611018bb1b03b51343e903e900835c2c070c024fe9000651cb5c85b788074c3f4c3f5007420404075c03d0120404075c020404075c034800c0416841644160415c4159b06b6cf1b28604e02012039570193b5a5cde4bda89a1f481f48041ae1603860127f4800328e5ae42dbc403a61fa61fa803a1020203ae01e809020203ae01020203ae01a4006020b420b220b020ae20acd834aa93b678d94303a02e4f8286d7070561106104556130554143f0388c855b150bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc93b560114ff00f4a413f4bcf2c80b3c0201623d4502f8d001d072d721d200d200fa4021103450666f04f86102f862ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1c0d925f0de0702cd74920c21f95310cd31f0dde218210164a11f1bae3022182101e57efdeba3e3f01c25b3bf8425370c70592307f945250c705e2f2e0ce0ab392296e9170e2f2e0d17f8306702b70c85982101fcbffc65003cb1fcb3fca00c928597013c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00109b108a10791068105710461035440341039a8f315b0b810101d70001312bb3f2e0d0f8235240bcf2e0cbf8416f2430325316bef2e0c9236eb39133e30d59126f03109b5518e03d208210ec533ec0bae3023d5f0b01c00001c121b0dcf2c08240414200d603206ef2d0806f235331bcf2e0c921a7058064a90482101dcd650001b6095220a05240bcf2e0ca705410326d027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87101cb0312cb3fcb7f23cf16c9c88258c000000000000000000000000101cb67ccc970fb0000c4c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed5402fe303b0ab3f2e0d0f8235220b9f2e0d2f8425360c70592307f945240c705e2f2e0cec87201cb035210cbfe7f2b6e8e4c3cc9c88258c000000000000000000000000101cb67ccc970fb007f8306702b7fc85982101fcbffc65003cb1fcb3fca00c92859027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb00e30e109b434400ba2b206ef2d0806f233203cb3fc9c88258c000000000000000000000000101cb67ccc970fb0083062b7004c8598210a9ee5a8d5003cb1f810101cf00cb7fc95448135044027fc8cf8580ca00cf8440ce01fa02806acf40f400c901fb000b00e0108a107910681057104610354430c855b050bccb3fc8500acf16c95009ccc8c85009cf16c95008cc5006cf165004cf1658cf16cb7fcb3f01c8810101cf00236eb38e167f01ca0003206ef2d0806f2310355acf1612cb7fca3f9633705003ca00e213ca0013ca00c958ccc901ccc9ed540201204648018bbf76b76a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c470040226eb38e1922206ef2d0806f233031a7058064a90482101dcd650001b609e02502012049540201484a4c01a3b1d8bb513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf0f4f4f4f4f4f4f4f4f4f4f4f556c204b00b053526eb38e1a3022206ef2d0806f233031a7058064a90482101dcd650001b609de6d246eb39a3023206ef2d0806f235bdef8288b562617369638f8276f105610055610515f0556110554143d513f513c513c5033102410230201204d4f018baf6076a268699fea00e800ea00e86a00e800fd207d207d2069bfe99fea1868408080eb80690000cd7d2069bfe91faa903781c8b6f100e90069001808560855b60e6d9e3660c04e0008f8276f1002016a50520189a077b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b306510002230189a243b513434cff5007400750074350074007e903e903e9034dff4cff50c3420404075c034800066be9034dff48fd5481bc0e45b7880748034800c042b042adb0736cf1b3065300022b01b7bad95ed44d0d33fd401d001d401d0d401d001fa40fa40fa40d37fd33fd430d0810101d700d200019afa40d37fd23f55206f03916de201d200d2003010ac10ab6c1cdb3c6cc1206e92306d99206ef2d0806f236f03e2206e92306dde855000222005a705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d001bbb43d5da89a1f481f48041ae1603860127f4800328e5ae42dbc403a61fa61fa803a1020203ae01e809020203ae01020203ae01a4006020b420b220b020ae20acd834aa13b678d94240dd2460db3240dde5a100de52de13c440dd2460dbbd0580070810101250259f40d6fa192306ddf206e92306d8e22d0810101d700d401d001d401d001fa40d401d001d33fd37fd200d20055806c196f09e22744c6ae');
     const builder = beginCell();
     initController_init_args({ $$type: 'Controller_init_args', owner1, owner2, service_comission, referral_comission, initialisers })(builder);
     const __data = builder.endCell();
@@ -2306,6 +2536,7 @@ const Controller_types: ABIType[] = [
     {"name":"Initialize","header":2208443317,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"ReferralCommission","header":3733998990,"fields":[]},
     {"name":"CreateBasicAuction","header":3773222016,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"CreateBasicAuctionData","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"CleanUp","header":2848052031,"fields":[]},
     {"name":"AccountData","header":null,"fields":[{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}},{"name":"version","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionConfig","valueFormat":"ref"}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"Account$Data","header":null,"fields":[{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"auctions","type":{"kind":"dict","key":"int","value":"AuctionConfig","valueFormat":"ref"}},{"name":"max_allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"allowance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"initialised","type":{"kind":"simple","type":"bool","optional":false}}]},
@@ -2313,11 +2544,13 @@ const Controller_types: ABIType[] = [
     {"name":"Winner","header":null,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":64}}]},
     {"name":"Resolve","header":3964878528,"fields":[]},
     {"name":"Delete","header":373953009,"fields":[]},
+    {"name":"AuctionData","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"type","type":{"kind":"simple","type":"string","optional":false}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}},{"name":"winner","type":{"kind":"simple","type":"address","optional":true}},{"name":"minimal_raise","type":{"kind":"simple","type":"int","optional":false,"format":128}}]},
     {"name":"BasicAuction$Data","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner_chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"winner","type":{"kind":"simple","type":"Winner","optional":true}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"CreateAccount","header":241429993,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"AccountCreated","header":3905897037,"fields":[]},
+    {"name":"Test","header":3338592498,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"ConfigureService","header":1770454153,"fields":[{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
-    {"name":"CleanInitialiser","header":2553827134,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"CleanInitialiser","header":1364507255,"fields":[]},
     {"name":"ConfigureAccount","header":2001958088,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"RequestInitialisation","header":277078452,"fields":[{"name":"user_account","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"ServiceComission","header":265023355,"fields":[]},
@@ -2340,28 +2573,30 @@ const Controller_opcodes = {
     "Delete": 373953009,
     "CreateAccount": 241429993,
     "AccountCreated": 3905897037,
+    "Test": 3338592498,
     "ConfigureService": 1770454153,
-    "CleanInitialiser": 2553827134,
+    "CleanInitialiser": 1364507255,
     "ConfigureAccount": 2001958088,
     "RequestInitialisation": 277078452,
     "ServiceComission": 265023355,
 }
 
 const Controller_getters: ABIGetter[] = [
-    {"name":"userAccount","methodId":83736,"arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
     {"name":"serviceComission","methodId":102003,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"referralComission","methodId":125602,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"balance","methodId":104128,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"accountAddress","methodId":126907,"arguments":[{"name":"wallet","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 
 export const Controller_getterMapping: { [key: string]: string } = {
-    'userAccount': 'getUserAccount',
     'serviceComission': 'getServiceComission',
     'referralComission': 'getReferralComission',
     'balance': 'getBalance',
+    'accountAddress': 'getAccountAddress',
 }
 
 const Controller_receivers: ABIReceiver[] = [
+    {"receiver":"internal","message":{"kind":"typed","type":"Test"}},
     {"receiver":"internal","message":{"kind":"typed","type":"ConfigureService"}},
     {"receiver":"internal","message":{"kind":"typed","type":"ConfigureAccount"}},
     {"receiver":"internal","message":{"kind":"typed","type":"CleanInitialiser"}},
@@ -2435,9 +2670,12 @@ export class Controller implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: ConfigureService | ConfigureAccount | CleanInitialiser | CreateAccount | RequestInitialisation | AccountCreated | null | ServiceComission) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Test | ConfigureService | ConfigureAccount | CleanInitialiser | CreateAccount | RequestInitialisation | AccountCreated | null | ServiceComission) {
         
         let body: Cell | null = null;
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Test') {
+            body = beginCell().store(storeTest(message)).endCell();
+        }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ConfigureService') {
             body = beginCell().store(storeConfigureService(message)).endCell();
         }
@@ -2468,14 +2706,6 @@ export class Controller implements Contract {
         
     }
     
-    async getUserAccount(provider: ContractProvider, user: Address) {
-        const builder = new TupleBuilder();
-        builder.writeAddress(user);
-        const source = (await provider.get('userAccount', builder.build())).stack;
-        const result = source.readAddress();
-        return result;
-    }
-    
     async getServiceComission(provider: ContractProvider) {
         const builder = new TupleBuilder();
         const source = (await provider.get('serviceComission', builder.build())).stack;
@@ -2494,6 +2724,14 @@ export class Controller implements Contract {
         const builder = new TupleBuilder();
         const source = (await provider.get('balance', builder.build())).stack;
         const result = source.readBigNumber();
+        return result;
+    }
+    
+    async getAccountAddress(provider: ContractProvider, wallet: Address) {
+        const builder = new TupleBuilder();
+        builder.writeAddress(wallet);
+        const source = (await provider.get('accountAddress', builder.build())).stack;
+        const result = source.readAddress();
         return result;
     }
     
