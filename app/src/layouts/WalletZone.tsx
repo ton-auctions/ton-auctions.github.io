@@ -35,10 +35,6 @@ export const WalletZone = () => {
       });
   }, [ui, wallet]);
 
-  if (!wallet) {
-    return <></>;
-  }
-
   return (
     <>
       <NavbarContextProvider setShowBurger={setShowBurger}>

@@ -100,12 +100,11 @@ export const AccountZone = () => {
     if (!account) return;
 
     if (!account.deployed) {
+      loader.hide();
       navigate("/app/register", {
         state: {
           forward: location.pathname,
         },
-      })?.finally(() => {
-        loader.hide();
       });
     } else {
       navBarControls.setShowBurger(true);
