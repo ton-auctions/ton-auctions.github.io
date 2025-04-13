@@ -1,7 +1,6 @@
 import { Address, toNano } from "@ton/core";
 import { useLoader } from "../contexts/loader";
 import { useAlerts } from "../contexts/alerts";
-import { useUserAccount } from "../contexts/account";
 import { useConnection } from "../hooks/ton";
 import { useServiceController } from "../contexts/serviceController";
 import { useLocation, useNavigate } from "react-router";
