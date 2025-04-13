@@ -24,7 +24,7 @@ export const RegistrationPage: React.FC<unknown> = () => {
           right in navigation bar).
         </div>
         <RegisterButton referree={referree}></RegisterButton>
-        <CleanButton></CleanButton>
+        {/* <CleanButton></CleanButton> */}
       </div>
     </div>
   );
