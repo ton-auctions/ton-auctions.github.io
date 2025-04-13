@@ -4,7 +4,14 @@ import { ConnectWallet } from "./features/ConnectWallet";
 
 import React from "react";
 
-import { Navigate, Route, Routes, useNavigate, useParams } from "react-router";
+import {
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router";
 import { BaseLayout } from "./layouts/BaseLayout";
 import { RegistrationPage } from "./features/RegistrationPage";
 import { CreateAuction } from "./features/CreateAuction";
@@ -19,7 +26,14 @@ import { useEffect } from "react";
 const CONTROLLER_ADDRESS = "EQAoBwzUQDvHl8nak23mTMtiqGDWbbmh0alvu0Kc39OgXF9I";
 
 function About() {
+  const [params, _] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!params.get("fwd")) return;
+    console.log(params.get("fwd"));
+    navigate(`${params.get("fwd")}`);
+  }, [params]);
 
   return (
     <div>
@@ -37,15 +51,6 @@ function About() {
 }
 
 function Fwd() {
-  const params = useParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!params["*"]) return;
-    console.log(params["*"]);
-    navigate(`/${params["*"]}`);
-  }, [params]);
-
   return <>Redirrecting</>;
 }
 
@@ -68,7 +73,7 @@ function App() {
           }
         >
           <Route index element={<About />} />
-          <Route path="fwd_to/*" element={<Fwd />} />
+
           <Route path="connect" element={<ConnectWallet />} />
           <Route path="auction/:address" element={<SKIP name="auction" />} />
 
