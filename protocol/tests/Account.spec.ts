@@ -665,7 +665,7 @@ describe("Account", () => {
       },
       {
         $$type: "Collect",
-        amount: await userAccount.getBalance(),
+        // amount: await userAccount.getBalance(),
       },
     );
     let accountBalanceAfterCollect = await userAccount.getBalance();
@@ -699,7 +699,7 @@ describe("Account", () => {
       },
       {
         $$type: "Collect",
-        amount: await userAccount.getBalance(),
+        // amount: await userAccount.getBalance(),
       },
     );
 
