@@ -20,8 +20,6 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
   const loader = useLoader();
   const alerts = useAlerts();
 
-  const { refreshAccount } = useUserAccount();
-
   const connection = useConnection();
   const controller = useServiceController();
   const location = useLocation();
@@ -67,7 +65,6 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
         loader.hide();
       })
       .then(() => {
-        refreshAccount();
         loader.hide();
         navigate(location.state.forward || "/app/account");
       });

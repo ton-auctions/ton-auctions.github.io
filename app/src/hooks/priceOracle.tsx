@@ -6,12 +6,15 @@ import {
   PythContract,
 } from "@pythnetwork/pyth-ton-js";
 import { Address } from "@ton/core";
+import { useLoader } from "../contexts/loader";
 
 export const useTonPriceOracle = () => {
-  const [tonUsdPrice, setTonUsdPrice] = useState<number | undefined>(undefined);
+  const loader = useLoader();
+  const [tonUsdPrice, setTonUsdPrice] = useState<number>(1);
   const ton = useTon();
 
   useEffect(() => {
+    loader.show("Loading TON prices.");
     const contract = ton.cachedOpenContract(
       PythContract.createFromAddress(
         Address.parse(PYTH_CONTRACT_ADDRESS_TESTNET)
@@ -24,6 +27,9 @@ export const useTonPriceOracle = () => {
       )
       .then(({ price }) => {
         setTonUsdPrice(price);
+      })
+      .finally(() => {
+        loader.hide();
       });
   }, [ton]);
 

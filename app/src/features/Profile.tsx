@@ -38,7 +38,7 @@ export const Profile: React.FC<unknown> = () => {
   const alerts = useAlerts();
 
   useEffect(() => {
-    if (!account) return;
+    if (!account?.deployed) return;
 
     shortenUrl(account.address.toString()).then((data) => {
       setUrl(data);
@@ -54,7 +54,7 @@ export const Profile: React.FC<unknown> = () => {
   }, [ref]);
 
   // TODO: move into components with non null props
-  if (!account) return <></>;
+  if (!account?.deployed) return <></>;
   if (!wallet) return <></>;
 
   return (

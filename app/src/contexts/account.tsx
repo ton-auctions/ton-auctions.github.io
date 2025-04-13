@@ -20,7 +20,7 @@ export interface UndeployedAccount {
 export type Account = DeployedAccount | UndeployedAccount;
 
 interface AccountValue {
-  account?: DeployedAccount;
+  account?: Account;
   refreshAccount: () => void;
 }
 
@@ -31,7 +31,7 @@ export const AccountContext = createContext<AccountValue>({
 });
 
 type AccountContextProviderProps = React.PropsWithChildren & {
-  account: DeployedAccount;
+  account?: Account;
   refreshAccount: () => void;
 };
 
@@ -43,8 +43,8 @@ export const AccountContextProvider: React.FC<AccountContextProviderProps> = ({
   return (
     <AccountContext.Provider
       value={{
-        account: account,
-        refreshAccount: refreshAccount,
+        account,
+        refreshAccount,
       }}
     >
       {children}

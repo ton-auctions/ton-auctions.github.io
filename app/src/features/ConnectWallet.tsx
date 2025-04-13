@@ -17,7 +17,10 @@ export const useWalletContract = (ton: TonContextValue) => {
   const wallet = useTonWallet();
 
   useEffect(() => {
-    if (!wallet) return;
+    if (!wallet) {
+      setWalletContract(undefined);
+      return;
+    }
 
     if (
       walletContract?.address.toRawString() == wallet.account.address.toString()

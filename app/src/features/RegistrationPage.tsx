@@ -1,7 +1,6 @@
 import React from "react";
 
 import { useParamsReferree } from "../hooks/referree";
-import { CleanButton } from "./CleanButton";
 import { RegisterButton } from "./RegisterButton";
 
 export const RegistrationPage: React.FC<unknown> = () => {
@@ -23,7 +22,10 @@ export const RegistrationPage: React.FC<unknown> = () => {
           Or you might need to change the wallet (use disconnect button to the
           right in navigation bar).
         </div>
-        <RegisterButton referree={referree}></RegisterButton>
+        <div className="px-5 pb-5">
+          <RegisterButton referree={referree}></RegisterButton>
+        </div>
+
         {/* <CleanButton></CleanButton> */}
       </div>
     </div>

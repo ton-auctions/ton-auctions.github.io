@@ -11,11 +11,11 @@ export const NavbarContext = createContext<NavbarControls>({
   setShowBurger: () => false,
 });
 
-type AccountContextProviderProps = React.PropsWithChildren & {
+type NavbarContextProviderProps = React.PropsWithChildren & {
   setShowBurger: (value: boolean) => void;
 };
 
-export const NavbarContextProvider: React.FC<AccountContextProviderProps> = ({
+export const NavbarContextProvider: React.FC<NavbarContextProviderProps> = ({
   children,
   setShowBurger,
 }) => {

@@ -114,18 +114,11 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
 
   const tonUsdPair = useTonPriceOracle();
 
-  if (!tonUsdPair) {
-    loader.show("Loading TON prices.");
-    return <></>;
-  }
-
   const conversionRate = tonUsdPair / 100000000;
   const minimalAmountValue = Number.parseFloat(minimalAmountString);
 
   const usdValue = minimalAmountValue * conversionRate;
   const usdString = usdValue.toFixed(1);
-
-  loader.hide();
 
   return (
     <form
@@ -233,7 +226,7 @@ export const CreateAuction: React.FC<unknown> = () => {
   const ton = useTon();
   const wallet = useWalletContract(ton);
 
-  if (!account) return <></>;
+  if (!account?.deployed) return <></>;
   if (!wallet) return <></>;
 
   return (

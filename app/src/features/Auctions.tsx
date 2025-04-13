@@ -14,7 +14,7 @@ export const Auctions: React.FC<unknown> = () => {
   const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
 
   useEffect(() => {
-    if (!account) return;
+    if (!account?.deployed) return;
 
     setAuctions(account.data.auctions.values());
   }, [account]);
@@ -34,7 +34,7 @@ export const Auctions: React.FC<unknown> = () => {
     );
   }
 
-  if (!account) return <></>;
+  if (!account?.deployed) return <></>;
 
   return (
     <div className="max-h-dvh min-w-xs snap-y snap-proximity mx-auto text-gray-100 overflow-y-auto pb-10">

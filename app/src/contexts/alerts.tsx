@@ -29,7 +29,6 @@ interface AlertProps {
 
 const Alert: React.FC<AlertProps> = ({ title, text, timeout, onTimeout }) => {
   useEffect(() => {
-    console.log(onTimeout, timeout);
     const timeoutHandle = setTimeout(onTimeout, timeout);
     return () => {
       clearTimeout(timeoutHandle);
