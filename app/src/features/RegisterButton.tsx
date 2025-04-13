@@ -61,7 +61,7 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
         testMessage: (cell) => loadInitialize(cell.asSlice()),
       })
       .catch((e) => {
-        alerts.addAlert(`Something went wrong. ${e}.`, 5000);
+        alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();
