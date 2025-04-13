@@ -32,6 +32,7 @@ const useAccountState = () => {
     if (!controller.loaded) return;
 
     const loadServiceAccount = async () => {
+      if (!wallet) return;
       if (!controller.loaded) return;
 
       const walletAddressStr = wallet!.account.address;
@@ -68,7 +69,7 @@ const useAccountState = () => {
     loader.show("Locating user account.");
     loadServiceAccount().finally(loader.hide);
     // TODO: handle exceptions.
-  }, [ton, controller, refresher]);
+  }, [ton, wallet, controller, refresher]);
 
   const refreshAccount = useCallback(() => {
     setRefresher((refresher + 1) % 1000);
