@@ -12,6 +12,13 @@ export interface DeployedAccount {
   data: AccountData;
 }
 
+export interface UndeployedAccount {
+  address?: Address;
+  deployed: false;
+}
+
+export type Account = DeployedAccount | UndeployedAccount;
+
 interface AccountValue {
   account?: DeployedAccount;
   refreshAccount: () => void;

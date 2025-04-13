@@ -4,7 +4,12 @@ import { useTonWallet } from "@tonconnect/ui-react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
 import { useTon } from "../contexts/tonClient";
-import { Account, AccountContextProvider } from "../contexts/account";
+import {
+  Account,
+  UndeployedAccount,
+  AccountContextProvider,
+  DeployedAccount,
+} from "../contexts/account";
 import { useLoader } from "../contexts/loader";
 import { useServiceController } from "../contexts/serviceController";
 import { useNavbarControls } from "../contexts/navbar";
@@ -22,45 +27,50 @@ const useAccountState = () => {
   const controller = useServiceController();
   const [account, setAccount] = useState<Account | undefined>();
 
+  const loadServiceAccount = useCallback(async () => {
+    if (!controller.loaded) return;
+
+    const walletAddressStr = wallet!.account.address;
+    const walletAddress = Address.parse(walletAddressStr);
+
+    const accountWrapper = await getAccountWrapper(
+      controller.contract,
+      walletAddress
+    );
+
+    const isDeployed = await ton.client.isContractDeployed(
+      accountWrapper.address
+    );
+
+    if (!isDeployed) {
+      setAccount({
+        deployed: false,
+        address: accountWrapper.address,
+      } as UndeployedAccount);
+      return;
+    }
+
+    const contract = ton.cachedOpenContract(accountWrapper);
+    const data = await contract.getData();
+
+    setAccount({
+      address: accountWrapper.address,
+      deployed: true,
+      contract: contract,
+      data: data,
+    } as DeployedAccount);
+  }, [controller, wallet]);
+
   useEffect(() => {
     if (!ton) return;
     if (!controller.loaded) return;
 
-    const walletAddressStr = wallet!.account.address;
-
-    const walletAddress = Address.parse(walletAddressStr);
-
-    const loadServiceAccount = async () => {
-      const accountWrapper = await getAccountWrapper(
-        controller.contract,
-        walletAddress
-      );
-
-      const isDeployed = await ton.client.isContractDeployed(
-        accountWrapper.address
-      );
-
-      if (!isDeployed) {
-        setAccount({
-          deployed: false,
-          address: accountWrapper.address,
-        });
-        return;
-      }
-
-      const contract = ton.cachedOpenContract(accountWrapper);
-      const data = await contract.getData();
-
-      setAccount({
-        address: accountWrapper.address,
-        deployed: true,
-        contract: contract,
-        data: data,
-      });
-    };
-
     loader.show("Locating user account.");
-    loadServiceAccount().finally(loader.hide);
+    loadServiceAccount()
+      .catch(() => {
+        /* Log error */
+      })
+      .finally(loader.hide);
     // TODO: handle exceptions.
   }, [ton, controller, refresher]);
 
@@ -94,6 +104,8 @@ export const AccountZone = () => {
         state: {
           forward: location.pathname,
         },
+      })?.finally(() => {
+        loader.hide();
       });
     } else {
       navBarControls.setShowBurger(true);

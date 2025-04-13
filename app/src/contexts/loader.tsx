@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createContext } from "react";
 import { proxy, useSnapshot } from "valtio";
 import Loader from "../components/Loader";
 import { useContext } from "react";
@@ -35,8 +35,7 @@ const contextValue = {
   },
 } as LoaderContextValue;
 
-export const LoaderContext =
-  React.createContext<LoaderContextValue>(contextValue);
+export const LoaderContext = createContext<LoaderContextValue>(contextValue);
 
 export const LoaderProvider: React.FC<React.PropsWithChildren> = ({
   children,

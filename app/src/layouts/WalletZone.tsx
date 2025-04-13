@@ -20,12 +20,15 @@ export const WalletZone = () => {
     loader.show("Checking wallet connection");
 
     ui.connectionRestored
-      .then((restored) => {
+      .then(async (restored) => {
         if (restored) return;
 
         if (!wallet) {
-          navigate("/connect", { state: { forward: location.pathname } });
+          await navigate("/connect", { state: { forward: location.pathname } });
         }
+      })
+      .catch(() => {
+        // TODO: work it out.
       })
       .finally(() => {
         loader.hide();
