@@ -15,7 +15,7 @@ import { Profile } from "./features/Profile";
 import { Auctions } from "./features/Auctions";
 import { AuctionPublic } from "./features/AuctionPublic";
 
-const CONTROLLER_ADDRESS = "EQC-FtV545kd5EweOfG7FReI5KEYR8eC-yT3zzeyz2iTcOD0";
+const CONTROLLER_ADDRESS = "EQAoBwzUQDvHl8nak23mTMtiqGDWbbmh0alvu0Kc39OgXF9I";
 
 function About() {
   const navigate = useNavigate();

@@ -812,37 +812,31 @@ function dictValueParserProfit(): DictionaryValue<Profit> {
 
 export type Collect = {
     $$type: 'Collect';
-    amount: bigint;
 }
 
 export function storeCollect(src: Collect) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(1321421870, 32);
-        b_0.storeUint(src.amount, 128);
+        b_0.storeUint(1729135813, 32);
     };
 }
 
 export function loadCollect(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1321421870) { throw Error('Invalid prefix'); }
-    const _amount = sc_0.loadUintBig(128);
-    return { $$type: 'Collect' as const, amount: _amount };
+    if (sc_0.loadUint(32) !== 1729135813) { throw Error('Invalid prefix'); }
+    return { $$type: 'Collect' as const };
 }
 
 function loadTupleCollect(source: TupleReader) {
-    const _amount = source.readBigNumber();
-    return { $$type: 'Collect' as const, amount: _amount };
+    return { $$type: 'Collect' as const };
 }
 
 function loadGetterTupleCollect(source: TupleReader) {
-    const _amount = source.readBigNumber();
-    return { $$type: 'Collect' as const, amount: _amount };
+    return { $$type: 'Collect' as const };
 }
 
 function storeTupleCollect(source: Collect) {
     const builder = new TupleBuilder();
-    builder.writeNumber(source.amount);
     return builder.build();
 }
 
@@ -2046,53 +2040,6 @@ function dictValueParserAccountCreated(): DictionaryValue<AccountCreated> {
     }
 }
 
-export type Test = {
-    $$type: 'Test';
-    address: Address | null;
-}
-
-export function storeTest(src: Test) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(3338592498, 32);
-        b_0.storeAddress(src.address);
-    };
-}
-
-export function loadTest(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3338592498) { throw Error('Invalid prefix'); }
-    const _address = sc_0.loadMaybeAddress();
-    return { $$type: 'Test' as const, address: _address };
-}
-
-function loadTupleTest(source: TupleReader) {
-    const _address = source.readAddressOpt();
-    return { $$type: 'Test' as const, address: _address };
-}
-
-function loadGetterTupleTest(source: TupleReader) {
-    const _address = source.readAddressOpt();
-    return { $$type: 'Test' as const, address: _address };
-}
-
-function storeTupleTest(source: Test) {
-    const builder = new TupleBuilder();
-    builder.writeAddress(source.address);
-    return builder.build();
-}
-
-function dictValueParserTest(): DictionaryValue<Test> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeTest(src)).endCell());
-        },
-        parse: (src) => {
-            return loadTest(src.loadRef().beginParse());
-        }
-    }
-}
-
 export type ConfigureService = {
     $$type: 'ConfigureService';
     service_comission: bigint;
@@ -2547,7 +2494,7 @@ const BasicAuction_types: ABIType[] = [
     {"name":"ChangeOwnerOk","header":846932810,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"AuctionConfig","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"type","type":{"kind":"simple","type":"string","optional":false}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"Profit","header":2850970253,"fields":[{"name":"id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}}]},
-    {"name":"Collect","header":1321421870,"fields":[{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}}]},
+    {"name":"Collect","header":1729135813,"fields":[]},
     {"name":"AuctionDeleted","header":533462982,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"AccountDelete","header":1792346535,"fields":[]},
     {"name":"AccountInitialisation","header":null,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
@@ -2566,7 +2513,6 @@ const BasicAuction_types: ABIType[] = [
     {"name":"BasicAuction$Data","header":null,"fields":[{"name":"id","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"name","type":{"kind":"simple","type":"string","optional":false}},{"name":"description","type":{"kind":"simple","type":"string","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"owner_account","type":{"kind":"simple","type":"address","optional":false}},{"name":"collector","type":{"kind":"simple","type":"address","optional":false}},{"name":"minimal_amount","type":{"kind":"simple","type":"uint","optional":false,"format":128}},{"name":"ends_at","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"owner_chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"winner","type":{"kind":"simple","type":"Winner","optional":true}},{"name":"ended","type":{"kind":"simple","type":"bool","optional":false}},{"name":"refund","type":{"kind":"simple","type":"bool","optional":false}}]},
     {"name":"CreateAccount","header":241429993,"fields":[{"name":"chat_id","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"referree","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"AccountCreated","header":3905897037,"fields":[]},
-    {"name":"Test","header":3338592498,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"ConfigureService","header":1770454153,"fields":[{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
     {"name":"CleanInitialiser","header":1364507255,"fields":[]},
     {"name":"ConfigureAccount","header":2001958088,"fields":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}},{"name":"service_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"referral_comission","type":{"kind":"simple","type":"uint","optional":false,"format":16}},{"name":"max_allowance","type":{"kind":"simple","type":"uint","optional":false,"format":16}}]},
@@ -2579,7 +2525,7 @@ const BasicAuction_opcodes = {
     "ChangeOwner": 2174598809,
     "ChangeOwnerOk": 846932810,
     "Profit": 2850970253,
-    "Collect": 1321421870,
+    "Collect": 1729135813,
     "AuctionDeleted": 533462982,
     "AccountDelete": 1792346535,
     "Initialize": 2208443317,
@@ -2591,7 +2537,6 @@ const BasicAuction_opcodes = {
     "Delete": 373953009,
     "CreateAccount": 241429993,
     "AccountCreated": 3905897037,
-    "Test": 3338592498,
     "ConfigureService": 1770454153,
     "CleanInitialiser": 1364507255,
     "ConfigureAccount": 2001958088,

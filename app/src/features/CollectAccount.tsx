@@ -54,7 +54,6 @@ export const CollectAccount: React.FC<CollectAccountProps> = ({
             },
             {
               $$type: "Collect",
-              amount: 0n, // TODO: delete
             }
           );
         },
