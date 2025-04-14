@@ -36,7 +36,7 @@ function About() {
   return (
     <div className="max-h-dvh min-w-xs flex h-full flex-col overflow-y-auto">
       <div className="navbar absolute bg-base-300 shadow-sm max-h-dvh min-w-xs z-10">
-        <div className="flex-1 text-xl pl-2">BidTon</div>
+        <div className="flex-1 text-xl pl-2">BidTon (Alpha-Testnet)</div>
       </div>
 
       <div className=" min-w-xs mx-auto text-gray-100 w-min-xs w-max-md pb-10">
