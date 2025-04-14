@@ -22,29 +22,35 @@ export type Account = DeployedAccount | UndeployedAccount;
 interface AccountValue {
   account?: Account;
   refreshAccount: () => void;
+  dropAccount: () => void;
 }
 
 export const AccountContext = createContext<AccountValue>({
   refreshAccount: () => {
     throw new Error("refreshAccount function must be overridden");
   },
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  dropAccount: () => {},
 });
 
 type AccountContextProviderProps = React.PropsWithChildren & {
   account?: Account;
   refreshAccount: () => void;
+  dropAccount: () => void;
 };
 
 export const AccountContextProvider: React.FC<AccountContextProviderProps> = ({
   children,
   account,
   refreshAccount,
+  dropAccount,
 }) => {
   return (
     <AccountContext.Provider
       value={{
         account,
         refreshAccount,
+        dropAccount,
       }}
     >
       {children}

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 
 import Exit from "../assets/exit.svg";
 import Burger from "../assets/burger.svg";
+import { useUserAccount } from "../contexts/account";
 
 interface NavbarProps {
   withBurger: boolean;
@@ -13,11 +14,13 @@ export const Navbar: React.FC<NavbarProps> = ({ withBurger }) => {
   const wallet = useTonWallet();
   const [ui] = useTonConnectUI();
   const navigate = useNavigate();
+  const { dropAccount } = useUserAccount();
 
   const disconnect = useCallback(async () => {
     await ui.disconnect();
+    dropAccount();
     navigate("/");
-  }, []);
+  }, [dropAccount]);
 
   return (
     <div className="navbar absolute bg-base-300 shadow-sm max-h-dvh min-w-xs">

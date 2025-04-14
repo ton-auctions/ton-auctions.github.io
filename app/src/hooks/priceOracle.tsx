@@ -28,6 +28,9 @@ export const useTonPriceOracle = () => {
       .then(({ price }) => {
         setTonUsdPrice(price);
       })
+      .catch(() => {
+        // TODO: log
+      })
       .finally(() => {
         loader.hide();
       });

@@ -30,11 +30,10 @@ const useAccountState = () => {
   useEffect(() => {
     if (!ton) return;
     if (!controller.loaded) return;
+    if (!wallet) return;
+    if (!controller.loaded) return;
 
     const loadServiceAccount = async () => {
-      if (!wallet) return;
-      if (!controller.loaded) return;
-
       const walletAddressStr = wallet!.account.address;
       const walletAddress = Address.parse(walletAddressStr);
 
@@ -75,9 +74,14 @@ const useAccountState = () => {
     setRefresher((refresher + 1) % 1000);
   }, [controller, wallet, account]);
 
+  const dropAccount = useCallback(() => {
+    setAccount(undefined);
+  }, [account]);
+
   return {
     account,
     refreshAccount,
+    dropAccount,
   };
 };
 
@@ -87,7 +91,7 @@ export const AccountZone = () => {
   const navigate = useNavigate();
 
   const navBarControls = useNavbarControls();
-  const { account, refreshAccount } = useAccountState();
+  const { account, refreshAccount, dropAccount } = useAccountState();
 
   useEffect(() => {
     loader.show("Fetching account");
@@ -110,7 +114,11 @@ export const AccountZone = () => {
   }, [account]);
 
   return (
-    <AccountContextProvider account={account} refreshAccount={refreshAccount}>
+    <AccountContextProvider
+      account={account}
+      refreshAccount={refreshAccount}
+      dropAccount={dropAccount}
+    >
       <Drawer>
         <Outlet />
       </Drawer>
