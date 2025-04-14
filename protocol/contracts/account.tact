@@ -124,7 +124,12 @@ contract Account(
 
         self.initialised = true;
 
-        self.reply(AccountCreated {}.toCell());
+        message(MessageParameters {
+            mode: SendDefaultMode | SendPayGasSeparately, // We put charge on account and keep funds sent in it.
+            to: self.collector,
+            value: 0,
+            body: AccountCreated {}.toCell(),
+        });
     }
 
     receive(msg: ConfigureAccount) {
@@ -352,7 +357,7 @@ contract Account(
     receive(msg: AccountDelete) {
         throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner);
 
-        send(SendParameters {
+        message(MessageParameters {
             to: self.owner,
             value: 0,
             mode: SendRemainingBalance | SendDestroyIfZero,
