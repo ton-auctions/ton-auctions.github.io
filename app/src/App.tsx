@@ -22,7 +22,7 @@ import { Auctions } from "./features/Auctions";
 import { AuctionPublic } from "./features/AuctionPublic";
 import { useEffect } from "react";
 
-const CONTROLLER_ADDRESS = "EQAoBwzUQDvHl8nak23mTMtiqGDWbbmh0alvu0Kc39OgXF9I";
+const CONTROLLER_ADDRESS = "EQA7lJFrsZlTzdcm2csEFoidUNJs2U0VBqP5mHIj4zv5OpPC";
 
 function About() {
   const [params] = useSearchParams();
