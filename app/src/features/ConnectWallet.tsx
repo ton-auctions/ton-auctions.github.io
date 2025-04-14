@@ -52,7 +52,7 @@ export const ConnectWallet = () => {
     ui.connectionRestored
       .then(() => {
         if (wallet) {
-          navigate(location.state.forward);
+          navigate(location.state.forward || "/app/account");
         }
       })
       .finally(() => {
