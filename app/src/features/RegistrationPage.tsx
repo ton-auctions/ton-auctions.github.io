@@ -14,13 +14,13 @@ export const RegistrationPage: React.FC<unknown> = () => {
         <h1 className="p-4 mx-auto">No account found for wallet</h1>
         <div className="divider p-0 m-0 h-0"></div>
         <div className="join p-5 wrap-pretty">
-          Your account could not be found. It was either deleted or never
-          existed. In any case you'll have to create it. It's as easy as push
-          the register button. And then pray.
+          It might’ve been deleted… or maybe it never existed in the first
+          place. Either way, you’ll need to create a new one. Just hit the
+          Register button—it’s easy. Then, well… pray.
           <br />
           <br />
-          Or you might need to change the wallet (use disconnect button to the
-          right in navigation bar).
+          If you think you're in the wrong wallet, try switching it using the
+          Disconnect button up in the navigation bar (top right).
         </div>
         <div className="px-5 pb-5">
           <RegisterButton referree={referree}></RegisterButton>
