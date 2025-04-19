@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { useTon } from "../contexts/tonClient";
+import { useTonContext } from "../contexts/tonClient";
 import { useEffect } from "react";
 import {
   PYTH_CONTRACT_ADDRESS_TESTNET,
   PythContract,
 } from "@pythnetwork/pyth-ton-js";
 import { Address } from "@ton/core";
-import { useLoader } from "../contexts/loader";
+import { useLoaderContext } from "../contexts/loader";
 
 export const useTonPriceOracle = () => {
-  const loader = useLoader();
+  const loader = useLoaderContext();
   const [tonUsdPrice, setTonUsdPrice] = useState<number>(1);
-  const ton = useTon();
+  const ton = useTonContext();
 
   useEffect(() => {
     loader.show("Loading TON prices.");

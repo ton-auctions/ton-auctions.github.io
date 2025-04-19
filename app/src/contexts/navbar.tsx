@@ -26,4 +26,4 @@ export const NavbarContextProvider: React.FC<NavbarContextProviderProps> = ({
   );
 };
 
-export const useNavbarControls = () => useContext(NavbarContext);
+export const useNavbarContext = () => useContext(NavbarContext);

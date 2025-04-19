@@ -2,34 +2,37 @@ import moment from "moment";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
-import { Address, OpenedContract, toNano } from "@ton/core";
+import { Address, beginCell, OpenedContract, toNano } from "@ton/core";
 
-import { useUserAccount } from "../contexts/account";
-import { useTon } from "../contexts/tonClient";
-import { useLoader } from "../contexts/loader";
-import { useAlerts } from "../contexts/alerts";
+import { useAccountContext } from "../contexts/account";
+import { useTonContext } from "../contexts/tonClient";
+import { useLoaderContext } from "../contexts/loader";
+import { useAlertsContext } from "../contexts/alerts";
 
 import { useConnection } from "../hooks/ton";
 import { useTonPriceOracle } from "../hooks/priceOracle";
 
-import { AuctionData, BasicAuction } from "../protocol/tact_BasicAuction";
+import { BasicAuctionData, BasicAuction } from "../protocol/tact_BasicAuction";
 import { loadBid } from "../protocol/tact_Account";
 
 import { useWalletContract } from "./ConnectWallet";
 import { RegisterButton } from "./RegisterButton";
 
 import Ton from "../assets/ton.svg";
+import { redirectToTg, useEncryptedUserId } from "../hooks/launchParams";
 
 const useAuctionContract = (
   address?: string
-): [OpenedContract<BasicAuction> | undefined, AuctionData | undefined] => {
-  const loader = useLoader();
-  const ton = useTon();
+): [OpenedContract<BasicAuction> | undefined, BasicAuctionData | undefined] => {
+  const loader = useLoaderContext();
+  const ton = useTonContext();
 
   const [auctionContract, setAuctionContract] = useState<
     OpenedContract<BasicAuction> | undefined
   >();
-  const [auctionData, setContractData] = useState<AuctionData | undefined>();
+  const [auctionData, setContractData] = useState<
+    BasicAuctionData | undefined
+  >();
 
   useEffect(() => {
     if (!address) return;
@@ -57,25 +60,27 @@ const useAuctionContract = (
 };
 
 export const AuctionPublic: React.FC<unknown> = () => {
-  const loader = useLoader();
-  const alerts = useAlerts();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
 
   const { address } = useParams();
 
-  const { account, refreshAccount } = useUserAccount();
+  const { account, refreshAccount } = useAccountContext();
   const tonBidRef = useRef<HTMLInputElement>(null);
   const usdBidRef = useRef<HTMLInputElement>(null);
   const tonUsdPair = Number(useTonPriceOracle()) / 1000000000;
-  const ton = useTon();
+  const ton = useTonContext();
   const connection = useConnection();
   const wallet = useWalletContract(ton);
 
+  const encryptedUserId = useEncryptedUserId();
   const [minimalBid, setMinimalBid] = useState(0);
 
   const [auctionContract, auctionData] = useAuctionContract(address);
 
   useEffect(() => {
     if (!auctionData) return;
+
     const minimalRaise = Number(auctionData.minimal_raise) / 1000000000;
     const minimalAmount = Number(auctionData.minimal_amount) / 1000000000;
 
@@ -87,6 +92,11 @@ export const AuctionPublic: React.FC<unknown> = () => {
     if (!wallet) return;
     if (!auctionContract) return;
     if (!tonBidRef.current) return;
+
+    if (!encryptedUserId) {
+      redirectToTg(location.pathname);
+      return;
+    }
 
     loader.show("Placing bid. Sending transaction.");
 
@@ -103,7 +113,7 @@ export const AuctionPublic: React.FC<unknown> = () => {
             },
             {
               $$type: "Bid",
-              chat_id: 0n,
+              secret_id: beginCell().storeBuffer(encryptedUserId).endCell(),
             }
           );
         },
@@ -303,15 +313,6 @@ export const AuctionPublic: React.FC<unknown> = () => {
                 </div>
               </>
             )}
-            {/* <div
-              className="btn w-full"
-              onClick={() => {
-                console.log("WOW");
-                alerts.addAlert("title", "hahaha", 4000);
-              }}
-            >
-              TEST
-            </div> */}
           </div>
         </li>
       </ul>

@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract, TreasuryContract } from "@ton/sandbox";
-import { Address, Dictionary, toNano } from "@ton/core";
+import { Address, beginCell, Dictionary, toNano } from "@ton/core";
 import { Controller } from "../wrappers/Controller";
 import { Account } from "../wrappers/Account";
 import { PrivateKey } from "eciesjs";
@@ -19,20 +19,23 @@ describe("Controller", () => {
 
   const getAccountWrapper = async (
     controller: SandboxContract<Controller>,
-    address: Address,
+    owner_address: Address,
   ) => {
-    return await Account.fromInit(
-      controller.address,
-      address,
-      null,
-      0n,
-      0n,
-      0n,
-      Dictionary.empty(),
-      0n,
-      0n,
-      false,
-    );
+    return await Account.fromInit({
+      $$type: "AccountData",
+      allowance: 0n,
+      auctions: Dictionary.empty(),
+      balance: null,
+      collector: controller.address,
+      initialised: false,
+      referral_comission: 0n,
+      service_comission: 0n,
+      referree: null,
+      max_allowance: 0n,
+      owner: owner_address,
+      version: 1n,
+      secret_id: beginCell().endCell(),
+    });
   };
 
   beforeEach(async () => {
@@ -192,7 +195,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: referree.address,
       },
     );
@@ -229,7 +234,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: null,
       },
     );
@@ -251,6 +258,7 @@ describe("Controller", () => {
     const data = await userAccount.getData();
     expect(data.version).toBe(1n);
     expect(data.owner.toString()).toBe(user.address.toString());
+    expect(data.secret_id.toString()).toBe("x{010203}");
 
     expect(data.service_comission).toBe(
       controllerComission + controllerReferralComission,
@@ -268,7 +276,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: referree.address,
       },
     );
@@ -296,7 +306,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: referree.address,
       },
     );
@@ -326,7 +338,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: referree.address,
       },
     );
@@ -362,7 +376,9 @@ describe("Controller", () => {
       },
       {
         $$type: "CreateAccount",
-        chat_id: BigInt(100),
+        secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
         referree: referree.address,
       },
     );

@@ -1,31 +1,33 @@
-import { Address, toNano } from "@ton/core";
-import { useLoader } from "../contexts/loader";
-import { useAlerts } from "../contexts/alerts";
+import { Address, beginCell, toNano } from "@ton/core";
+import { useLoaderContext } from "../contexts/loader";
+import { useAlertsContext } from "../contexts/alerts";
 import { useConnection } from "../hooks/ton";
-import { useServiceController } from "../contexts/serviceController";
+import { useServiceControllerContext } from "../contexts/serviceController";
 import { useLocation, useNavigate } from "react-router";
-import { useTon } from "../contexts/tonClient";
+import { useTonContext } from "../contexts/tonClient";
 import { useWalletContract } from "./ConnectWallet";
 import { useCallback } from "react";
 import { getAccountWrapper } from "../utils/addresses";
-import { loadInitialize } from "../protocol/tact_Account";
+import { loadInitialise } from "../protocol/tact_Account";
 import React from "react";
+import { redirectToTg, useEncryptedUserId } from "../hooks/launchParams";
 
 interface RegisterButtonProps {
   referree?: Address;
 }
 
 export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
-  const loader = useLoader();
-  const alerts = useAlerts();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
 
   const connection = useConnection();
-  const controller = useServiceController();
-  const location = useLocation();
+  const controller = useServiceControllerContext();
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const encryptedUserId = useEncryptedUserId();
 
-  const ton = useTon();
+  const ton = useTonContext();
   const wallet = useWalletContract(ton);
 
   const register = useCallback(async () => {
@@ -36,6 +38,13 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
       controller.contract,
       wallet.address
     );
+
+    if (!encryptedUserId) {
+      redirectToTg(location.pathname);
+      return;
+    }
+
+    console.log(encryptedUserId);
 
     loader.show("Creating account.");
     ton
@@ -49,25 +58,26 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
             { value: toNano("0.1"), bounce: true },
             {
               $$type: "CreateAccount",
-              chat_id: 0n, // TODO: debug miniapp finally.
+              secret_id: beginCell().storeBuffer(encryptedUserId).endCell(),
               referree: referree || null,
             }
           );
         },
         updateLoader: (text) => loader.show(`Creating account. ${text}`),
-        testMessage: (cell) => loadInitialize(cell.asSlice()),
+        testMessage: (cell) => loadInitialise(cell.asSlice()),
+      })
+      .then(() => {
+        navigate(location.state.forward || "/app/account", {
+          state: { forward: undefined },
+        });
       })
       .catch((e) => {
         alerts.addAlert("Error", `Something went wrong. ${e}.`, 5000);
       })
       .finally(() => {
         loader.hide();
-      })
-      .then(() => {
-        loader.hide();
-        navigate(location.state.forward || "/app/account");
       });
-  }, [controller, wallet]);
+  }, [controller, wallet, encryptedUserId]);
 
   return (
     <button className="btn btn-primary w-full" onClick={register}>

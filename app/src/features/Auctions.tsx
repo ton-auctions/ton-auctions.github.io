@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUserAccount } from "../contexts/account";
+import { useAccountContext } from "../contexts/account";
 import { Link } from "react-router";
 
 import { AuctionConfig } from "../protocol";
@@ -9,7 +9,7 @@ import { useTonPriceOracle } from "../hooks/priceOracle";
 import { AuctionRow } from "./AuctionRow";
 
 export const Auctions: React.FC<unknown> = () => {
-  const { account } = useUserAccount();
+  const { account } = useAccountContext();
   const tonUsdPair = Number(useTonPriceOracle()) / 1000000000;
   const [auctions, setAuctions] = useState<AuctionConfig[]>([]);
 

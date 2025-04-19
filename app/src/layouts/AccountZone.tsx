@@ -1,49 +1,47 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Address } from "@ton/core";
-import { useTonWallet } from "@tonconnect/ui-react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
-import { useTon } from "../contexts/tonClient";
+import { useTonContext } from "../contexts/tonClient";
 import {
   Account,
   UndeployedAccount,
   AccountContextProvider,
   DeployedAccount,
 } from "../contexts/account";
-import { useLoader } from "../contexts/loader";
-import { useServiceController } from "../contexts/serviceController";
-import { useNavbarControls } from "../contexts/navbar";
+import { useLoaderContext } from "../contexts/loader";
+import { useServiceControllerContext } from "../contexts/serviceController";
+import { useNavbarContext } from "../contexts/navbar";
 
 import { Drawer } from "../features/Drawer";
 import { getAccountWrapper } from "../utils/addresses";
+import { wrapWithRetry } from "../utils/wrappers";
+import { useWalletContext } from "../contexts/wallet";
 
+// TODO: Rewrite like WalletZone
 const useAccountState = () => {
   const [refresher, setRefresher] = useState(0);
 
-  const ton = useTon();
-  const loader = useLoader();
-  const wallet = useTonWallet();
+  const ton = useTonContext();
+  const loader = useLoaderContext();
+  const wallet = useWalletContext();
 
-  const controller = useServiceController();
+  const controller = useServiceControllerContext();
   const [account, setAccount] = useState<Account | undefined>();
 
   useEffect(() => {
     if (!ton) return;
     if (!controller.loaded) return;
-    if (!wallet) return;
-    if (!controller.loaded) return;
+    if (!wallet.connected) return;
 
     const loadServiceAccount = async () => {
-      const walletAddressStr = wallet!.account.address;
-      const walletAddress = Address.parse(walletAddressStr);
-
       const accountWrapper = await getAccountWrapper(
         controller.contract,
-        walletAddress
+        wallet.address
       );
 
-      const isDeployed = await ton.client.isContractDeployed(
-        accountWrapper.address
+      // TODO: handle errors
+      const isDeployed = await wrapWithRetry<boolean>(() =>
+        ton.client.isContractDeployed(accountWrapper.address)
       );
 
       if (!isDeployed) {
@@ -55,6 +53,8 @@ const useAccountState = () => {
       }
 
       const contract = ton.cachedOpenContract(accountWrapper);
+
+      // TODO: retry wrapper
       const data = await contract.getData();
 
       setAccount({
@@ -86,13 +86,13 @@ const useAccountState = () => {
 };
 
 export const AccountZone = () => {
-  const loader = useLoader();
+  const loader = useLoaderContext();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const navBarControls = useNavbarControls();
+  const navBarControls = useNavbarContext();
   const { account, refreshAccount, dropAccount } = useAccountState();
-
+  // TODO: move into context
   useEffect(() => {
     loader.show("Fetching account");
 

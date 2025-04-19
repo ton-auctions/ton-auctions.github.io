@@ -11,6 +11,7 @@ import React from "react";
 import { useContext } from "react";
 import { createContext } from "react";
 import { proxy, useSnapshot } from "valtio";
+import { wrapWithRetry } from "../utils/wrappers";
 
 interface ClientState {
   apiKey?: string;
@@ -43,6 +44,13 @@ export interface TonContextValue {
     testMessage: (cell: Cell) => void;
   }) => Promise<void>;
 
+  signSendAndWaitForDestuction: (params: {
+    checkAddress: Address;
+    checkTimeout?: number;
+    send: () => Promise<void>;
+    updateLoader: (operation: string) => void;
+  }) => Promise<void>;
+
   setApiKey: (apiKey: string) => void;
 }
 
@@ -64,6 +72,19 @@ export interface Tx {
   in: Message;
 }
 
+interface ContractState {
+  state: string;
+  balance?: bigint;
+  extra_currencies?:
+    | { "@type": "extraCurrency"; id: number; amount: string }[]
+    | undefined;
+  code?: Buffer<ArrayBufferLike> | null;
+  data?: Buffer<ArrayBufferLike> | null;
+  lastTransaction?: { lt: string; hash: string } | null;
+  blockId?: { workchain: number; shard: string; seqno: number };
+  timestampt?: number;
+}
+
 const createContextValue = (endpointV2: string, apiKey?: string) => {
   const client = new TonClient({ endpoint: endpointV2, apiKey });
   const _cache = new Map<string, OpenedContract<Contract>>();
@@ -82,6 +103,28 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
       if (clientState.apiKey == apiKey) return;
 
       clientState.apiKey = apiKey;
+    },
+
+    waitForDestruction: async (params: {
+      address: Address;
+      timeout?: number;
+    }) => {
+      while (true) {
+        try {
+          const isDeployed = await client.isContractDeployed(params.address);
+          if (isDeployed === false) {
+            return;
+          }
+
+          await new Promise((resolve) =>
+            setTimeout(resolve, params.timeout || 1000)
+          );
+        } catch {
+          await new Promise((resolve) =>
+            setTimeout(resolve, params.timeout || 1000)
+          );
+        }
+      }
     },
 
     waitForTransactions: async (params: {
@@ -149,7 +192,9 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
       // TODO: move somewhere else. Probably create a folder for callback factories.
       params.updateLoader("Signing transaction.");
 
-      const state = await ton.client.getContractState(params.checkAddress);
+      const state: ContractState = await wrapWithRetry<ContractState>(() =>
+        ton.client.getContractState(params.checkAddress)
+      );
 
       const tx =
         state.state == "uninitialized"
@@ -170,6 +215,24 @@ const createContextValue = (endpointV2: string, apiKey?: string) => {
         startingTx: tx[0],
         testMessage: params.testMessage,
         limit: 10,
+        timeout: params.checkTimeout ?? 1000,
+      });
+    },
+    signSendAndWaitForDestuction: async (params: {
+      checkAddress: Address;
+      checkTimeout?: number;
+      send: () => Promise<void>;
+      updateLoader: (operation: string) => void;
+    }) => {
+      // TODO: move somewhere else. Probably create a folder for callback factories.
+      params.updateLoader("Signing transaction.");
+
+      await wrapWithRetry<void>(() => params.send());
+
+      params.updateLoader("Waiting for transaction to settle.");
+
+      await ton.waitForDestruction({
+        address: params.checkAddress,
         timeout: params.checkTimeout ?? 1000,
       });
     },
@@ -204,4 +267,4 @@ export const TonClientProvider: React.FC<TonClientProviderProps> = ({
   );
 };
 
-export const useTon = () => useContext(TonClientContext);
+export const useTonContext = () => useContext(TonClientContext);

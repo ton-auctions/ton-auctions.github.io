@@ -79,7 +79,7 @@ export const AlertContextProvider: React.FC<React.PropsWithChildren> = ({
     >
       <>
         {children}
-        <div className="absolute bottom-0 stack h-20 w-full z-100">
+        <div className="absolute bottom-0 stack h-20 w-full z-100 overflow-hidden">
           {alerts.map((a) => (
             <Alert
               key={a.id}
@@ -97,4 +97,4 @@ export const AlertContextProvider: React.FC<React.PropsWithChildren> = ({
   );
 };
 
-export const useAlerts = () => useContext(AlertContext);
+export const useAlertsContext = () => useContext(AlertContext);

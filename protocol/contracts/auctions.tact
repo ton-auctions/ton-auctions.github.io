@@ -1,47 +1,33 @@
 import "@stdlib/ownable";
 import "./account";
-
-message Bid { chat_id: Int }
+import "./messages/auctionMessages";
 
 struct Winner {
     address: Address;
     amount: Int as uint128;
-    chat_id: Int as int64;
+    secret_id: Cell;
 }
 
-message Resolve {}
-
-message Delete {}
-
-struct AuctionData {
+struct BasicAuctionData {
     id: Int;
     name: String;
-    owner_account: Address;
     description: String;
-    address: Address;
+    owner: Address;
+    owner_account: Address;
+    owner_secret_id: Cell;
+    collector: Address;
     type: String;
-    ends_at: Int as uint64;
-    minimal_amount: Int as uint128;
-    balance: Int;
+    minimal_amount: Int;
     ended: Bool;
     refund: Bool;
-    winner: Address?;
-    minimal_raise: Int as int128;
+    ends_at: Int;
+    balance: Int?;
+    minimal_raise: Int;
+    winner: Winner?;
 }
 
 contract BasicAuction(
-    id: Int as uint64,
-    name: String,
-    description: String,
-    owner: Address,
-    owner_account: Address,
-    collector: Address,
-    minimal_amount: Int as uint128,
-    ends_at: Int as uint64,
-    owner_chat_id: Int,
-    winner: Winner?,
-    ended: Bool,
-    refund: Bool,
+    data: BasicAuctionData,
 ) {
     const ERRORS_BID_IS_TOO_SMALL: Int = 201;
     const ERRORS_BID_RAISE_IS_TOO_SMALL: Int = 202;
@@ -52,40 +38,38 @@ contract BasicAuction(
     const ERRORS_HAS_WINNER: Int = 209;
     const ERRORS_UNFINISHED: Int = 210;
 
-    const EVENT_OUTBIDDED: Int = 1;
-    const EVENT_RESOLVED: Int = 2;
     const MINIMAL_RAISE: Int = ton("0.5");
 
     receive(msg: Delete) {
         let sender = sender();
 
-        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.owner || sender == self.collector);
-        throwUnless(self.ERRORS_HAS_WINNER, !self.ended && self.winner == null);
+        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.data.owner || sender == self.data.collector);
+        throwUnless(self.ERRORS_HAS_WINNER, !self.data.ended && self.data.winner == null);
 
-        self.ended = true;
+        self.data.ended = true;
 
         message(MessageParameters {
             mode: SendDefaultMode | SendRemainingBalance,
-            to: self.owner_account,
+            to: self.data.owner_account,
             value: 0,
-            body: AuctionDeleted { id: self.id, refund: false }.toCell(),
+            body: AuctionDeleted { id: self.data.id, refund: false }.toCell(),
             bounce: false,
         });
     }
 
     receive(msg: Bid) {
-        throwUnless(self.ERRORS_ENDED, !self.ended);
-        throwUnless(self.ERRORS_FINISHED, self.ends_at > now());
+        throwUnless(self.ERRORS_ENDED, !self.data.ended);
+        throwUnless(self.ERRORS_FINISHED, self.data.ends_at > now());
 
         let context = context();
         let amount = context.value;
         let bidder = context.sender;
 
         // throwUnless(self.ERRORS_OWNER_BID_NOT_ALLOWED, bidder != self.owner);
-        throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount >= self.minimal_amount);
+        throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount >= self.data.minimal_amount);
 
-        if self.winner != null {
-            let winner = self.winner!!;
+        if self.data.winner != null {
+            let winner = self.data.winner!!;
 
             throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount > winner.amount);
 
@@ -101,116 +85,101 @@ contract BasicAuction(
                 value: winner.amount,
             });
 
-            let event_outbidded = beginCell()
-                .storeUint(self.EVENT_OUTBIDDED, 4)
-                .storeUint(winner.chat_id, 64)
-                .storeUint(winner.amount, 128)
-                .storeAddress(bidder)
-                .asCell();
-
-            emit(event_outbidded);
+            emit(
+                AuctionOutbiddedEvent {
+                    old_winner_secret_id: winner.secret_id,
+                    new_winner_secret_id: msg.secret_id,
+                    owner_secret_id: self.data.owner_secret_id,
+                    address: myAddress(),
+                    amount: amount,
+                }.toCell(),
+            );
         }
 
         // Assign new winner
-        self.winner = Winner {
+        self.data.winner = Winner {
             amount: amount,
             address: bidder,
-            chat_id: msg.chat_id,
+            secret_id: msg.secret_id,
         };
+
+        let five_percent = self.data.winner!!.amount * 5 / 100;
+        self.data.minimal_raise = max(self.MINIMAL_RAISE, five_percent);
     }
 
-    receive(_: Resolve) {
-        throwUnless(self.ERRORS_ENDED, !self.ended);
-        throwUnless(self.ERRORS_UNFINISHED, self.ends_at < now());
-
-        let sender = sender();
-
-        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.owner || sender == self.collector);
-
-        let auction_resolved = beginCell()
-            .storeUint(self.EVENT_RESOLVED, 4)
-            .storeUint(self.owner_chat_id, 255);
-
-        self.ended = true;
-
-        if self.winner == null {
-            emit(auction_resolved.asCell());
-            self.refund = true;
+    fun resolve() {
+        self.data.ended = true;
+        if self.data.winner == null {
+            emit(
+                AuctionResolvedEvent {
+                    address: myAddress(),
+                    owner_secret_id: self.data.owner_secret_id,
+                    winner_secret_id: null,
+                }.toCell(),
+            );
+            self.data.refund = true;
             message(MessageParameters {
-                mode: SendDefaultMode | SendRemainingBalance,
-                to: self.owner_account,
+                mode: SendDefaultMode | SendRemainingBalance | SendDestroyIfZero,
+                to: self.data.owner_account,
                 value: 0,
-                body: AuctionDeleted { id: self.id, refund: true }.toCell(),
+                body: AuctionDeleted { id: self.data.id, refund: true }.toCell(),
             });
         } else {
-            let winner = self.winner!!;
+            let winner = self.data.winner!!;
 
-            auction_resolved = auction_resolved.storeUint(winner.chat_id, 64);
-            emit(auction_resolved.asCell());
+            emit(
+                AuctionResolvedEvent {
+                    address: myAddress(),
+                    owner_secret_id: self.data.owner_secret_id,
+                    winner_secret_id: winner.secret_id,
+                }.toCell(),
+            );
 
             message(MessageParameters {
-                mode: SendDefaultMode | SendRemainingBalance,
-                to: self.owner_account,
+                mode: SendDefaultMode | SendRemainingBalance | SendDestroyIfZero,
+                to: self.data.owner_account,
                 value: 0,
                 body: Profit {
-                    id: self.id,
+                    id: self.data.id,
                     amount: winner.amount,
                 }.toCell(),
             });
         }
     }
 
-    receive() {}
+    // TODO: Should be external
+    receive(_: Resolve) {
+        throwUnless(self.ERRORS_ENDED, !self.data.ended);
+        throwUnless(self.ERRORS_UNFINISHED, self.data.ends_at < now());
 
-    get fun id(): Int {
-        return self.id;
+        self.resolve();
     }
 
-    get fun winner(): Winner? {
-        return self.winner;
+    external(_: Resolve) {
+        throwUnless(self.ERRORS_ENDED, !self.data.ended);
+        throwUnless(self.ERRORS_UNFINISHED, self.data.ends_at < now());
+
+        acceptMessage();
+
+        self.resolve();
     }
 
-    get fun minimal_raise(): Int {
-        if self.winner != null {
-            let five_percent = self.winner!!.amount * 5 / 100;
-            return max(self.MINIMAL_RAISE, five_percent);
-        } else {
-            return self.minimal_amount;
-        }
+    receive() {
+        let sender = sender();
+
+        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.data.owner || sender == self.data.owner_account);
+
+        emit(
+            AuctionCreatedEvent {
+                address: myAddress(),
+                owner_secret_id: self.data.owner_secret_id,
+            }.toCell(),
+        );
     }
 
-    get fun owner_chat_id(): Int {
-        return self.owner_chat_id;
-    }
-
-    get fun balance(): Int {
-        return myBalance();
-    }
-
-    get fun data(): AuctionData {
-        let minimal_raise = self.minimal_amount;
-        if self.winner != null {
-            let five_percent = self.winner!!.amount * 5 / 100;
-            minimal_raise = max(self.MINIMAL_RAISE, five_percent);
-        }
-
-        let winner: Address? = null;
-        if self.winner != null { winner = self.winner!!.address }
-
-        return AuctionData {
-            id: self.id,
-            name: self.name,
-            owner_account: self.owner,
-            description: self.description,
-            address: myAddress(),
-            type: "basic",
-            ends_at: self.ends_at,
-            minimal_amount: self.minimal_amount,
-            ended: self.ended,
-            refund: self.refund,
-            balance: myBalance(),
-            winner: winner,
-            minimal_raise: minimal_raise,
-        };
+    get fun data(): BasicAuctionData {
+        let tmp = self.data;
+        tmp.balance = myBalance();
+        return tmp;
     }
 }

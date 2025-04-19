@@ -55,4 +55,4 @@ export const LoaderProvider: React.FC<React.PropsWithChildren> = ({
   );
 };
 
-export const useLoader = () => useContext(LoaderContext);
+export const useLoaderContext = () => useContext(LoaderContext);

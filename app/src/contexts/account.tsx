@@ -58,4 +58,4 @@ export const AccountContextProvider: React.FC<AccountContextProviderProps> = ({
   );
 };
 
-export const useUserAccount = () => useContext(AccountContext);
+export const useAccountContext = () => useContext(AccountContext);

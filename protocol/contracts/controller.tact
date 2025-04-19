@@ -1,46 +1,34 @@
 import "@stdlib/ownable";
+import "./messages/controllerMessages";
 import "./account";
 
-message CreateAccount {
-    chat_id: Int;
+// TODO: create utils package
+// TODO: split messages between internal and external and analytics and manually assign opcodes
+// TODO: check gas optimisations
+// TODO: go through production checklist
+
+struct AccountConfig {
     referree: Address?;
-}
-
-message AccountCreated {}
-
-message ConfigureService {
-    service_comission: Int as uint16;
-    referral_comission: Int as uint16;
-}
-
-message CleanInitialiser {}
-
-message ConfigureAccount {
-    address: Address;
     service_comission: Int as uint16;
     referral_comission: Int as uint16;
     max_allowance: Int as uint16;
+    secret_id: Cell;
 }
 
-message RequestInitialisation {
-    user_account: Address;
-}
-
-message ServiceComission {}
 
 contract Controller(
     owner1: Address,
     owner2: Address,
     service_comission: Int as uint16,
     referral_comission: Int as uint16,
-    initialisers: map<Address, AccountInitialisation>,
+    initialisers: map<Address, AccountConfig>,
 ) {
     const VERSION: Int = 1;
     const ERRORS_UNAUTHORISED: Int = 201;
     const ERRORS_BAD_CONFIGURATION: Int = 202;
     const NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT: Int = 203;
 
-    // const REGISTRATION_FEE: Int = ton("1");
+    const REGISTRATION_FEE: Int = ton("0.1");
     const DEFAULT_ALLOWANCE: Int = 10;
 
     receive(msg: ConfigureService) {
@@ -74,43 +62,35 @@ contract Controller(
     }
 
     receive(msg: CleanInitialiser) {
-        let init = initOf Account(
-            myAddress(),
-            sender(),
-            null,
-            0, // service com
-            0, // referral com
-            0, // chat id
-            emptyMap(),
-            0, // max allow
-            0, // allow
-            false,
-        );
+        let sender = sender();
+        throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
 
-        let user_account = contractAddress(init);
-
-        let _ = self.initialisers.del(user_account);
-        self.reply(null);
+        let _ = self.initialisers.del(msg.address);
+        cashback(sender);
     }
 
     receive(msg: CreateAccount) {
         let ctx = context();
 
-        // throwUnless(self.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT, ctx.value >= self.REGISTRATION_FEE);
+        throwUnless(self.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT, ctx.value >= self.REGISTRATION_FEE);
 
         let user = ctx.sender;
 
         let init = initOf Account(
-            myAddress(),
-            user,
-            null,
-            0, // service com
-            0, // referral com
-            0, // chat id
-            emptyMap(),
-            0, // max allow
-            0, // allow
-            false,
+            AccountData {
+                version: 1,
+                collector: myAddress(),
+                balance: null,
+                owner: user,
+                referree: null,
+                service_comission: 0, 
+                referral_comission: 0, 
+                auctions: emptyMap(),
+                max_allowance: 0, 
+                allowance: 0, 
+                initialised: false,
+                secret_id: emptyCell(), 
+            }
         );
 
         let user_account = contractAddress(init);
@@ -130,12 +110,12 @@ contract Controller(
             account_referral_comission = 0;
         }
 
-        self.initialisers.set(user_account, AccountInitialisation {
+        self.initialisers.set(user_account, AccountConfig {
             referree: msg.referree,
-            chat_id: msg.chat_id,
             service_comission: account_serice_comission,
             referral_comission: account_referral_comission,
             max_allowance: self.DEFAULT_ALLOWANCE,
+            secret_id: msg.secret_id,
         });
 
         deploy(DeployParameters {
@@ -146,7 +126,7 @@ contract Controller(
         });
     }
 
-    receive(msg: RequestInitialisation) {
+    receive(_: RequestInitialisation) {
         let source = sender();
 
         if !self.initialisers.exists(source) {
@@ -156,8 +136,9 @@ contract Controller(
 
         let data = self.initialisers.get(source)!!;
 
-        self.reply(Initialize {
-            chat_id: data.chat_id, // TODO: encrypt!
+        self.reply(Initialise {
+            secret_id: data.secret_id,
+
             referree: data.referree,
             service_comission: data.service_comission,
             referral_comission: data.referral_comission,
@@ -167,10 +148,14 @@ contract Controller(
 
     receive(msg: AccountCreated) {
         let source = sender();
+        let _ = self.initialisers.del(source);
+    }
 
-        if !self.initialisers.exists(source) { return }
+    receive() {
+    }
 
-        self.initialisers.del(source);
+    receive(msg: ServiceComission) {
+        // hmm
     }
 
     get fun serviceComission(): Int {
@@ -181,38 +166,7 @@ contract Controller(
         return self.referral_comission;
     }
 
-    get fun balance(): Int {
-        return myBalance();
-    }
-
-    get fun accountAddress(wallet: Address): Address {
-        let init = initOf Account(
-            myAddress(),
-            wallet,
-            null,
-            0, // service com
-            0, // referral com
-            0, // chat id
-            emptyMap(),
-            0, // max allow
-            0, // allow
-            false,
-        );
-
-        return contractAddress(init);
-    }
-
-    receive() {
-        message(MessageParameters {
-            mode: SendRemainingBalance | SendIgnoreErrors,
-            body: null,
-            value: 0,
-            to: sender(),
-            bounce: false,
-        });
-    }
-
-    receive(msg: ServiceComission) {
-        // hmm
+    get fun version(): Int {
+        return self.VERSION;
     }
 }

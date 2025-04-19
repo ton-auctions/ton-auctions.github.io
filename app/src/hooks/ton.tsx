@@ -8,16 +8,21 @@ export function useConnection(): { sender: Sender; connected: boolean } {
   return {
     sender: {
       send: async (args: SenderArguments) => {
-        await TonConnectUI.sendTransaction({
-          messages: [
-            {
-              address: args.to.toString(),
-              amount: args.value.toString(),
-              payload: args.body?.toBoc().toString("base64"),
-            },
-          ],
-          validUntil: Date.now() + 6 * 60 * 1000,
-        });
+        await TonConnectUI.sendTransaction(
+          {
+            messages: [
+              {
+                address: args.to.toString(),
+                amount: args.value.toString(),
+                payload: args.body?.toBoc().toString("base64"),
+              },
+            ],
+            validUntil: Date.now() + 6 * 60 * 1000,
+          },
+          {
+            modals: ["before"],
+          }
+        );
       },
     },
     connected: TonConnectUI.connected,

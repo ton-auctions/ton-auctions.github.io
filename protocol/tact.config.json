@@ -1,14 +1,15 @@
 {
-    "$schema": "http://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
-    "projects": [
-        {
-          "name": "slotton",
-          "path": "./contracts/controller.tact",
-          "output": "./contracts/output/controller.output",
-          "mode": "full",
-          "options": {
-            "debug": true
-          }
-        }
-    ]
+  "$schema": "http://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
+  "projects": [
+    {
+      "name": "slotton",
+      "path": "./contracts/controller.tact",
+      "output": "./contracts/output/controller.output",
+      "mode": "full",
+      "options": {
+        "debug": true,
+        "external": true
+      }
+    }
+  ]
 }

@@ -3,10 +3,10 @@ import { useCallback } from "react";
 import { OpenedContract, toNano } from "@ton/core";
 
 import { DeployedAccount } from "../contexts/account";
-import { useLoader } from "../contexts/loader";
-import { useAlerts } from "../contexts/alerts";
-import { useTon } from "../contexts/tonClient";
-import { useServiceController } from "../contexts/serviceController";
+import { useLoaderContext } from "../contexts/loader";
+import { useAlertsContext } from "../contexts/alerts";
+import { useTonContext } from "../contexts/tonClient";
+import { useServiceControllerContext } from "../contexts/serviceController";
 
 import { useConnection } from "../hooks/ton";
 
@@ -27,11 +27,11 @@ export const CollectAccount: React.FC<CollectAccountProps> = ({
   wallet,
 }) => {
   const conn = useConnection();
-  const loader = useLoader();
-  const alerts = useAlerts();
-  const ton = useTon();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
+  const ton = useTonContext();
 
-  const controller = useServiceController();
+  const controller = useServiceControllerContext();
 
   const collectAccount = useCallback(async () => {
     if (!account) return;

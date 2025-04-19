@@ -2,9 +2,9 @@ import React from "react";
 import axios from "axios";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useUserAccount } from "../contexts/account";
-import { useTon } from "../contexts/tonClient";
-import { useAlerts } from "../contexts/alerts";
+import { useAccountContext } from "../contexts/account";
+import { useTonContext } from "../contexts/tonClient";
+import { useAlertsContext } from "../contexts/alerts";
 
 import { useWalletContract } from "./ConnectWallet";
 import { DeleteAccount } from "./DeleteAccount";
@@ -30,12 +30,13 @@ const shortenUrl = async (referral: string) => {
 };
 
 export const Profile: React.FC<unknown> = () => {
-  const { account, refreshAccount } = useUserAccount();
+  const { account, refreshAccount } = useAccountContext();
   const ref = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(null);
-  const ton = useTon();
+
+  const ton = useTonContext();
   const wallet = useWalletContract(ton);
-  const alerts = useAlerts();
+  const alerts = useAlertsContext();
 
   useEffect(() => {
     if (!account?.deployed) return;

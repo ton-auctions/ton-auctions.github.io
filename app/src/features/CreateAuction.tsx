@@ -5,15 +5,15 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { OpenedContract, toNano } from "@ton/core";
 
-import { useLoader } from "../contexts/loader";
-import { useTon } from "../contexts/tonClient";
-import { DeployedAccount, useUserAccount } from "../contexts/account";
-import { useAlerts } from "../contexts/alerts";
+import { useLoaderContext } from "../contexts/loader";
+import { useTonContext } from "../contexts/tonClient";
+import { DeployedAccount, useAccountContext } from "../contexts/account";
+import { useAlertsContext } from "../contexts/alerts";
 
 import { useWalletContract } from "./ConnectWallet";
 import { useConnection } from "../hooks/ton";
 import { useTonPriceOracle } from "../hooks/priceOracle";
-import { useServiceController } from "../contexts/serviceController";
+import { useServiceControllerContext } from "../contexts/serviceController";
 
 import { WalletV5 } from "../protocol/wallet_v5";
 import { BasicAuction } from "../protocol";
@@ -31,11 +31,11 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
   wallet,
   onAccountChange,
 }) => {
-  const loader = useLoader();
-  const alerts = useAlerts();
-  const ton = useTon();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
+  const ton = useTonContext();
   const connection = useConnection();
-  const controller = useServiceController();
+  const controller = useServiceControllerContext();
   const navigate = useNavigate();
 
   const [name, setName] = useState<string>("");
@@ -48,24 +48,29 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
     if (!wallet) return;
     if (!controller.loaded) return;
 
-    const id = BigInt(Math.ceil(Math.random() * 1000));
     const ends_at = BigInt(Math.ceil(endsAt.unix()));
     const minimal_amount = toNano(minimalAmountString);
+    const id = BigInt(Math.ceil(Math.random() * 1000));
+    const secret_id = account.data.secret_id;
 
-    const auctionContract = await BasicAuction.fromInit(
-      id,
-      name,
-      description,
-      wallet.address,
-      account.address,
-      controller.contract.address,
-      minimal_amount,
-      ends_at,
-      account.data.chat_id,
-      null,
-      false,
-      false
-    );
+    const auctionContract = await BasicAuction.fromInit({
+      $$type: "BasicAuctionData",
+      id: id,
+      name: name,
+      description: description,
+      balance: null,
+      collector: controller.contract.address,
+      ended: false,
+      ends_at: ends_at,
+      minimal_amount: minimal_amount,
+      minimal_raise: 0n,
+      owner: wallet.address,
+      owner_account: account.address,
+      owner_secret_id: secret_id,
+      refund: false,
+      type: "basic",
+      winner: null,
+    });
 
     ton
       .signSendAndWait({
@@ -85,6 +90,7 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
               description: description,
               ends_at: ends_at,
               minimal_amount: minimal_amount,
+              secret_id: secret_id,
             }
           );
         },
@@ -103,7 +109,15 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
         navigate("/app/account/auctions");
         // TODO: notify complete
       });
-  }, [account, wallet, name, description, minimalAmountString, endsAt]);
+  }, [
+    account,
+    wallet,
+    name,
+    description,
+    minimalAmountString,
+    endsAt,
+    encryptedUserId,
+  ]);
 
   const resetForm = useCallback(() => {
     setName("");
@@ -222,8 +236,8 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
 };
 
 export const CreateAuction: React.FC<unknown> = () => {
-  const { account, refreshAccount } = useUserAccount();
-  const ton = useTon();
+  const { account, refreshAccount } = useAccountContext();
+  const ton = useTonContext();
   const wallet = useWalletContract(ton);
 
   if (!account?.deployed) return <></>;

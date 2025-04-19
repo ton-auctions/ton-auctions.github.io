@@ -7,7 +7,7 @@ import { Address, OpenedContract } from "@ton/core";
 import { WalletV5 } from "../protocol/wallet_v5";
 import { useTonWallet } from "@tonconnect/ui-react";
 import { useEffect } from "react";
-import { useLoader } from "../contexts/loader";
+import { useWalletContext } from "../contexts/wallet";
 
 type ServiceWallet = OpenedContract<WalletV5> | undefined;
 
@@ -40,25 +40,19 @@ export const useWalletContract = (ton: TonContextValue) => {
 
 export const ConnectWallet = () => {
   const [ui] = useTonConnectUI();
-  const wallet = useTonWallet();
-  const loader = useLoader();
-
   const location = useLocation();
   const navigate = useNavigate();
+  const wallet = useWalletContext();
 
   useEffect(() => {
-    loader.show("Checking connection");
+    if (!wallet.connected) return;
 
-    ui.connectionRestored
-      .then(() => {
-        if (wallet) {
-          navigate(location.state.forward || "/app/account");
-        }
-      })
-      .finally(() => {
-        loader.hide();
+    if (wallet.connected) {
+      navigate(location.state?.forward || "/app/account", {
+        state: { forward: undefined },
       });
-  }, [ui, wallet]);
+    }
+  }, [wallet]);
 
   const imageUrl = new URL(
     "/public/logo_t.png?as=webp&width=250",
@@ -81,6 +75,7 @@ export const ConnectWallet = () => {
         <button
           className="btn btn-primary text-gray-100 p-5 mt-5"
           onClick={async () => {
+            // TODO: handle errors
             await ui.openModal();
           }}
         >

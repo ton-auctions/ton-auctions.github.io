@@ -1,6 +1,7 @@
 import React from "react";
 
 import { useParamsReferree } from "../hooks/referree";
+
 import { RegisterButton } from "./RegisterButton";
 
 export const RegistrationPage: React.FC<unknown> = () => {

@@ -2,10 +2,10 @@ import React, { useCallback } from "react";
 import moment from "moment";
 import { toNano } from "@ton/core";
 
-import { useUserAccount } from "../contexts/account";
-import { useTon } from "../contexts/tonClient";
-import { useLoader } from "../contexts/loader";
-import { useAlerts } from "../contexts/alerts";
+import { useAccountContext } from "../contexts/account";
+import { useTonContext } from "../contexts/tonClient";
+import { useLoaderContext } from "../contexts/loader";
+import { useAlertsContext } from "../contexts/alerts";
 
 import { useConnection } from "../hooks/ton";
 
@@ -25,14 +25,14 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
   auction,
   tonUsdPrice,
 }) => {
-  const loader = useLoader();
-  const alerts = useAlerts();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
 
   const now = moment();
 
   const secondsDiff = Number(auction.ends_at) - now.unix();
   const duration = moment.duration(secondsDiff, "seconds");
-  const { refreshAccount } = useUserAccount();
+  const { refreshAccount } = useAccountContext();
 
   const daysTillEnd = Math.floor(duration.asDays());
   const hoursTillEnd = Math.floor(duration.asHours() % 24);
@@ -45,7 +45,7 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
 
   const minimal_amount = Number(auction.minimal_amount) / 1000000000;
 
-  const ton = useTon();
+  const ton = useTonContext();
   const connection = useConnection();
   const wallet = useWalletContract(ton);
 
@@ -123,13 +123,13 @@ export const AuctionRow: React.FC<AuctionRowProps> = ({
           <button className="btn bg-secondary" onClick={stopAuction}>
             Stop
           </button>
-          <button className="btn bg-gray-600">Open</button>
+          {/* <button className="btn bg-gray-600">Open</button> */}
           <button
             className="btn bg-gray-600"
             onClick={() => {
               const origin = window.location.origin;
               navigator.clipboard.writeText(
-                `${origin}/app/auction/${auction.address}`
+                `${origin}/auction/${auction.address}`
               );
             }}
           >

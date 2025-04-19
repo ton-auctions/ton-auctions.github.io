@@ -3,15 +3,14 @@ import { useCallback } from "react";
 import { OpenedContract, toNano } from "@ton/core";
 
 import { DeployedAccount } from "../contexts/account";
-import { useLoader } from "../contexts/loader";
-import { useAlerts } from "../contexts/alerts";
-import { useTon } from "../contexts/tonClient";
-import { useServiceController } from "../contexts/serviceController";
+import { useLoaderContext } from "../contexts/loader";
+import { useAlertsContext } from "../contexts/alerts";
+import { useTonContext } from "../contexts/tonClient";
+import { useServiceControllerContext } from "../contexts/serviceController";
 
 import { useConnection } from "../hooks/ton";
 
 import { WalletV5 } from "../protocol/wallet_v5";
-import { loadAccountDelete } from "../protocol/tact_Account";
 
 interface DeleteAccountProps {
   account: DeployedAccount;
@@ -25,11 +24,11 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
   wallet,
 }) => {
   const conn = useConnection();
-  const loader = useLoader();
-  const alerts = useAlerts();
-  const ton = useTon();
+  const loader = useLoaderContext();
+  const alerts = useAlertsContext();
+  const ton = useTonContext();
 
-  const controller = useServiceController();
+  const controller = useServiceControllerContext();
 
   const deleteAccount = useCallback(async () => {
     if (!account) return;
@@ -40,9 +39,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
     loader.show("Deleting account. Sending transaction.");
 
     ton
-      .signSendAndWait({
+      .signSendAndWaitForDestuction({
         checkAddress: account.contract.address,
-        checkTransactionFrom: wallet.address,
         checkTimeout: 10000,
         send: async () => {
           await account.contract.send(
@@ -54,9 +52,6 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({
               $$type: "AccountDelete",
             }
           );
-        },
-        testMessage: (cell) => {
-          loadAccountDelete(cell.asSlice());
         },
         updateLoader: (text) => loader.show(`Deleting account. ${text}`),
       })

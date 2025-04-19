@@ -24,3 +24,42 @@
 ### Add a new contract
 
 `npx blueprint create ContractName` or `yarn blueprint create ContractName`
+
+
+### Protocol structure
+
+contract `Controller`:
+    // admin
+    internal ConfigureService
+    internal ConfigureAccount
+    internal CleanInitialiser
+    internal ServiceComission
+    
+    // user
+    internal CreateAccount
+    internal RequestInitialisation
+    internal AccountCreated
+
+contract `Account`:
+    // service
+    internal Initialize
+    internal ConfigureAccount
+    internal AuctionDeleted 
+    internal Profit
+    internal ReferralCommission
+
+    // user
+    internal Collect
+    internal CreateBasicAuction    
+    internal AccountDelete
+    internal CleanUp
+
+contract `BasicAuction`:
+    // user
+    internal Delete
+    internal Bid
+    
+    // zzz
+    external Resolve
+
+    

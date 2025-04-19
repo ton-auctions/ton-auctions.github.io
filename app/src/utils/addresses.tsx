@@ -1,20 +1,23 @@
-import { Address, Dictionary, OpenedContract } from "@ton/core";
+import { Address, beginCell, Dictionary, OpenedContract } from "@ton/core";
 import { Account, Controller } from "../protocol";
 
 export const getAccountWrapper = async (
   controller: OpenedContract<Controller>,
   address: Address
 ) => {
-  return await Account.fromInit(
-    controller.address,
-    address,
-    null,
-    0n,
-    0n,
-    0n,
-    Dictionary.empty(),
-    0n,
-    0n,
-    false
-  );
+  return await Account.fromInit({
+    $$type: "AccountData",
+    version: 1n,
+    allowance: 0n,
+    max_allowance: 0n,
+    auctions: Dictionary.empty(),
+    balance: null,
+    collector: controller.address,
+    initialised: false,
+    owner: address,
+    referral_comission: 0n,
+    service_comission: 0n,
+    referree: null,
+    secret_id: beginCell().endCell(),
+  });
 };

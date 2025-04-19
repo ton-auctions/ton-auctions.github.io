@@ -2,7 +2,7 @@ import { Address, OpenedContract } from "@ton/core";
 import React from "react";
 import { createContext } from "react";
 import { Controller } from "../protocol";
-import { TonContextValue, useTon } from "./tonClient";
+import { TonContextValue, useTonContext } from "./tonClient";
 import { useContext } from "react";
 
 interface UninitialisedController {
@@ -36,7 +36,7 @@ type ServiceControllerProviderProps = React.PropsWithChildren & {
 export const ServiceControllerProvider: React.FC<
   ServiceControllerProviderProps
 > = ({ children, address }) => {
-  const ton = useTon();
+  const ton = useTonContext();
 
   return (
     <ServiceControllerContext.Provider
@@ -47,4 +47,5 @@ export const ServiceControllerProvider: React.FC<
   );
 };
 
-export const useServiceController = () => useContext(ServiceControllerContext);
+export const useServiceControllerContext = () =>
+  useContext(ServiceControllerContext);
