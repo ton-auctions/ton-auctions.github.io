@@ -15,6 +15,7 @@ message(0x00aaaa02) AuctionResolvedEvent {
 message(0x00aaaa03) AuctionCreatedEvent {
     address: Address;
     owner_secret_id: Cell;
+    ends_at: Int;
 }
 
 message Bid {

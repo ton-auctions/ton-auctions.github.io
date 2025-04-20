@@ -173,6 +173,7 @@ contract BasicAuction(
             AuctionCreatedEvent {
                 address: myAddress(),
                 owner_secret_id: self.data.owner_secret_id,
+                ends_at: self.data.ends_at,
             }.toCell(),
         );
     }

@@ -8,11 +8,11 @@ export const getAccountWrapper = async (
   return await Account.fromInit({
     $$type: "AccountData",
     version: 1n,
+    collector: controller.address,
     allowance: 0n,
     max_allowance: 0n,
     auctions: Dictionary.empty(),
     balance: null,
-    collector: controller.address,
     initialised: false,
     owner: address,
     referral_comission: 0n,
