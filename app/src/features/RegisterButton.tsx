@@ -44,8 +44,6 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
       return;
     }
 
-    console.log(encryptedUserId);
-
     loader.show("Creating account.");
     ton
       .signSendAndWait({
