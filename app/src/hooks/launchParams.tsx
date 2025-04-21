@@ -26,7 +26,11 @@ export const useEncryptedUserId = () => {
   useEffect(() => {
     if (!launchParams) return;
     const userId = launchParams.tgWebAppData!.user!.id;
-    const hexString = userId.toString(16);
+    let hexString = userId.toString(16);
+    // NOTE: AES gsm requires message to be multiple of 2 bytes. Thus pad with zero
+    if (hexString.length % 2 === 1) {
+      hexString = `0${hexString}`;
+    }
     const buffer = Buffer.from(hexString, "hex");
 
     encrypt(buffer).then((result) => {
