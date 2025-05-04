@@ -1,5 +1,5 @@
 export const config = {
-  botName: "auction_bot",
+  botName: "bidton_bot",
   appName: "",
   controller: "EQDW7MXclFrvvMWYxiOuDbnr1VcFRmHqYrbDhMTDxasfZQi9",
   toncenterKey:

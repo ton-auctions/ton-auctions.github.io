@@ -8,7 +8,7 @@ import { useTonContext } from "../contexts/tonClient";
 import { useWalletContract } from "./ConnectWallet";
 import { useCallback } from "react";
 import { getAccountWrapper } from "../utils/addresses";
-import { loadInitialise } from "../protocol/tact_Account";
+import { loadAccountInitialise } from "../protocol/tact_Account";
 import React from "react";
 import { redirectToTg, useEncryptedUserId } from "../hooks/launchParams";
 
@@ -40,7 +40,7 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
     );
 
     if (!encryptedUserId) {
-      redirectToTg(location.pathname);
+      redirectToTg(location.pathname, `registration`);
       return;
     }
 
@@ -62,7 +62,7 @@ export const RegisterButton: React.FC<RegisterButtonProps> = ({ referree }) => {
           );
         },
         updateLoader: (text) => loader.show(`Creating account. ${text}`),
-        testMessage: (cell) => loadInitialise(cell.asSlice()),
+        testMessage: (cell) => loadAccountInitialise(cell.asSlice()),
       })
       .then(() => {
         navigate(location.state.forward || "/app/account", {

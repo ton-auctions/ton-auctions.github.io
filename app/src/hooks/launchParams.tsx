@@ -1,20 +1,23 @@
-import { useLaunchParams } from "@telegram-apps/sdk-react";
+import { init, useLaunchParams } from "@telegram-apps/sdk-react";
 import { config } from "../config.ts";
 import { useState } from "react";
 import { useEffect } from "react";
 import { encrypt } from "../utils/crypto.tsx";
 
-export const redirectToTg = (location: string) => {
+export const redirectToTg = (location: string, name: string) => {
   window.location.replace(
-    `tg://resolve?domain=${config.botName}&startapp=${location}`
+    `tg://resolve?domain=${config.botName}&start=${btoa(
+      JSON.stringify({ fwd: location, page: name })
+    )}`
   );
 };
 
 export const useLaunchParamsSilent = () => {
   try {
+    init();
     return useLaunchParams();
   } catch {
-    // TODO: think!
+    // skip error
   }
 };
 

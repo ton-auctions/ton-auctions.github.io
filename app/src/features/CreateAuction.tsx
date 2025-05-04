@@ -109,15 +109,7 @@ export const CreateAuctionForm: React.FC<CreateAuctionFormProps> = ({
         navigate("/app/account/auctions");
         // TODO: notify complete
       });
-  }, [
-    account,
-    wallet,
-    name,
-    description,
-    minimalAmountString,
-    endsAt,
-    encryptedUserId,
-  ]);
+  }, [account, wallet, name, description, minimalAmountString, endsAt]);
 
   const resetForm = useCallback(() => {
     setName("");

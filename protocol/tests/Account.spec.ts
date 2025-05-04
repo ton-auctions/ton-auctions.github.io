@@ -1,6 +1,6 @@
 import { Blockchain, SandboxContract, TreasuryContract } from "@ton/sandbox";
-import { Address, beginCell, Dictionary, internal, toNano } from "@ton/core";
-import { Account, storeProfit } from "../wrappers/Account";
+import { Address, beginCell, toNano } from "@ton/core";
+import { Account } from "../wrappers/Account";
 import "@ton/test-utils";
 import { BasicAuction } from "../wrappers/Auctions";
 import { isCloseTo } from "./helpers";
@@ -8,11 +8,27 @@ import { Controller } from "../wrappers/Controller";
 
 let createAuction = async (
   blockchain: Blockchain,
+  controller: SandboxContract<TreasuryContract>,
   user: SandboxContract<TreasuryContract>,
   account: SandboxContract<Account>,
-  id?: bigint,
+  name?: string,
 ) => {
-  let result = await account.send(
+  name = name || "Auction 1";
+
+  const endsAt = Math.trunc(new Date().valueOf() / 1000 + 3600 * 24);
+  const description = "Empty";
+
+  const auction = blockchain.openContract(
+    await BasicAuction.fromInit({
+      $$type: "BasicAuctionInit",
+      collector: controller.address,
+      ends_at: BigInt(endsAt),
+      name: name,
+      owner_account: account.address,
+    }),
+  );
+
+  const result = await account.send(
     user.getSender(),
     {
       value: toNano("0.02"),
@@ -20,11 +36,11 @@ let createAuction = async (
     },
     {
       $$type: "CreateBasicAuction",
-      id: id || 0n,
-      name: "Auction 1",
-      description: "Empty",
+      name: name,
+      type: "basic",
+      description: description,
       minimal_amount: toNano("1"),
-      ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
+      ends_at: BigInt(endsAt),
       secret_id: beginCell()
         .storeBuffer(Buffer.from([0, 1, 2, 3]))
         .endCell(),
@@ -40,19 +56,20 @@ let createAuction = async (
   });
   expect(result.transactions).toHaveTransaction({
     from: account.address,
+    to: auction.address,
     aborted: false,
     success: true,
     deploy: true,
   });
 
   const data = await account.getData();
-  const auctionMeta = data.auctions.get(0n);
-  expect(auctionMeta).not.toBeNull();
-  const contract = blockchain.openContract(
-    BasicAuction.fromAddress(auctionMeta!.address),
-  );
-  expect(contract.init).not.toBeNull();
-  return contract;
+
+  expect(data.auctions.get(auction.address)).not.toBeUndefined();
+
+  const contract = await blockchain.getContract(auction.address);
+  expect(contract.accountState?.type).toBe("active");
+
+  return auction;
 };
 
 const getBalance = async (blockchain: Blockchain, address: Address) => {
@@ -66,8 +83,6 @@ let deleteAuction = async (
   auction: SandboxContract<BasicAuction>,
   refund?: boolean,
 ) => {
-  const data = await auction.getData();
-
   let result = await account.send(
     blockchain.sender(auction.address),
     {
@@ -76,7 +91,6 @@ let deleteAuction = async (
     },
     {
       $$type: "AuctionDeleted",
-      id: data.id,
       refund: refund || false,
     },
   );
@@ -102,7 +116,6 @@ let sendProfit = async (
     },
     {
       $$type: "Profit",
-      id: 0n,
       amount,
     },
   );
@@ -157,21 +170,9 @@ let createUserAndAccount = async (
 
   let account_contract = blockchain.openContract(
     await Account.fromInit({
-      $$type: "AccountData",
-      allowance: 10n,
-      max_allowance: 10n,
-      auctions: Dictionary.empty(),
-      balance: null,
+      $$type: "AccountInit",
       collector: collector.address,
-      initialised: true,
       owner: user.address,
-      referral_comission: referral_comission || 150n,
-      service_comission: service_comission || 150n,
-      referree: referree_account?.address || null,
-      secret_id: beginCell()
-        .storeBuffer(Buffer.from([9, 9, 9]))
-        .endCell(),
-      version: 1n,
     }),
   );
 
@@ -180,7 +181,16 @@ let createUserAndAccount = async (
     {
       value: toNano("0.1"),
     },
-    null,
+    {
+      $$type: "AccountInitialise",
+      max_allowance: 10n,
+      referral_comission: referral_comission || 150n,
+      service_comission: service_comission || 150n,
+      referree: referree_account?.address || null,
+      secret_id: beginCell()
+        .storeBuffer(Buffer.from([9, 9, 9]))
+        .endCell(),
+    },
   );
 
   expect(deployResult.transactions).toHaveTransaction({
@@ -197,18 +207,19 @@ describe("Account", () => {
   let blockchain: Blockchain;
   let deployer: SandboxContract<TreasuryContract>;
   let collector: SandboxContract<TreasuryContract>;
-  let referree: SandboxContract<TreasuryContract>;
-  let user: SandboxContract<TreasuryContract>;
 
+  let referree: SandboxContract<TreasuryContract>;
   let referreeAccount: SandboxContract<Account>;
+
+  let user: SandboxContract<TreasuryContract>;
   let userAccount: SandboxContract<Account>;
+
+  let userWithoutReferree: SandboxContract<TreasuryContract>;
   let userWithoutReferreeAccount: SandboxContract<Account>;
 
   beforeEach(async () => {
     blockchain = await Blockchain.create();
 
-    // referree = await blockchain.treasury("referree");
-    user = await blockchain.treasury("owner");
     collector = await blockchain.treasury("collector");
     deployer = await blockchain.treasury("deployer");
 
@@ -218,21 +229,19 @@ describe("Account", () => {
       null,
       150n,
       150n,
-      "owner",
+      "referee",
     );
 
-    userAccount = (
-      await createUserAndAccount(
-        blockchain,
-        collector,
-        referreeAccount,
-        150n,
-        200n,
-        "owner",
-      )
-    )[1];
+    [user, userAccount] = await createUserAndAccount(
+      blockchain,
+      collector,
+      referreeAccount,
+      150n,
+      200n,
+      "owner_with_referee",
+    );
 
-    userWithoutReferreeAccount = (
+    [userWithoutReferree, userWithoutReferreeAccount] =
       await createUserAndAccount(
         blockchain,
         collector,
@@ -240,28 +249,15 @@ describe("Account", () => {
         150n,
         200n,
         "owner",
-      )
-    )[1];
+      );
   });
 
   it("Should send commission to referree and collector", async () => {
-    await userAccount.send(
-      user.getSender(),
-      {
-        value: toNano("0.02"),
-        bounce: false,
-      },
-      {
-        $$type: "CreateBasicAuction",
-        id: 0n,
-        name: "Auction 1",
-        description: "Empty",
-        minimal_amount: toNano("1"),
-        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
-        secret_id: beginCell()
-          .storeBuffer(Buffer.from([9, 9, 9]))
-          .endCell(),
-      },
+    const auction = await createAuction(
+      blockchain,
+      collector,
+      user,
+      userAccount,
     );
 
     const initialUserData = await userAccount.getData();
@@ -278,7 +274,7 @@ describe("Account", () => {
 
     const initialCollectorBalance = await collector.getBalance();
 
-    const auctionMeta = initialUserData.auctions.get(0n);
+    const auctionMeta = initialUserData.auctions.get(auction.address);
 
     expect(auctionMeta).not.toBeNull();
 
@@ -289,7 +285,6 @@ describe("Account", () => {
       },
       {
         $$type: "Profit",
-        id: 0n,
         amount: toNano("1000"),
       },
     );
@@ -369,7 +364,6 @@ describe("Account", () => {
       },
       {
         $$type: "Profit",
-        id: 0n,
         amount: toNano("1000"),
       },
     );
@@ -394,27 +388,16 @@ describe("Account", () => {
   });
 
   it("Should send commission to controller if no referry exist", async () => {
-    await userWithoutReferreeAccount.send(
-      user.getSender(),
-      {
-        value: toNano("0.1"),
-        bounce: false,
-      },
-      {
-        $$type: "CreateBasicAuction",
-        id: 0n,
-        name: "Auction 1",
-        description: "Empty",
-        minimal_amount: toNano("1"),
-        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
-        secret_id: beginCell()
-          .storeBuffer(Buffer.from([9, 9, 9]))
-          .endCell(),
-      },
+    const auction = await createAuction(
+      blockchain,
+      collector,
+      userWithoutReferree,
+      userWithoutReferreeAccount,
     );
+
     const data = await userWithoutReferreeAccount.getData();
 
-    const auctionMeta = data.auctions.get(0n);
+    const auctionMeta = data.auctions.get(auction.address);
 
     const initialBalance = await getBalance(
       blockchain,
@@ -426,7 +409,7 @@ describe("Account", () => {
     );
     const initialCollectorBalance = await collector.getBalance();
 
-    expect(auctionMeta).not.toBeNull();
+    expect(auctionMeta).not.toBeUndefined();
 
     const profitResult = await userWithoutReferreeAccount.send(
       blockchain.sender(auctionMeta!.address),
@@ -435,7 +418,6 @@ describe("Account", () => {
       },
       {
         $$type: "Profit",
-        id: 0n,
         amount: toNano("1000"),
       },
     );
@@ -502,8 +484,8 @@ describe("Account", () => {
       },
       {
         $$type: "CreateBasicAuction",
-        id: 0n,
         name: "Auction 1",
+        type: "basic",
         description: "Empty",
         minimal_amount: toNano("1"),
         ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
@@ -522,8 +504,7 @@ describe("Account", () => {
     });
 
     let data = await userAccount.getData();
-    let auction = data.auctions.get(0n);
-    expect(auction).toBeFalsy();
+    expect(data.auctions.keys().length).toBe(0);
 
     expect(createContractResult.transactions).toHaveLength(2);
   });
@@ -537,8 +518,8 @@ describe("Account", () => {
       },
       {
         $$type: "CreateBasicAuction",
-        id: 0n,
         name: "Auction 1",
+        type: "basic",
         description: "Empty",
         minimal_amount: toNano("1"),
         ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000)),
@@ -557,9 +538,7 @@ describe("Account", () => {
     });
 
     let data = await userAccount.getData();
-    let auction = data.auctions.get(0n);
-    expect(auction).toBeFalsy();
-
+    expect(data.auctions.keys().length).toBe(0);
     expect(createContractResult.transactions).toHaveLength(2);
   });
 
@@ -572,8 +551,8 @@ describe("Account", () => {
       },
       {
         $$type: "CreateBasicAuction",
-        id: 0n,
         name: "Auction 1",
+        type: "basic",
         description: "Empty",
         minimal_amount: toNano("1"),
         ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000)),
@@ -592,63 +571,35 @@ describe("Account", () => {
     });
 
     let data = await userAccount.getData();
-    let auction = data.auctions.get(0n);
-    expect(auction).toBeFalsy();
 
+    expect(data.auctions.keys().length).toBe(0);
     expect(createContractResult.transactions).toHaveLength(2);
   });
 
   it("User should be able to create Auction through account", async () => {
-    const createContractResult = await userAccount.send(
-      user.getSender(),
-      {
-        value: toNano("0.1"),
-        bounce: false,
-      },
-      {
-        $$type: "CreateBasicAuction",
-        id: 0n,
-        name: "Auction 1",
-        description: "Empty",
-        minimal_amount: toNano("1"),
-        ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
-        secret_id: beginCell()
-          .storeBuffer(Buffer.from([9, 9, 9]))
-          .endCell(),
-      },
+    const auction = await createAuction(
+      blockchain,
+      collector,
+      user,
+      userAccount,
     );
 
-    expect(createContractResult.transactions).toHaveTransaction({
-      from: user.address,
-      to: userAccount.address,
-      success: true,
-      aborted: false,
-      deploy: false,
-    });
-
     let data = await userAccount.getData();
-    let auction = data.auctions.get(0n);
-    expect(auction).not.toBeNull();
-    expect(auction).toMatchObject({
+
+    let auctionData = data.auctions.get(auction.address);
+
+    expect(auctionData).not.toBeNull();
+    expect(auctionData).toMatchObject({
       $$type: "AuctionConfig",
-      id: 0n,
       name: "Auction 1",
       description: "Empty",
       type: "basic",
       ended: false,
     });
-
-    expect(createContractResult.transactions).toHaveTransaction({
-      from: userAccount.address,
-      to: auction!.address,
-      success: true,
-      aborted: false,
-      deploy: true,
-    });
   });
 
   it("User should be able to delete Auction", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
 
     {
       let data = await userAccount.getData();
@@ -690,7 +641,7 @@ describe("Account", () => {
   });
 
   it("Owner should be able to collect profit", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
 
     let accountBalance = await getBalance(blockchain, userAccount.address);
 
@@ -731,7 +682,7 @@ describe("Account", () => {
   });
 
   it("No one else should be able to collect profit", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
     let accountBalance = await getBalance(blockchain, userAccount.address);
 
     await sendProfit(blockchain, auction, userAccount, toNano("1000"));
@@ -766,13 +717,13 @@ describe("Account", () => {
 
   it("Adding new auctions depletes allowance", async () => {
     expect((await userAccount.getData()).allowance).toBe(10n);
-    await createAuction(blockchain, user, userAccount, 0n);
+    await createAuction(blockchain, collector, user, userAccount, "1");
     expect((await userAccount.getData()).allowance).toBe(9n);
-    await createAuction(blockchain, user, userAccount, 1n);
+    await createAuction(blockchain, collector, user, userAccount, "2");
     expect((await userAccount.getData()).allowance).toBe(8n);
-    await createAuction(blockchain, user, userAccount, 2n);
+    await createAuction(blockchain, collector, user, userAccount, "3");
     expect((await userAccount.getData()).allowance).toBe(7n);
-    await createAuction(blockchain, user, userAccount, 3n);
+    await createAuction(blockchain, collector, user, userAccount, "4");
     expect((await userAccount.getData()).allowance).toBe(6n);
 
     let result2 = await userAccount.send(
@@ -783,8 +734,8 @@ describe("Account", () => {
       },
       {
         $$type: "CreateBasicAuction",
-        id: 3n,
-        name: "Auction 1",
+        name: "3",
+        type: "basic",
         description: "Empty",
         minimal_amount: toNano("1"),
         ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
@@ -793,6 +744,7 @@ describe("Account", () => {
           .endCell(),
       },
     );
+
     expect(result2.transactions).toHaveTransaction({
       from: user.address,
       to: userAccount.address,
@@ -802,17 +754,17 @@ describe("Account", () => {
       exitCode: Number(Controller.ERRORS_AUCTION_ALREADY_EXISTS),
     });
 
-    await createAuction(blockchain, user, userAccount, 4n);
+    await createAuction(blockchain, collector, user, userAccount, "5");
     expect((await userAccount.getData()).allowance).toBe(5n);
-    await createAuction(blockchain, user, userAccount, 5n);
+    await createAuction(blockchain, collector, user, userAccount, "6");
     expect((await userAccount.getData()).allowance).toBe(4n);
-    await createAuction(blockchain, user, userAccount, 6n);
+    await createAuction(blockchain, collector, user, userAccount, "7");
     expect((await userAccount.getData()).allowance).toBe(3n);
-    await createAuction(blockchain, user, userAccount, 7n);
+    await createAuction(blockchain, collector, user, userAccount, "8");
     expect((await userAccount.getData()).allowance).toBe(2n);
-    await createAuction(blockchain, user, userAccount, 8n);
+    await createAuction(blockchain, collector, user, userAccount, "9");
     expect((await userAccount.getData()).allowance).toBe(1n);
-    await createAuction(blockchain, user, userAccount, 9n);
+    await createAuction(blockchain, collector, user, userAccount, "10");
     expect((await userAccount.getData()).allowance).toBe(0n);
 
     let result1 = await userAccount.send(
@@ -823,8 +775,8 @@ describe("Account", () => {
       },
       {
         $$type: "CreateBasicAuction",
-        id: 10n,
-        name: "Auction 1",
+        name: "11",
+        type: "basic",
         description: "Empty",
         minimal_amount: toNano("1"),
         ends_at: BigInt(Math.trunc(new Date().valueOf() / 1000 + 3600 * 24)),
@@ -845,7 +797,7 @@ describe("Account", () => {
   });
 
   it("Resolve (Profit) increases allowance", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
     let allowanceBefore = (await userAccount.getData()).allowance;
     await sendProfit(blockchain, auction, userAccount, toNano("1000"));
     let allowanceAfter = (await userAccount.getData()).allowance;
@@ -853,7 +805,7 @@ describe("Account", () => {
   });
 
   it("Refund increases allowance", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
     let allowanceBefore = (await userAccount.getData()).allowance;
     await deleteAuction(blockchain, userAccount, auction, true);
     let allowanceAfter = (await userAccount.getData()).allowance;
@@ -861,7 +813,7 @@ describe("Account", () => {
   });
 
   it("Delete increases allowance", async () => {
-    let auction = await createAuction(blockchain, user, userAccount);
+    let auction = await createAuction(blockchain, collector, user, userAccount);
     let allowanceBefore = (await userAccount.getData()).allowance;
     await deleteAuction(blockchain, userAccount, auction, false);
     let allowanceAfter = (await userAccount.getData()).allowance;
@@ -876,6 +828,7 @@ describe("Account", () => {
       null,
       0n,
       1000n, // 10%
+      "u1",
     );
     // 1
     let [user2, account2] = await createUserAndAccount(
@@ -884,6 +837,7 @@ describe("Account", () => {
       account1,
       0n,
       1000n, // 10%
+      "u2",
     );
     // 2
     let [user3, account3] = await createUserAndAccount(
@@ -892,6 +846,7 @@ describe("Account", () => {
       account2,
       0n,
       1000n, // 10%
+      "u3",
     );
     // 4
     let [user4, account4] = await createUserAndAccount(
@@ -900,6 +855,7 @@ describe("Account", () => {
       account3,
       0n,
       1000n, // 10%
+      "u4",
     );
     // 16
     let [user5, account5] = await createUserAndAccount(
@@ -908,8 +864,9 @@ describe("Account", () => {
       account4,
       0n,
       1000n, // 10%
+      "u5",
     );
-    let auction = await createAuction(blockchain, user5, account5);
+    let auction = await createAuction(blockchain, collector, user5, account5);
 
     let balance1before = await getBalance(blockchain, account1.address);
     let balance2before = await getBalance(blockchain, account2.address);

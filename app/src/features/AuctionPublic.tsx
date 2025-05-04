@@ -18,8 +18,8 @@ import { loadBid } from "../protocol/tact_Account";
 import { useWalletContract } from "./ConnectWallet";
 import { RegisterButton } from "./RegisterButton";
 
-import Ton from "../assets/ton.svg";
 import { redirectToTg, useEncryptedUserId } from "../hooks/launchParams";
+import Ton from "../assets/ton.svg";
 
 const useAuctionContract = (
   address?: string
@@ -94,7 +94,7 @@ export const AuctionPublic: React.FC<unknown> = () => {
     if (!tonBidRef.current) return;
 
     if (!encryptedUserId) {
-      redirectToTg(location.pathname);
+      redirectToTg(location.pathname, `auction bid`);
       return;
     }
 

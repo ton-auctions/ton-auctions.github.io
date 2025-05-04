@@ -13,6 +13,7 @@ message(0x00aaaa02) AuctionResolvedEvent {
 }
 
 message(0x00aaaa03) AuctionCreatedEvent {
+    name: String;
     address: Address;
     owner_secret_id: Cell;
     ends_at: Int;
@@ -25,3 +26,11 @@ message Bid {
 message Resolve {}
 
 message Delete {}
+
+message BasicAuctionInitialise {
+    description: String;
+    owner: Address;
+    owner_secret_id: Cell;
+    minimal_amount: Int;
+    type: String;
+}

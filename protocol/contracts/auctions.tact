@@ -8,27 +8,73 @@ struct Winner {
     secret_id: Cell;
 }
 
-struct BasicAuctionData {
-    id: Int;
-    name: String;
-    description: String;
-    owner: Address;
+struct BasicAuctionInit {
     owner_account: Address;
-    owner_secret_id: Cell;
+    collector: Address;
+    ends_at: Int;
+    name: String;
+}
+
+struct BasicAuctionData {
+    owner: Address?;
     collector: Address;
     type: String;
+    name: String;
+    description: String;
+    owner_account: Address;
+    owner_secret_id: Cell;
     minimal_amount: Int;
+    ends_at: Int;
     ended: Bool;
     refund: Bool;
-    ends_at: Int;
     balance: Int?;
     minimal_raise: Int;
     winner: Winner?;
 }
 
-contract BasicAuction(
-    data: BasicAuctionData,
-) {
+contract BasicAuction {
+    owner: Address? = null;
+    collector: Address;
+    owner_account: Address;
+    name: String;
+    ends_at: Int;
+
+    description: String = "";
+
+    owner_secret_id: Cell;
+    minimal_amount: Int = ton("1");
+    ended: Bool = false;
+    refund: Bool = false;
+    type: String = "";
+
+    minimal_raise: Int = 0;
+    winner: Winner? = null;
+    initialised: Bool = false;
+
+    init(data: BasicAuctionInit) {
+        self.collector = data.collector;
+        self.owner_account = data.owner_account;
+        self.name = data.name;
+        self.ends_at = data.ends_at;
+        self.owner_secret_id = emptyCell();
+    }
+
+    receive(msg: BasicAuctionInitialise) {
+        throwUnless(self.ERRORS_UNAUTHORISED, sender() == self.owner_account);
+
+        if (self.initialised) {
+            cashback(self.owner!!);
+            return;
+        }
+
+        self.description = msg.description;
+        self.owner = msg.owner;
+        self.owner_secret_id = msg.owner_secret_id;
+        self.minimal_amount = msg.minimal_amount;
+        self.type = msg.type;
+    }
+
+    const ERRORS_UNAUTHORISED: Int = 200;
     const ERRORS_BID_IS_TOO_SMALL: Int = 201;
     const ERRORS_BID_RAISE_IS_TOO_SMALL: Int = 202;
     const ERRORS_FINISHED: Int = 203;
@@ -43,33 +89,33 @@ contract BasicAuction(
     receive(msg: Delete) {
         let sender = sender();
 
-        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.data.owner || sender == self.data.collector);
-        throwUnless(self.ERRORS_HAS_WINNER, !self.data.ended && self.data.winner == null);
+        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.owner!! || sender == self.collector);
+        throwUnless(self.ERRORS_HAS_WINNER, !self.ended && self.winner == null);
 
-        self.data.ended = true;
+        self.ended = true;
 
         message(MessageParameters {
             mode: SendDefaultMode | SendRemainingBalance,
-            to: self.data.owner_account,
+            to: self.owner_account,
             value: 0,
-            body: AuctionDeleted { id: self.data.id, refund: false }.toCell(),
+            body: AuctionDeleted { refund: false }.toCell(),
             bounce: false,
         });
     }
 
     receive(msg: Bid) {
-        throwUnless(self.ERRORS_ENDED, !self.data.ended);
-        throwUnless(self.ERRORS_FINISHED, self.data.ends_at > now());
+        throwUnless(self.ERRORS_ENDED, !self.ended);
+        throwUnless(self.ERRORS_FINISHED, self.ends_at > now());
 
         let context = context();
         let amount = context.value;
         let bidder = context.sender;
 
         // throwUnless(self.ERRORS_OWNER_BID_NOT_ALLOWED, bidder != self.owner);
-        throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount >= self.data.minimal_amount);
+        throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount >= self.minimal_amount);
 
-        if self.data.winner != null {
-            let winner = self.data.winner!!;
+        if self.winner != null {
+            let winner = self.winner!!;
 
             throwUnless(self.ERRORS_BID_IS_TOO_SMALL, amount > winner.amount);
 
@@ -89,7 +135,7 @@ contract BasicAuction(
                 AuctionOutbiddedEvent {
                     old_winner_secret_id: winner.secret_id,
                     new_winner_secret_id: msg.secret_id,
-                    owner_secret_id: self.data.owner_secret_id,
+                    owner_secret_id: self.owner_secret_id,
                     address: myAddress(),
                     amount: amount,
                 }.toCell(),
@@ -97,67 +143,66 @@ contract BasicAuction(
         }
 
         // Assign new winner
-        self.data.winner = Winner {
+        self.winner = Winner {
             amount: amount,
             address: bidder,
             secret_id: msg.secret_id,
         };
 
-        let five_percent = self.data.winner!!.amount * 5 / 100;
-        self.data.minimal_raise = max(self.MINIMAL_RAISE, five_percent);
+        let five_percent = self.winner!!.amount * 5 / 100;
+        self.minimal_raise = max(self.MINIMAL_RAISE, five_percent);
     }
 
     fun resolve() {
-        self.data.ended = true;
-        if self.data.winner == null {
+        self.ended = true;
+        if self.winner == null {
             emit(
                 AuctionResolvedEvent {
                     address: myAddress(),
-                    owner_secret_id: self.data.owner_secret_id,
+                    owner_secret_id: self.owner_secret_id,
                     winner_secret_id: null,
                 }.toCell(),
             );
-            self.data.refund = true;
+            self.refund = true;
             message(MessageParameters {
                 mode: SendDefaultMode | SendRemainingBalance | SendDestroyIfZero,
-                to: self.data.owner_account,
+                to: self.owner_account,
                 value: 0,
-                body: AuctionDeleted { id: self.data.id, refund: true }.toCell(),
+                body: AuctionDeleted { refund: true }.toCell(),
             });
         } else {
-            let winner = self.data.winner!!;
+            let winner = self.winner!!;
 
             emit(
                 AuctionResolvedEvent {
                     address: myAddress(),
-                    owner_secret_id: self.data.owner_secret_id,
+                    owner_secret_id: self.owner_secret_id,
                     winner_secret_id: winner.secret_id,
                 }.toCell(),
             );
 
             message(MessageParameters {
                 mode: SendDefaultMode | SendRemainingBalance | SendDestroyIfZero,
-                to: self.data.owner_account,
+                to: self.owner_account,
                 value: 0,
                 body: Profit {
-                    id: self.data.id,
                     amount: winner.amount,
                 }.toCell(),
             });
         }
     }
 
-    // TODO: Should be external
     receive(_: Resolve) {
-        throwUnless(self.ERRORS_ENDED, !self.data.ended);
-        throwUnless(self.ERRORS_UNFINISHED, self.data.ends_at < now());
+        throwUnless(self.ERRORS_ENDED, !self.ended);
+        throwUnless(self.ERRORS_UNFINISHED, self.ends_at < now());
 
         self.resolve();
     }
 
+    // TODO: needs tests
     external(_: Resolve) {
-        throwUnless(self.ERRORS_ENDED, !self.data.ended);
-        throwUnless(self.ERRORS_UNFINISHED, self.data.ends_at < now());
+        throwUnless(self.ERRORS_ENDED, !self.ended);
+        throwUnless(self.ERRORS_UNFINISHED, self.ends_at < now());
 
         acceptMessage();
 
@@ -167,20 +212,34 @@ contract BasicAuction(
     receive() {
         let sender = sender();
 
-        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.data.owner || sender == self.data.owner_account);
+        throwUnless(self.ERRORS_NOT_ALLOWED, sender == self.owner || sender == self.owner_account);
 
         emit(
             AuctionCreatedEvent {
+                name: self.name,
                 address: myAddress(),
-                owner_secret_id: self.data.owner_secret_id,
-                ends_at: self.data.ends_at,
+                owner_secret_id: self.owner_secret_id,
+                ends_at: self.ends_at,
             }.toCell(),
         );
     }
 
     get fun data(): BasicAuctionData {
-        let tmp = self.data;
-        tmp.balance = myBalance();
-        return tmp;
+        return BasicAuctionData {
+            balance: myBalance(),
+            collector: self.collector,
+            description: self.description,
+            ended: self.ended,
+            ends_at: self.ends_at,
+            minimal_amount: self.minimal_amount,
+            minimal_raise: self.minimal_raise,
+            name: self.name,
+            owner: self.owner,
+            owner_account: self.owner_account,
+            owner_secret_id: self.owner_secret_id,
+            refund: self.refund,
+            type: "basic",
+            winner: self.winner,
+        };
     }
 }

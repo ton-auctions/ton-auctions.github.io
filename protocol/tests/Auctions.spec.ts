@@ -26,33 +26,44 @@ describe("Auctions", () => {
 
     auction = blockchain.openContract(
       await BasicAuction.fromInit({
-        $$type: "BasicAuctionData",
-        balance: null,
+        $$type: "BasicAuctionInit",
+
         collector: collector.address,
-        description: "description",
-        name: "name",
-        ended: false,
         ends_at: BigInt(ends_at),
-        id: 0n,
-        minimal_amount: toNano("10"),
-        minimal_raise: toNano("10"),
-        owner: owner.address,
+        name: "name",
         owner_account: owner_account.address,
-        owner_secret_id: beginCell()
-          .storeBuffer(Buffer.from([1, 2, 3]))
-          .endCell(),
-        refund: false,
-        type: "basic",
-        winner: null,
+
+        // balance: null,
+        // description: "",
+        // name: ,
+        // ended: false,
+        // ends_at: ,
+        // minimal_amount: toNano("10"),
+        // minimal_raise: toNano("10"),
+        // owner_account: ,
+        // owner_secret_id: ,
+        // refund: false,
+        // winner: null,
       }),
     );
+
+    const endsAt = Math.trunc(new Date().valueOf() / 1000 + 3600 * 24);
 
     const deployResult = await auction.send(
       owner_account.getSender(),
       {
         value: toNano("0.05"),
       },
-      null,
+      {
+        $$type: "BasicAuctionInitialise",
+        description: "description",
+        type: "basic",
+        minimal_amount: toNano("10"),
+        owner_secret_id: beginCell()
+          .storeBuffer(Buffer.from([1, 2, 3]))
+          .endCell(),
+        owner: owner.address,
+      },
     );
 
     expect(deployResult.transactions).toHaveTransaction({

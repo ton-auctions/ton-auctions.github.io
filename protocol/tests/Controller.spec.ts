@@ -1,5 +1,11 @@
 import { Blockchain, SandboxContract, TreasuryContract } from "@ton/sandbox";
-import { Address, beginCell, Dictionary, toNano } from "@ton/core";
+import {
+  Address,
+  beginCell,
+  Dictionary,
+  storeCurrencyCollection,
+  toNano,
+} from "@ton/core";
 import { Controller } from "../wrappers/Controller";
 import { Account } from "../wrappers/Account";
 import { PrivateKey } from "eciesjs";
@@ -15,26 +21,14 @@ describe("Controller", () => {
   let controllerComission = 150n;
   let controllerReferralComission = 200n;
 
-  const sk = new PrivateKey();
-
   const getAccountWrapper = async (
     controller: SandboxContract<Controller>,
     owner_address: Address,
   ) => {
     return await Account.fromInit({
-      $$type: "AccountData",
-      allowance: 0n,
-      auctions: Dictionary.empty(),
-      balance: null,
+      $$type: "AccountInit",
       collector: controller.address,
-      initialised: false,
-      referral_comission: 0n,
-      service_comission: 0n,
-      referree: null,
-      max_allowance: 0n,
       owner: owner_address,
-      version: 1n,
-      secret_id: beginCell().endCell(),
     });
   };
 
@@ -49,7 +43,6 @@ describe("Controller", () => {
         owner2.address,
         controllerComission,
         controllerReferralComission,
-        Dictionary.empty(),
       ),
     );
     deployer = await blockchain.treasury("deployer");
@@ -355,14 +348,6 @@ describe("Controller", () => {
       deploy: true,
     });
 
-    expect(result1.transactions).toHaveTransaction({
-      from: accountWrapper.address,
-      to: controller.address,
-      success: true,
-      aborted: false,
-      deploy: false,
-    });
-
     const account = blockchain.openContract(accountWrapper);
 
     const data = await account.getData();
@@ -383,6 +368,28 @@ describe("Controller", () => {
       },
     );
 
-    expect(result2.transactions).toHaveLength(3);
+    // User intent
+    expect(result2.transactions).toHaveTransaction({
+      from: user.address,
+      to: controller.address,
+      success: true,
+      deploy: false,
+    });
+
+    // Deploy account failure
+    expect(result2.transactions).toHaveTransaction({
+      from: controller.address,
+      to: account.address,
+      success: true,
+    });
+
+    // Cashback
+    expect(result2.transactions).toHaveTransaction({
+      from: account.address,
+      to: user.address,
+      success: true,
+    });
+
+    expect(result2.transactions).toHaveLength(4);
   });
 });

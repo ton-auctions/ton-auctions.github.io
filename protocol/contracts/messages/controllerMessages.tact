@@ -21,4 +21,4 @@ message CleanInitialiser { address: Address }
 
 message RequestInitialisation {}
 
-message ServiceComission {}
+message CollectMoneys {}

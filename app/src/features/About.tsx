@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 
 export function About() {
-  const [params] = useSearchParams();
   const navigate = useNavigate();
+  const [params] = useSearchParams();
 
   useEffect(() => {
     if (!params.get("fwd")) return;

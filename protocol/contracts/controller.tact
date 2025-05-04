@@ -1,36 +1,29 @@
 import "@stdlib/ownable";
 import "./messages/controllerMessages";
 import "./account";
+import "./messages/accountMessages";
 
 // TODO: create utils package
-// TODO: split messages between internal and external and analytics and manually assign opcodes
 // TODO: check gas optimisations
 // TODO: go through production checklist
-
-struct AccountConfig {
-    referree: Address?;
-    service_comission: Int as uint16;
-    referral_comission: Int as uint16;
-    max_allowance: Int as uint16;
-    secret_id: Cell;
-}
-
 
 contract Controller(
     owner1: Address,
     owner2: Address,
     service_comission: Int as uint16,
     referral_comission: Int as uint16,
-    initialisers: map<Address, AccountConfig>,
 ) {
     const VERSION: Int = 1;
     const ERRORS_UNAUTHORISED: Int = 201;
     const ERRORS_BAD_CONFIGURATION: Int = 202;
     const NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT: Int = 203;
+    const NOTHING_TO_COLLECT: Int = 204;
 
+    // TODO: remove
     const REGISTRATION_FEE: Int = ton("0.1");
+    const COLLECT_THRESHOLD: Int = ton("0.1");
     const DEFAULT_ALLOWANCE: Int = 10;
-
+    
     receive(msg: ConfigureService) {
         let sender = sender();
 
@@ -61,102 +54,71 @@ contract Controller(
         }.toCell(), false, null);
     }
 
-    receive(msg: CleanInitialiser) {
-        let sender = sender();
-        throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
-
-        let _ = self.initialisers.del(msg.address);
-        cashback(sender);
-    }
-
     receive(msg: CreateAccount) {
         let ctx = context();
 
+        // TODO: THROW IF NOT ENOUGH GAS.
         throwUnless(self.NOT_ENOUGH_FUNDS_TO_CREATE_ACCOUNT, ctx.value >= self.REGISTRATION_FEE);
 
         let user = ctx.sender;
 
         let init = initOf Account(
-            AccountData {
-                version: 1,
+            AccountInit {
                 collector: myAddress(),
-                balance: null,
-                owner: user,
-                referree: null,
-                service_comission: 0, 
-                referral_comission: 0, 
-                auctions: emptyMap(),
-                max_allowance: 0, 
-                allowance: 0, 
-                initialised: false,
-                secret_id: emptyCell(), 
+                owner: user
             }
         );
 
-        let user_account = contractAddress(init);
-
-        let initialiserExists = self.initialisers.exists(user_account);
-        if initialiserExists {
-            self.reply(null);
-            return;
-        }
-
-        let account_serice_comission = self.service_comission;
+        let account_service_comission = self.service_comission;
         let account_referral_comission = self.referral_comission;
 
         if msg.referree == null {
             // If no referree service takes it all.
-            account_serice_comission = self.service_comission + self.referral_comission;
+            account_service_comission = self.service_comission + self.referral_comission;
             account_referral_comission = 0;
         }
 
-        self.initialisers.set(user_account, AccountConfig {
-            referree: msg.referree,
-            service_comission: account_serice_comission,
-            referral_comission: account_referral_comission,
-            max_allowance: self.DEFAULT_ALLOWANCE,
-            secret_id: msg.secret_id,
-        });
-
         deploy(DeployParameters {
             mode: SendDefaultMode | SendRemainingValue,
-            value: ton("0"),
-            bounce: true,
+            value: 0,
             init: init,
+            body: AccountInitialise {
+                secret_id: msg.secret_id,
+                referree: msg.referree,
+                service_comission: account_service_comission,
+                referral_comission: account_referral_comission,
+                max_allowance: self.DEFAULT_ALLOWANCE,
+            }.toCell()
         });
-    }
-
-    receive(_: RequestInitialisation) {
-        let source = sender();
-
-        if !self.initialisers.exists(source) {
-            self.reply(null);
-            return;
-        }
-
-        let data = self.initialisers.get(source)!!;
-
-        self.reply(Initialise {
-            secret_id: data.secret_id,
-
-            referree: data.referree,
-            service_comission: data.service_comission,
-            referral_comission: data.referral_comission,
-            max_allowance: data.max_allowance,
-        }.toCell());
-    }
-
-    receive(msg: AccountCreated) {
-        let source = sender();
-        let _ = self.initialisers.del(source);
     }
 
     receive() {
     }
 
-    receive(msg: ServiceComission) {
-        // hmm
+    receive(msg: CollectMoneys) {
+        let sender = sender();
+        throwUnless(self.ERRORS_UNAUTHORISED, sender == self.owner1 || sender == self.owner2);
+
+        let balance = myBalance();
+        throwUnless(self.NOTHING_TO_COLLECT, balance > self.COLLECT_THRESHOLD);
+        
+        let share = (balance - self.COLLECT_THRESHOLD / 2) >> 1;
+
+        message(MessageParameters{
+            mode: SendDefaultMode,
+            to: self.owner1,
+            value: share,
+        });
+        
+        message(MessageParameters{
+            mode: SendDefaultMode,
+            to: self.owner2,
+            value: share,
+        });
     }
+
+    // Receive ServiceComission funds
+    receive(msg: ServiceComission) {}
 
     get fun serviceComission(): Int {
         return self.service_comission;

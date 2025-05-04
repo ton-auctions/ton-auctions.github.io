@@ -14,16 +14,14 @@ message(0x00acca01) ProfitReceivedEvent {
 }
 
 message Profit {
-    id: Int;
     amount: Int as uint128;
 }
 
 message AuctionDeleted {
-    id: Int as uint64;
     refund: Bool;
 }
 
-message Initialise {
+message AccountInitialise {
     referree: Address?;
     service_comission: Int as uint16;
     referral_comission: Int as uint16;
@@ -32,12 +30,14 @@ message Initialise {
 }
 
 message CreateBasicAuction {
-    id: Int as uint64;
     name: String;
     description: String;
     minimal_amount: Int;
     ends_at: Int as uint64;
     secret_id: Cell;
+    type: String;
 }
 
 message CleanUp {}
+
+message ServiceComission {}
