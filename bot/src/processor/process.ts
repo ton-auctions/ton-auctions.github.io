@@ -281,7 +281,7 @@ export const getBatchProcessor = async function* (
 ) {
   const logger = getLogger("processor.process");
   while (true) {
-    // await new Promise<void>((resolve) => setTimeout(() => resolve(), 2000));
+    await new Promise<void>((resolve) => setTimeout(() => resolve(), 2000));
     const batch = storage.messages.getUnreservedMessageBatch(network.name);
 
     let messageCount = 0;
