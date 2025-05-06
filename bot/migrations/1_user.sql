@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS users (
+    user_id_hash TEXT PRIMARY KEY,
+    chat_id TEXT NOT NULL
+) WITHOUT ROWID;

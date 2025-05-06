@@ -8,7 +8,7 @@ export async function run(provider: NetworkProvider) {
   );
 
   const controller = provider.open(
-    await Controller.fromInit(owner, owner, 200n, 200n, Dictionary.empty()),
+    await Controller.fromInit(owner, owner, 200n, 200n),
   );
 
   await controller.send(

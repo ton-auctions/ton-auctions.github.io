@@ -1,0 +1,289 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@db/sqlite@0.11": "0.11.1",
+    "jsr:@db/sqlite@0.12": "0.12.0",
+    "jsr:@denosaurs/plug@1": "1.0.6",
+    "jsr:@std/assert@*": "1.0.13",
+    "jsr:@std/assert@0.217": "0.217.0",
+    "jsr:@std/assert@0.221": "0.221.0",
+    "jsr:@std/assert@^1.0.12": "1.0.13",
+    "jsr:@std/assert@^1.0.13": "1.0.13",
+    "jsr:@std/async@^1.0.12": "1.0.12",
+    "jsr:@std/data-structures@^1.0.6": "1.0.7",
+    "jsr:@std/encoding@*": "0.221.0",
+    "jsr:@std/encoding@0.221": "0.221.0",
+    "jsr:@std/encoding@^1.0.10": "1.0.10",
+    "jsr:@std/expect@*": "1.0.15",
+    "jsr:@std/expect@^1.0.15": "1.0.15",
+    "jsr:@std/fmt@0.221": "0.221.0",
+    "jsr:@std/fmt@^1.0.5": "1.0.7",
+    "jsr:@std/fs@*": "1.0.17",
+    "jsr:@std/fs@0.221": "0.221.0",
+    "jsr:@std/fs@^1.0.11": "1.0.17",
+    "jsr:@std/internal@^1.0.6": "1.0.6",
+    "jsr:@std/io@~0.225.2": "0.225.2",
+    "jsr:@std/log@~0.224.14": "0.224.14",
+    "jsr:@std/path@0.217": "0.217.0",
+    "jsr:@std/path@0.221": "0.221.0",
+    "jsr:@std/testing@*": "1.0.11",
+    "npm:@ecies/ciphers@~0.2.3": "0.2.3_@noble+ciphers@1.2.1",
+    "npm:@ton/core@~0.60.1": "0.60.1_@ton+crypto@3.3.0",
+    "npm:@types/node@*": "22.12.0",
+    "npm:eciesjs@~0.4.14": "0.4.14_@noble+ciphers@1.2.1",
+    "npm:gramio@*": "0.4.3_@gramio+types@9.0.2",
+    "npm:gramio@~0.4.3": "0.4.3_@gramio+types@9.0.2",
+    "npm:moment@^2.30.1": "2.30.1"
+  },
+  "jsr": {
+    "@db/sqlite@0.11.1": {
+      "integrity": "546434e7ed762db07e6ade0f963540dd5e06723b802937bf260ff855b21ef9c5",
+      "dependencies": [
+        "jsr:@denosaurs/plug",
+        "jsr:@std/path@0.217"
+      ]
+    },
+    "@db/sqlite@0.12.0": {
+      "integrity": "dd1ef7f621ad50fc1e073a1c3609c4470bd51edc0994139c5bf9851de7a6d85f",
+      "dependencies": [
+        "jsr:@denosaurs/plug",
+        "jsr:@std/path@0.217"
+      ]
+    },
+    "@denosaurs/plug@1.0.6": {
+      "integrity": "6cf5b9daba7799837b9ffbe89f3450510f588fafef8115ddab1ff0be9cb7c1a7",
+      "dependencies": [
+        "jsr:@std/encoding@0.221",
+        "jsr:@std/fmt@0.221",
+        "jsr:@std/fs@0.221",
+        "jsr:@std/path@0.221"
+      ]
+    },
+    "@std/assert@0.217.0": {
+      "integrity": "c98e279362ca6982d5285c3b89517b757c1e3477ee9f14eb2fdf80a45aaa9642"
+    },
+    "@std/assert@0.221.0": {
+      "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
+    },
+    "@std/assert@1.0.13": {
+      "integrity": "ae0d31e41919b12c656c742b22522c32fb26ed0cba32975cb0de2a273cb68b29",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/async@1.0.12": {
+      "integrity": "d1bfcec459e8012846fe4e38dfc4241ab23240ecda3d8d6dfcf6d81a632e803d"
+    },
+    "@std/data-structures@1.0.7": {
+      "integrity": "16932d2c8d281f65eaaa2209af2473209881e33b1ced54cd1b015e7b4cdbb0d2"
+    },
+    "@std/encoding@0.221.0": {
+      "integrity": "d1dd76ef0dc5d14088411e6dc1dede53bf8308c95d1537df1214c97137208e45"
+    },
+    "@std/encoding@1.0.10": {
+      "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
+    },
+    "@std/expect@1.0.15": {
+      "integrity": "eca360007b5a7f13dbfa1294224baee7fb98dcd460d8461fe64eeae302902945",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.12",
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/fmt@0.221.0": {
+      "integrity": "379fed69bdd9731110f26b9085aeb740606b20428ce6af31ef6bd45ef8efa62a"
+    },
+    "@std/fmt@1.0.7": {
+      "integrity": "2a727c043d8df62cd0b819b3fb709b64dd622e42c3b1bb817ea7e6cc606360fb"
+    },
+    "@std/fs@0.221.0": {
+      "integrity": "028044450299de8ed5a716ade4e6d524399f035513b85913794f4e81f07da286",
+      "dependencies": [
+        "jsr:@std/assert@0.221",
+        "jsr:@std/path@0.221"
+      ]
+    },
+    "@std/fs@1.0.17": {
+      "integrity": "1c00c632677c1158988ef7a004cb16137f870aafdb8163b9dce86ec652f3952b"
+    },
+    "@std/internal@1.0.6": {
+      "integrity": "9533b128f230f73bd209408bb07a4b12f8d4255ab2a4d22a1fd6d87304aca9a4"
+    },
+    "@std/io@0.225.2": {
+      "integrity": "3c740cd4ee4c082e6cfc86458f47e2ab7cb353dc6234d5e9b1f91a2de5f4d6c7"
+    },
+    "@std/log@0.224.14": {
+      "integrity": "257f7adceee3b53bb2bc86c7242e7d1bc59729e57d4981c4a7e5b876c808f05e",
+      "dependencies": [
+        "jsr:@std/fmt@^1.0.5",
+        "jsr:@std/fs@^1.0.11",
+        "jsr:@std/io"
+      ]
+    },
+    "@std/path@0.217.0": {
+      "integrity": "1217cc25534bca9a2f672d7fe7c6f356e4027df400c0e85c0ef3e4343bc67d11",
+      "dependencies": [
+        "jsr:@std/assert@0.217"
+      ]
+    },
+    "@std/path@0.221.0": {
+      "integrity": "0a36f6b17314ef653a3a1649740cc8db51b25a133ecfe838f20b79a56ebe0095",
+      "dependencies": [
+        "jsr:@std/assert@0.221"
+      ]
+    },
+    "@std/testing@1.0.11": {
+      "integrity": "12b3db12d34f0f385a26248933bde766c0f8c5ad8b6ab34d4d38f528ab852f48",
+      "dependencies": [
+        "jsr:@std/assert@^1.0.12",
+        "jsr:@std/async",
+        "jsr:@std/data-structures",
+        "jsr:@std/internal"
+      ]
+    }
+  },
+  "npm": {
+    "@ecies/ciphers@0.2.3_@noble+ciphers@1.2.1": {
+      "integrity": "sha512-tapn6XhOueMwht3E2UzY0ZZjYokdaw9XtL9kEyjhQ/Fb9vL9xTFbOaI+fV0AWvTpYu4BNloC6getKW6NtSg4mA==",
+      "dependencies": [
+        "@noble/ciphers"
+      ]
+    },
+    "@gramio/callback-data@0.0.3": {
+      "integrity": "sha512-fL+fo3c58dIE6cl2yEoG9E4Y+mT+zvpw7PXImcATFVdRcK4mnuDzzxyOOibopzjKNszlHQZXYJer515kBr81RQ=="
+    },
+    "@gramio/contexts@0.2.5_@gramio+types@9.0.2_inspectable@3.0.2": {
+      "integrity": "sha512-Pl7jvcyM1nhMo8Ud5aSM6Sl8E1xXxj2n7NI43FI3yK0N375c49fzw2E5fQ8bCLwbVGOzMwFsh985gv79AgLADg==",
+      "dependencies": [
+        "@gramio/types",
+        "inspectable"
+      ]
+    },
+    "@gramio/files@0.3.0": {
+      "integrity": "sha512-ZdrwRm57xxWzQ+KxGB5V2aC6raZ9B0yZavkPhd0JzKFUkKS1jbeG3W35qQxdlZZLtD9aeZbjwRAHk4VrRDbpqA==",
+      "dependencies": [
+        "@gramio/types"
+      ]
+    },
+    "@gramio/format@0.2.1": {
+      "integrity": "sha512-amkEu4pIPETTp28+M63qFfenNwFJ++0dzXBlX1FjHROXqqsIO03YR16/ACdsh9qlBxooA/80DiSH+bcNzDPhww==",
+      "dependencies": [
+        "@gramio/types"
+      ]
+    },
+    "@gramio/keyboards@1.2.1": {
+      "integrity": "sha512-HqCJl9HmLTvckA2fMRc+mC258vBr2zKfMqvFEGEgaeauIIP4n8TTT9GU4YCqVFTGTzGA5I6gnfk87dGZuSP6vA==",
+      "dependencies": [
+        "@gramio/types"
+      ]
+    },
+    "@gramio/types@9.0.2": {
+      "integrity": "sha512-6YQ9wO1gXgScLd1yfNZLYhi4+GxF4buyQfIKmVdef/ooZEaiQ01lV9rTy0SxC7IyA4mvLr5H21qPyp2Zlr8BSw=="
+    },
+    "@noble/ciphers@1.2.1": {
+      "integrity": "sha512-rONPWMC7PeExE077uLE4oqWrZ1IvAfz3oH9LibVAcVCopJiA9R62uavnbEzdkVmJYI6M6Zgkbeb07+tWjlq2XA=="
+    },
+    "@noble/curves@1.6.0": {
+      "integrity": "sha512-TlaHRXDehJuRNR9TfZDNQ45mMEd5dwUwmicsafcIX4SsNiqnCHKjE/1alYPd/lDRVhxdhUAlv8uEhMCI5zjIJQ==",
+      "dependencies": [
+        "@noble/hashes"
+      ]
+    },
+    "@noble/hashes@1.5.0": {
+      "integrity": "sha512-1j6kQFb7QRru7eKN3ZDvRcP13rugwdxZqCjbiAVZfIJwgj2A65UmT4TgARXGlXgnRkORLTDTrO19ZErt7+QXgA=="
+    },
+    "@ton/core@0.60.1_@ton+crypto@3.3.0": {
+      "integrity": "sha512-8FwybYbfkk57C3l9gvnlRhRBHbLYmeu0LbB1z9N+dhDz0Z+FJW8w0TJlks8CgHrAFxsT3FlR2LsqFnsauMp38w==",
+      "dependencies": [
+        "@ton/crypto",
+        "symbol.inspect"
+      ]
+    },
+    "@ton/crypto-primitives@2.1.0": {
+      "integrity": "sha512-PQesoyPgqyI6vzYtCXw4/ZzevePc4VGcJtFwf08v10OevVJHVfW238KBdpj1kEDQkxWLeuNHEpTECNFKnP6tow==",
+      "dependencies": [
+        "jssha"
+      ]
+    },
+    "@ton/crypto@3.3.0": {
+      "integrity": "sha512-/A6CYGgA/H36OZ9BbTaGerKtzWp50rg67ZCH2oIjV1NcrBaCK9Z343M+CxedvM7Haf3f/Ee9EhxyeTp0GKMUpA==",
+      "dependencies": [
+        "@ton/crypto-primitives",
+        "jssha",
+        "tweetnacl"
+      ]
+    },
+    "@types/node@22.12.0": {
+      "integrity": "sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==",
+      "dependencies": [
+        "undici-types"
+      ]
+    },
+    "debug@4.4.0": {
+      "integrity": "sha512-6WTZ/IxCY/T6BALoZHaE4ctp9xm+Z5kY/pzYaCHRFeyVhojxlrm+46y68HA6hr0TcwEssoxNiDEUJQjfPZ/RYA==",
+      "dependencies": [
+        "ms"
+      ]
+    },
+    "eciesjs@0.4.14_@noble+ciphers@1.2.1": {
+      "integrity": "sha512-eJAgf9pdv214Hn98FlUzclRMYWF7WfoLlkS9nWMTm1qcCwn6Ad4EGD9lr9HXMBfSrZhYQujRE+p0adPRkctC6A==",
+      "dependencies": [
+        "@ecies/ciphers",
+        "@noble/ciphers",
+        "@noble/curves",
+        "@noble/hashes"
+      ]
+    },
+    "gramio@0.4.3_@gramio+types@9.0.2": {
+      "integrity": "sha512-P0R2bKQCXw8hxDSCRCNmrlKBCxIih9uDS9sL8+csQ3rrLxDJtcUicPN0RwE2J5syrL25A/Oku3ktS5k9vZLcjQ==",
+      "dependencies": [
+        "@gramio/callback-data",
+        "@gramio/contexts",
+        "@gramio/files",
+        "@gramio/format",
+        "@gramio/keyboards",
+        "@gramio/types",
+        "debug",
+        "middleware-io"
+      ]
+    },
+    "inspectable@3.0.2": {
+      "integrity": "sha512-XHygPjNXXe1TWQLlVdCYLejUklsGGo+XWS3Cn/RlkvnhkbZqcQxoXPrSh7Via5aATYJUMWVnrD5CbW2c+BtKMA=="
+    },
+    "jssha@3.2.0": {
+      "integrity": "sha512-QuruyBENDWdN4tZwJbQq7/eAK85FqrI4oDbXjy5IBhYD+2pTJyBUWZe8ctWaCkrV0gy6AaelgOZZBMeswEa/6Q=="
+    },
+    "middleware-io@2.8.1": {
+      "integrity": "sha512-H0XftkexHKxxQsoCsItMzM7WU3S/rIFzL3T4guU8tWLKr7e5cVkdaZ+JQeeL+TB3OaHpqFi/ozYqQl69z2X6bg=="
+    },
+    "moment@2.30.1": {
+      "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how=="
+    },
+    "ms@2.1.3": {
+      "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
+    },
+    "symbol.inspect@1.0.1": {
+      "integrity": "sha512-YQSL4duoHmLhsTD1Pw8RW6TZ5MaTX5rXJnqacJottr2P2LZBF/Yvrc3ku4NUpMOm8aM0KOCqM+UAkMA5HWQCzQ=="
+    },
+    "tweetnacl@1.0.3": {
+      "integrity": "sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw=="
+    },
+    "undici-types@6.20.0": {
+      "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@db/sqlite@0.12",
+      "jsr:@std/assert@^1.0.13",
+      "jsr:@std/encoding@^1.0.10",
+      "jsr:@std/expect@^1.0.15",
+      "jsr:@std/log@~0.224.14",
+      "npm:@ecies/ciphers@~0.2.3",
+      "npm:@ton/core@~0.60.1",
+      "npm:eciesjs@~0.4.14",
+      "npm:gramio@~0.4.3",
+      "npm:moment@^2.30.1"
+    ]
+  }
+}
